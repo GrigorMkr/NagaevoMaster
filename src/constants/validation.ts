@@ -1,6 +1,10 @@
-export const VALIDATION = {
-  MIN_PASSWORD_LENGTH: 6,
-  MIN_NAME_LENGTH: 2,
-  MIN_PHONE_LENGTH: 10,
-  MIN_MESSAGE_LENGTH: 10,
-} as const
+const VALIDATION = {
+    MIN_PASSWORD_LENGTH: 6,
+    MIN_NAME_LENGTH: 2,
+    MIN_PHONE_LENGTH: 10,
+    MIN_MESSAGE_LENGTH: 10,
+} as const;
+
+export {
+  VALIDATION,
+}

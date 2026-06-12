@@ -1,11 +1,9 @@
-import { memo } from 'react'
-import { ButtonLink } from '@/components/ui/Button/ButtonLink'
-import { ROUTES } from '@/constants'
-import styles from '../HomePage.module.css'
-
-export const CtaSection = memo(function CtaSection() {
-  return (
-    <div className={styles.callToActionSection}>
+import { memo } from 'react';
+import { ButtonLink } from '@/components/ui/Button/ButtonLink';
+import { ROUTES } from '@/constants';
+import styles from '../HomePage.module.css';
+const CtaSection = memo(function CtaSection() {
+    return (<div className={styles.callToActionSection}>
       <div className={styles.callToActionCard}>
         <div className={styles.callToActionContent}>
           <span className="badge">Для мастеров и бизнеса</span>
@@ -18,6 +16,9 @@ export const CtaSection = memo(function CtaSection() {
           Добавить объявление
         </ButtonLink>
       </div>
-    </div>
-  )
-})
+    </div>);
+});
+
+export {
+  CtaSection,
+}

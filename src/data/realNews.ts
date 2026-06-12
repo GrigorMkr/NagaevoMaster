@@ -1,150 +1,131 @@
-import type { NewsItem } from '@/types/news'
+import type { NewsItem } from '@/types/news';
+const NAGAEVO_ARTICLE_IMAGES: Record<string, string> = {
+    '/news/2026/04/4827/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/zhpp5.jpg',
+    '/news/2026/04/4823/': 'https://nagaevodk.ru/wp-content/cache/thumb/1e/dd026838a2bc61e_350x350.jpg',
+    '/news/2026/04/4815/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/nagaevskij-dk-konczert-9-maya.jpg',
+    '/news/2026/04/4806/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1k.jpg',
+    '/afisha/2026/04/4803/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/nagaevskij-dk-miting.jpg',
+    '/news/2026/04/4790/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1-2.jpg',
+    '/news/2026/04/4778/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1-1.jpg',
+    '/afisha/2026/04/4775/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/aprel-bravo.jpg',
+};
+const REAL_LOCAL_NEWS: NewsItem[] = [
+    {
+        id: 'local-4827',
+        title: 'С Международным днём танца — наши искренние поздравления!',
+        summary: 'Нагаевский ДК поздравил педагогов хореографии и всех участников творческих коллективов с праздником искусства танца.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4827/']!,
+        sourceUrl: 'https://nagaevodk.ru/news/2026/04/4827/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-29T11:57:31Z',
+        category: 'local',
+    },
+    {
+        id: 'local-4815',
+        title: 'Праздничный концерт «Во славу Победы!»',
+        summary: 'Нагаевский дом культуры приглашает жителей на торжественный концерт, посвящённый памяти героев Великой Отечественной войны.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4815/']!,
+        sourceUrl: 'https://nagaevodk.ru/news/2026/04/4815/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-28T04:37:52Z',
+        category: 'local',
+    },
+    {
+        id: 'local-4806',
+        title: 'Триумф ансамбля «Жар-птица» на конкурсе «Звезда Башкортостана»',
+        summary: 'Юные танцоры Нагаевского ДК одержали победы на XX юбилейном открытом чемпионате по восточным танцам.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4806/']!,
+        sourceUrl: 'https://nagaevodk.ru/news/2026/04/4806/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-27T12:54:00Z',
+        category: 'local',
+    },
+    {
+        id: 'local-4803',
+        title: 'Митинг, посвящённый 81-й годовщине Победы',
+        summary: 'Жители микрорайона Нагаево собрались на торжественный митинг в память о героях Великой Отечественной войны.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/afisha/2026/04/4803/']!,
+        sourceUrl: 'https://nagaevodk.ru/afisha/2026/04/4803/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-27T10:24:22Z',
+        category: 'local',
+    },
+    {
+        id: 'local-4790',
+        title: 'Отчётный концерт «БраВо!» в Нагаевском доме культуры',
+        summary: 'Праздник искусства: зажигательные танцы, вокальные номера и яркие сцены от творческих объединений ДК.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4790/']!,
+        sourceUrl: 'https://nagaevodk.ru/news/2026/04/4790/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-27T04:28:46Z',
+        category: 'local',
+    },
+    {
+        id: 'local-4778',
+        title: 'Победы ансамбля «Жар-птица» на чемпионате по восточным танцам',
+        summary: 'На прошедших выходных участники ансамбля танца «Жар-птица» блестяще выступили на юбилейном чемпионате.',
+        imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4778/']!,
+        sourceUrl: 'https://nagaevodk.ru/news/2026/04/4778/',
+        sourceName: 'ДК с. Нагаево',
+        publishedAt: '2026-04-20T10:00:00Z',
+        category: 'local',
+    },
+];
+const REAL_EXTERNAL_NEWS: NewsItem[] = [
+    {
+        id: 'ext-logistics',
+        title: 'Возле Нагаево построят логистический парк «Перспектива»',
+        summary: 'На стыке трассы М-5 и Нагаевского шоссе началось строительство складского комплекса класса А площадью 31 га. Сдача — в 2027 году.',
+        imageUrl: 'https://www.bashinform.ru/attachments/790f54b98f988df01f4681bbce0740810b68ad6d/store/crop_jpg/0/0/632/351/1200/0/0/0d9cd8200c0db65f6e81db035da3e8742184fe070cdaf1e95c11105d775c/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA.PNG',
+        sourceUrl: 'https://www.bashinform.ru/news/economy/2026-04-15/v-ufe-vozle-nagaevo-postroyat-logisticheskiy-park-vysshey-kategorii-4652378',
+        sourceName: 'Башинформ',
+        publishedAt: '2026-04-15T10:00:00Z',
+        category: 'external',
+    },
+    {
+        id: 'ext-yurta',
+        title: 'В Нагаево открыли башкирский музей-юрту',
+        summary: 'Альфия Юсупова создала аутентичный музей-юрту в селе Нагаево — с мастер-классами, национальными чаепитиями и экскурсиями.',
+        imageUrl: 'https://www.bashinform.ru/attachments/1da360d55507d42419c9bd9e34967d35f67e696a/store/crop_jpg/0/0/1280/960/1200/0/0/c302523126ac0b9bce4edd64a631e667d893d88b5d02b7595dd5f39d9461/oJkCK2Q0tvMLzquSsRQmLFXm2pAESVc2bOj3RiAlxrCtYJlFLqG_aKekjCISP6gc6rNPR1FQjyghFd2Y4UbJDX8R.jpg',
+        sourceUrl: 'https://www.bashinform.ru/news/social/2026-05-07/ufimke-pomogli-otkryt-bashkirskiy-yurta-muzey-4654118',
+        sourceName: 'Башинформ',
+        publishedAt: '2026-05-07T12:00:00Z',
+        category: 'external',
+    },
+    {
+        id: 'ext-school',
+        title: 'В Нагаево планируют построить новую школу с детским садом',
+        summary: 'Глава Башкирии сообщил о начале строительства в 2027–2028 годах. В 147-й школе сейчас обучается более 3700 учеников.',
+        imageUrl: 'https://www.bashinform.ru/attachments/072c616e7d993191e5f57e5f951dfbced8fcc224/store/crop_jpg/0/0/1600/903/1200/0/35/df4fd0ee2e1fce3e563e81f33f37a457397f66e12f30cdc24a406347e97b/Dmwdkt15fz8.jpg',
+        sourceUrl: 'https://www.bashinform.ru/news/social/2025-03-20/glava-bashkirii-rasskazal-o-planah-stroitelstva-novoy-shkoly-v-sele-nagaevo-4165164',
+        sourceName: 'Башинформ',
+        publishedAt: '2025-03-20T11:21:00Z',
+        category: 'external',
+    },
+    {
+        id: 'ext-school-land',
+        title: 'Инвестору выделили землю в Нагаево под строительство школы',
+        summary: 'Уфимская компания получила участки под частную школу на 300 мест и детский сад на 140 мест, а также спортивную площадку.',
+        imageUrl: 'https://www.bashinform.ru/attachments/694944e7ad50325fb3c3dc3934dc7faa7ae73b6e/store/crop/0/31/800/451/800/451/0/249e5afa7aca2299ca96a63c302f0312c6899bc7ee8c0020ad0db313c49e/3218644.jpeg',
+        sourceUrl: 'https://www.bashinform.ru/news/economy/2025-04-03/v-ufe-investoru-vydelili-zemlyu-v-nagaevo-pod-stroitelstvo-shkoly-4183176',
+        sourceName: 'Башинформ',
+        publishedAt: '2025-04-03T13:36:00Z',
+        category: 'external',
+    },
+    {
+        id: 'ext-water',
+        title: 'Нагаево получит водоснабжение в рамках развития Зауфимья',
+        summary: 'Глава Башкирии: федеральная поддержка 13,5 млрд рублей позволит обеспечить водой каждый населённый пункт Зауфимья, включая Нагаево.',
+        imageUrl: 'https://www.bashinform.ru/attachments/78c51cb3b412d7f062a0afc1160cc7a23034875b/store/crop_jpg/0/0/1000/667/1200/0/35/2c3e57e875973d63fd3bf18f5b25e633230a4e3f4266425baa474186dacd/09_IAR00108.jpg',
+        sourceUrl: 'https://www.bashinform.ru/articles/detalno/2025-09-11/gde-zhivem-rabotaem-i-otdyhaem-kak-v-bashkirii-povyshayut-kachestvo-zhizni-4382918',
+        sourceName: 'Башинформ',
+        publishedAt: '2025-09-11T10:00:00Z',
+        category: 'external',
+    },
+];
 
-export const NAGAEVO_ARTICLE_IMAGES: Record<string, string> = {
-  '/news/2026/04/4827/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/zhpp5.jpg',
-  '/news/2026/04/4823/': 'https://nagaevodk.ru/wp-content/cache/thumb/1e/dd026838a2bc61e_350x350.jpg',
-  '/news/2026/04/4815/':
-    'https://nagaevodk.ru/wp-content/uploads/2026/04/nagaevskij-dk-konczert-9-maya.jpg',
-  '/news/2026/04/4806/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1k.jpg',
-  '/afisha/2026/04/4803/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/nagaevskij-dk-miting.jpg',
-  '/news/2026/04/4790/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1-2.jpg',
-  '/news/2026/04/4778/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/1-1.jpg',
-  '/afisha/2026/04/4775/': 'https://nagaevodk.ru/wp-content/uploads/2026/04/aprel-bravo.jpg',
+export {
+  NAGAEVO_ARTICLE_IMAGES,
+  REAL_LOCAL_NEWS,
+  REAL_EXTERNAL_NEWS,
 }
-
-export const REAL_LOCAL_NEWS: NewsItem[] = [
-  {
-    id: 'local-4827',
-    title: 'С Международным днём танца — наши искренние поздравления!',
-    summary:
-      'Нагаевский ДК поздравил педагогов хореографии и всех участников творческих коллективов с праздником искусства танца.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4827/']!,
-    sourceUrl: 'https://nagaevodk.ru/news/2026/04/4827/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-29T11:57:31Z',
-    category: 'local',
-  },
-  {
-    id: 'local-4815',
-    title: 'Праздничный концерт «Во славу Победы!»',
-    summary:
-      'Нагаевский дом культуры приглашает жителей на торжественный концерт, посвящённый памяти героев Великой Отечественной войны.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4815/']!,
-    sourceUrl: 'https://nagaevodk.ru/news/2026/04/4815/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-28T04:37:52Z',
-    category: 'local',
-  },
-  {
-    id: 'local-4806',
-    title: 'Триумф ансамбля «Жар-птица» на конкурсе «Звезда Башкортостана»',
-    summary:
-      'Юные танцоры Нагаевского ДК одержали победы на XX юбилейном открытом чемпионате по восточным танцам.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4806/']!,
-    sourceUrl: 'https://nagaevodk.ru/news/2026/04/4806/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-27T12:54:00Z',
-    category: 'local',
-  },
-  {
-    id: 'local-4803',
-    title: 'Митинг, посвящённый 81-й годовщине Победы',
-    summary:
-      'Жители микрорайона Нагаево собрались на торжественный митинг в память о героях Великой Отечественной войны.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/afisha/2026/04/4803/']!,
-    sourceUrl: 'https://nagaevodk.ru/afisha/2026/04/4803/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-27T10:24:22Z',
-    category: 'local',
-  },
-  {
-    id: 'local-4790',
-    title: 'Отчётный концерт «БраВо!» в Нагаевском доме культуры',
-    summary:
-      'Праздник искусства: зажигательные танцы, вокальные номера и яркие сцены от творческих объединений ДК.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4790/']!,
-    sourceUrl: 'https://nagaevodk.ru/news/2026/04/4790/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-27T04:28:46Z',
-    category: 'local',
-  },
-  {
-    id: 'local-4778',
-    title: 'Победы ансамбля «Жар-птица» на чемпионате по восточным танцам',
-    summary:
-      'На прошедших выходных участники ансамбля танца «Жар-птица» блестяще выступили на юбилейном чемпионате.',
-    imageUrl: NAGAEVO_ARTICLE_IMAGES['/news/2026/04/4778/']!,
-    sourceUrl: 'https://nagaevodk.ru/news/2026/04/4778/',
-    sourceName: 'ДК с. Нагаево',
-    publishedAt: '2026-04-20T10:00:00Z',
-    category: 'local',
-  },
-]
-
-export const REAL_EXTERNAL_NEWS: NewsItem[] = [
-  {
-    id: 'ext-logistics',
-    title: 'Возле Нагаево построят логистический парк «Перспектива»',
-    summary:
-      'На стыке трассы М-5 и Нагаевского шоссе началось строительство складского комплекса класса А площадью 31 га. Сдача — в 2027 году.',
-    imageUrl:
-      'https://www.bashinform.ru/attachments/790f54b98f988df01f4681bbce0740810b68ad6d/store/crop_jpg/0/0/632/351/1200/0/0/0d9cd8200c0db65f6e81db035da3e8742184fe070cdaf1e95c11105d775c/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA.PNG',
-    sourceUrl:
-      'https://www.bashinform.ru/news/economy/2026-04-15/v-ufe-vozle-nagaevo-postroyat-logisticheskiy-park-vysshey-kategorii-4652378',
-    sourceName: 'Башинформ',
-    publishedAt: '2026-04-15T10:00:00Z',
-    category: 'external',
-  },
-  {
-    id: 'ext-yurta',
-    title: 'В Нагаево открыли башкирский музей-юрту',
-    summary:
-      'Альфия Юсупова создала аутентичный музей-юрту в селе Нагаево — с мастер-классами, национальными чаепитиями и экскурсиями.',
-    imageUrl:
-      'https://www.bashinform.ru/attachments/1da360d55507d42419c9bd9e34967d35f67e696a/store/crop_jpg/0/0/1280/960/1200/0/0/c302523126ac0b9bce4edd64a631e667d893d88b5d02b7595dd5f39d9461/oJkCK2Q0tvMLzquSsRQmLFXm2pAESVc2bOj3RiAlxrCtYJlFLqG_aKekjCISP6gc6rNPR1FQjyghFd2Y4UbJDX8R.jpg',
-    sourceUrl:
-      'https://www.bashinform.ru/news/social/2026-05-07/ufimke-pomogli-otkryt-bashkirskiy-yurta-muzey-4654118',
-    sourceName: 'Башинформ',
-    publishedAt: '2026-05-07T12:00:00Z',
-    category: 'external',
-  },
-  {
-    id: 'ext-school',
-    title: 'В Нагаево планируют построить новую школу с детским садом',
-    summary:
-      'Глава Башкирии сообщил о начале строительства в 2027–2028 годах. В 147-й школе сейчас обучается более 3700 учеников.',
-    imageUrl:
-      'https://www.bashinform.ru/attachments/072c616e7d993191e5f57e5f951dfbced8fcc224/store/crop_jpg/0/0/1600/903/1200/0/35/df4fd0ee2e1fce3e563e81f33f37a457397f66e12f30cdc24a406347e97b/Dmwdkt15fz8.jpg',
-    sourceUrl:
-      'https://www.bashinform.ru/news/social/2025-03-20/glava-bashkirii-rasskazal-o-planah-stroitelstva-novoy-shkoly-v-sele-nagaevo-4165164',
-    sourceName: 'Башинформ',
-    publishedAt: '2025-03-20T11:21:00Z',
-    category: 'external',
-  },
-  {
-    id: 'ext-school-land',
-    title: 'Инвестору выделили землю в Нагаево под строительство школы',
-    summary:
-      'Уфимская компания получила участки под частную школу на 300 мест и детский сад на 140 мест, а также спортивную площадку.',
-    imageUrl:
-      'https://www.bashinform.ru/attachments/694944e7ad50325fb3c3dc3934dc7faa7ae73b6e/store/crop/0/31/800/451/800/451/0/249e5afa7aca2299ca96a63c302f0312c6899bc7ee8c0020ad0db313c49e/3218644.jpeg',
-    sourceUrl:
-      'https://www.bashinform.ru/news/economy/2025-04-03/v-ufe-investoru-vydelili-zemlyu-v-nagaevo-pod-stroitelstvo-shkoly-4183176',
-    sourceName: 'Башинформ',
-    publishedAt: '2025-04-03T13:36:00Z',
-    category: 'external',
-  },
-  {
-    id: 'ext-water',
-    title: 'Нагаево получит водоснабжение в рамках развития Зауфимья',
-    summary:
-      'Глава Башкирии: федеральная поддержка 13,5 млрд рублей позволит обеспечить водой каждый населённый пункт Зауфимья, включая Нагаево.',
-    imageUrl:
-      'https://www.bashinform.ru/attachments/78c51cb3b412d7f062a0afc1160cc7a23034875b/store/crop_jpg/0/0/1000/667/1200/0/35/2c3e57e875973d63fd3bf18f5b25e633230a4e3f4266425baa474186dacd/09_IAR00108.jpg',
-    sourceUrl:
-      'https://www.bashinform.ru/articles/detalno/2025-09-11/gde-zhivem-rabotaem-i-otdyhaem-kak-v-bashkirii-povyshayut-kachestvo-zhizni-4382918',
-    sourceName: 'Башинформ',
-    publishedAt: '2025-09-11T10:00:00Z',
-    category: 'external',
-  },
-]

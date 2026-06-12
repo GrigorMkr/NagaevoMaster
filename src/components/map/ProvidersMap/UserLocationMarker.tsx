@@ -1,21 +1,15 @@
-import { memo } from 'react'
-import { CircleMarker, Popup } from 'react-leaflet'
-import type { AccountLocation } from '@/types/location'
-
+import { memo } from 'react';
+import { CircleMarker, Popup } from 'react-leaflet';
+import type { AccountLocation } from '@/types/location';
 interface UserLocationMarkerProps {
-  location: AccountLocation
+    location: AccountLocation;
 }
-
-export const UserLocationMarker = memo(function UserLocationMarker({
-  location,
-}: UserLocationMarkerProps) {
-  return (
-    <CircleMarker
-      center={[location.lat, location.lng]}
-      radius={10}
-      pathOptions={{ color: '#17624a', fillColor: '#2d9a74', fillOpacity: 0.85, weight: 2 }}
-    >
+const UserLocationMarker = memo(function UserLocationMarker({ location, }: UserLocationMarkerProps) {
+    return (<CircleMarker center={[location.lat, location.lng]} radius={10} pathOptions={{ color: '#17624a', fillColor: '#2d9a74', fillOpacity: 0.85, weight: 2 }}>
       <Popup>{location.label}</Popup>
-    </CircleMarker>
-  )
-})
+    </CircleMarker>);
+});
+
+export {
+  UserLocationMarker,
+}

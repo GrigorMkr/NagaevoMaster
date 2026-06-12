@@ -1,31 +1,19 @@
-import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
-import { SKELETON_COUNT_NEWS } from '@/constants'
-import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { NewsCard } from '@/components/news/NewsCard/NewsCard'
-import { useNews } from '@/hooks/useNews'
-import pageStyles from '@/styles/page.module.css'
-import styles from './NewsPage.module.css'
-
-export function NewsPage() {
-  const { local, external, loading, error } = useNews()
-
-  return (
-    <>
-      <PageMeta
-        title="Новости"
-        description="Новости поселка Нагаево и региона — события, культура, инфраструктура и жизнь микрорайона."
-        canonical="/news"
-        keywords="новости Нагаево, Башкортостан, Уфа, события поселка"
-      />
+import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
+import { SKELETON_COUNT_NEWS } from '@/constants';
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
+import { NewsCard } from '@/components/news/NewsCard/NewsCard';
+import { useNews } from '@/hooks/useNews';
+import pageStyles from '@/styles/page.module.css';
+import styles from './NewsPage.module.css';
+function NewsPage() {
+    const { local, external, loading, error } = useNews();
+    return (<>
+      <PageMeta title="Новости" description="Новости поселка Нагаево и региона — события, культура, инфраструктура и жизнь микрорайона." canonical="/news" keywords="новости Нагаево, Башкортостан, Уфа, события поселка"/>
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader
-            badge="Актуально"
-            title="Новости Нагаево"
-            subtitle="События микрорайона и материалы из региональных СМИ — с фотографиями и ссылками на источники"
-          />
+          <PageHeader badge="Актуально" title="Новости Нагаево" subtitle="События микрорайона и материалы из региональных СМИ — с фотографиями и ссылками на источники"/>
 
           {error && <p className={styles.error}>{error}</p>}
 
@@ -37,19 +25,11 @@ export function NewsPage() {
               </p>
             </div>
 
-            {loading ? (
-              <div className={styles.grid}>
-                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (
-                  <Skeleton key={i} variant="card" />
-                ))}
-              </div>
-            ) : (
-              <div className={styles.grid}>
-                {local.map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
-            )}
+            {loading ? (<div className={styles.grid}>
+                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (<Skeleton key={i} variant="card"/>))}
+              </div>) : (<div className={styles.grid}>
+                {local.map((item) => (<NewsCard key={item.id} item={item}/>))}
+              </div>)}
           </section>
 
           <section className={styles.section}>
@@ -60,19 +40,11 @@ export function NewsPage() {
               </p>
             </div>
 
-            {loading ? (
-              <div className={styles.grid}>
-                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (
-                  <Skeleton key={`ext-${i}`} variant="card" />
-                ))}
-              </div>
-            ) : (
-              <div className={styles.grid}>
-                {external.map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
-            )}
+            {loading ? (<div className={styles.grid}>
+                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (<Skeleton key={`ext-${i}`} variant="card"/>))}
+              </div>) : (<div className={styles.grid}>
+                {external.map((item) => (<NewsCard key={item.id} item={item}/>))}
+              </div>)}
           </section>
 
           <p className={styles.hint}>
@@ -87,6 +59,9 @@ export function NewsPage() {
           </p>
         </div>
       </div>
-    </>
-  )
+    </>);
+}
+
+export {
+  NewsPage,
 }

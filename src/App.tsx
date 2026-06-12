@@ -1,12 +1,9 @@
-import { SiteAccessGate } from '@/components/site/SiteAccessGate'
-import { AppRoutes } from '@/routes/AppRoutes'
-
+import { SiteAccessGate } from '@/components/site/SiteAccessGate';
+import { AppRoutes } from '@/routes/AppRoutes';
 function App() {
-  return (
-    <SiteAccessGate>
+    return (<SiteAccessGate>
       <AppRoutes />
-    </SiteAccessGate>
-  )
+    </SiteAccessGate>);
 }
 
 export default App

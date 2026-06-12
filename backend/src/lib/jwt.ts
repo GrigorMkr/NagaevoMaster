@@ -1,14 +1,20 @@
-import jwt from 'jsonwebtoken'
-import { env } from '../config/env.js'
-
-export interface JwtPayload {
-  userId: string
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
+interface JwtPayload {
+    userId: string;
+}
+function signToken(userId: string): string {
+    return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: '7d' });
+}
+function verifyToken(token: string): JwtPayload {
+    return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 }
 
-export function signToken(userId: string): string {
-  return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: '7d' })
+export {
+  signToken,
+  verifyToken,
 }
 
-export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, env.JWT_SECRET) as JwtPayload
+export type {
+  JwtPayload,
 }

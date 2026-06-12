@@ -1,12 +1,10 @@
-import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { ButtonLink } from '@/components/ui/Button/ButtonLink'
-import { ROUTES } from '@/utils/constants'
-import styles from './NotFoundPage.module.css'
-
-export function NotFoundPage() {
-  return (
-    <>
-      <PageMeta title="Страница не найдена" />
+import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { ButtonLink } from '@/components/ui/Button/ButtonLink';
+import { ROUTES } from '@/utils/constants';
+import styles from './NotFoundPage.module.css';
+function NotFoundPage() {
+    return (<>
+      <PageMeta title="Страница не найдена"/>
 
       <div className={styles.page}>
         <div className="container">
@@ -20,6 +18,9 @@ export function NotFoundPage() {
           </div>
         </div>
       </div>
-    </>
-  )
+    </>);
+}
+
+export {
+  NotFoundPage,
 }

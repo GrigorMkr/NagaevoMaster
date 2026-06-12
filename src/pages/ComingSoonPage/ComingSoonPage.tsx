@@ -1,37 +1,28 @@
-import { useState, type FormEvent } from 'react'
-import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { Logo } from '@/components/ui/Logo/Logo'
-import { Button } from '@/components/ui/Button/Button'
-import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput'
-import { COMING_SOON_COPY, grantPreviewAccess } from '@/utils/siteAccess'
-import styles from './ComingSoonPage.module.css'
-
+import { useState, type FormEvent } from 'react';
+import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { Logo } from '@/components/ui/Logo/Logo';
+import { Button } from '@/components/ui/Button/Button';
+import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput';
+import { COMING_SOON_COPY, grantPreviewAccess } from '@/utils/siteAccess';
+import styles from './ComingSoonPage.module.css';
 interface ComingSoonPageProps {
-  onAccessGranted: () => void
+    onAccessGranted: () => void;
 }
-
-export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
-  const [showTeamForm, setShowTeamForm] = useState(false)
-  const [accessKey, setAccessKey] = useState('')
-  const [error, setError] = useState('')
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (grantPreviewAccess(accessKey)) {
-      setError('')
-      onAccessGranted()
-      return
-    }
-    setError('Неверный ключ доступа')
-  }
-
-  return (
-    <>
-      <PageMeta
-        title="Скоро запуск"
-        description="NagaevoMaster скоро откроется для жителей посёлка Нагаево."
-        canonical="/"
-      />
+function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
+    const [showTeamForm, setShowTeamForm] = useState(false);
+    const [accessKey, setAccessKey] = useState('');
+    const [error, setError] = useState('');
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (grantPreviewAccess(accessKey)) {
+            setError('');
+            onAccessGranted();
+            return;
+        }
+        setError('Неверный ключ доступа');
+    };
+    return (<>
+      <PageMeta title="Скоро запуск" description="NagaevoMaster скоро откроется для жителей посёлка Нагаево." canonical="/"/>
 
       <main className={styles.page}>
         <div className={styles.card}>
@@ -48,36 +39,25 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
             {COMING_SOON_COPY.contactLabel}
           </a>
 
-          <button
-            type="button"
-            className={styles.teamToggle}
-            onClick={() => setShowTeamForm((current) => !current)}
-          >
+          <button type="button" className={styles.teamToggle} onClick={() => setShowTeamForm((current) => !current)}>
             Вход для команды
           </button>
 
-          {showTeamForm && (
-            <form className={styles.teamForm} onSubmit={handleSubmit}>
+          {showTeamForm && (<form className={styles.teamForm} onSubmit={handleSubmit}>
               <label className={styles.teamLabel} htmlFor="preview-access-key">
                 Ключ доступа
               </label>
-              <PasswordInput
-                id="preview-access-key"
-                value={accessKey}
-                onChange={(event) => setAccessKey(event.target.value)}
-                placeholder="Введите ключ"
-                autoComplete="off"
-                autoCapitalize="off"
-                spellCheck={false}
-              />
+              <PasswordInput id="preview-access-key" value={accessKey} onChange={(event) => setAccessKey(event.target.value)} placeholder="Введите ключ" autoComplete="off" autoCapitalize="off" spellCheck={false}/>
               {error && <p className={styles.teamError}>{error}</p>}
               <Button type="submit" fullWidth>
                 Открыть сайт
               </Button>
-            </form>
-          )}
+            </form>)}
         </div>
       </main>
-    </>
-  )
+    </>);
+}
+
+export {
+  ComingSoonPage,
 }

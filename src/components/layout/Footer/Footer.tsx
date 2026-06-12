@@ -1,24 +1,19 @@
-import { memo } from 'react'
-import { Link } from 'react-router-dom'
-import { Logo } from '@/components/ui/Logo/Logo'
-import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO } from '@/constants'
-import styles from './Footer.module.css'
-
-export const Footer = memo(function Footer() {
-  const currentYear = new Date().getFullYear()
-
-  return (
-    <footer className={styles.footer}>
+import { memo } from 'react';
+import { Link } from 'react-router-dom';
+import { Logo } from '@/components/ui/Logo/Logo';
+import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO } from '@/constants';
+import styles from './Footer.module.css';
+const Footer = memo(function Footer() {
+    const currentYear = new Date().getFullYear();
+    return (<footer className={styles.footer}>
       <div className="container">
         <div className={styles.inner}>
-          <Logo variant="footer" />
+          <Logo variant="footer"/>
 
           <nav className={styles.nav}>
-            {FOOTER_NAV_ITEMS.map((link) => (
-              <Link key={link.to} to={link.to}>
+            {FOOTER_NAV_ITEMS.map((link) => (<Link key={link.to} to={link.to}>
                 {link.label}
-              </Link>
-            ))}
+              </Link>))}
           </nav>
 
           <p className={styles.geo}>
@@ -33,6 +28,9 @@ export const Footer = memo(function Footer() {
           </a>
         </div>
       </div>
-    </footer>
-  )
-})
+    </footer>);
+});
+
+export {
+  Footer,
+}

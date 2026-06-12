@@ -1,96 +1,76 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { Button } from '@/components/ui/Button/Button'
-import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
-import { ReviewList } from '@/components/reviews/ReviewList/ReviewList'
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { fetchListingByIdThunk, fetchListingsThunk } from '@/features/listings/listingsThunks'
-import {
-  selectCurrentListing,
-  selectListingsLoading,
-  selectSimilarListings,
-} from '@/features/listings/listingsSelectors'
-import { fetchListingReviews } from '@/services/reviewsApi'
-import { reportListing } from '@/services/listingsWriteApi'
-import type { Listing } from '@/types/listing'
-import { META_DESCRIPTION_MAX_LENGTH } from '@/constants'
-import {
-  CAPTCHA_EXPECTED_ANSWER,
-  CAPTCHA_QUESTION,
-  ECHO_FORM_ACTION,
-} from '@/constants/forms'
-import { ROUTES, serviceDetailPath } from '@/utils/constants'
-import pageStyles from '@/styles/page.module.css'
-import styles from './ServiceDetailPage.module.css'
-
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { Button } from '@/components/ui/Button/Button';
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
+import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
+import { ReviewList } from '@/components/reviews/ReviewList/ReviewList';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { fetchListingByIdThunk, fetchListingsThunk } from '@/features/listings/listingsThunks';
+import { selectCurrentListing, selectListingsLoading, selectSimilarListings, } from '@/features/listings/listingsSelectors';
+import { fetchListingReviews } from '@/services/reviewsApi';
+import { reportListing } from '@/services/listingsWriteApi';
+import type { Listing } from '@/types/listing';
+import { META_DESCRIPTION_MAX_LENGTH } from '@/constants';
+import { CAPTCHA_EXPECTED_ANSWER, CAPTCHA_QUESTION, ECHO_FORM_ACTION, } from '@/constants/forms';
+import { ROUTES, serviceDetailPath } from '@/utils/constants';
+import pageStyles from '@/styles/page.module.css';
+import styles from './ServiceDetailPage.module.css';
 interface ServiceDetailViewProps {
-  listing: Listing
-  similarListings: Listing[]
+    listing: Listing;
+    similarListings: Listing[];
 }
-
 function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps) {
-  const [showPhone, setShowPhone] = useState(false)
-  const [showReviews, setShowReviews] = useState(false)
-  const [captchaAnswer, setCaptchaAnswer] = useState('')
-  const [listingReviews, setListingReviews] = useState<Awaited<ReturnType<typeof fetchListingReviews>>>([])
-  const [reviewsLoading, setReviewsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetchListingReviews(listing.id)
-      .then((reviews) => {
-        if (!cancelled) setListingReviews(reviews)
-      })
-      .catch(() => {
-        if (!cancelled) setListingReviews([])
-      })
-      .finally(() => {
-        if (!cancelled) setReviewsLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [listing.id])
-
-  const handleShowPhone = () => {
-    if (captchaAnswer.trim() !== CAPTCHA_EXPECTED_ANSWER) {
-      toast.error(`Неверный ответ. Сколько будет ${CAPTCHA_QUESTION}?`)
-      return
-    }
-    setShowPhone(true)
-    toast.success('Контакт открыт')
-  }
-
-  const handleCaptchaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCaptchaAnswer(event.target.value)
-  }
-
-  const handleReportClick = async () => {
-    try {
-      await reportListing(listing.id)
-      toast.success('Жалоба отправлена модератору')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Не удалось отправить жалобу')
-    }
-  }
-
-  const handleReviewsToggle = () => {
-    setShowReviews((current) => !current)
-  }
-
-  return (
-    <>
-      <PageMeta
-        title={listing.title}
-        description={`${listing.description.slice(0, META_DESCRIPTION_MAX_LENGTH)}. Цена от ${listing.priceFrom}₽ за ${listing.unit}.`}
-        keywords={`${listing.category}, ${listing.subcategory}, Нагаево, услуги`}
-        canonical={serviceDetailPath(listing.id)}
-      />
+    const [showPhone, setShowPhone] = useState(false);
+    const [showReviews, setShowReviews] = useState(false);
+    const [captchaAnswer, setCaptchaAnswer] = useState('');
+    const [listingReviews, setListingReviews] = useState<Awaited<ReturnType<typeof fetchListingReviews>>>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+    useEffect(() => {
+        let cancelled = false;
+        fetchListingReviews(listing.id)
+            .then((reviews) => {
+            if (!cancelled)
+                setListingReviews(reviews);
+        })
+            .catch(() => {
+            if (!cancelled)
+                setListingReviews([]);
+        })
+            .finally(() => {
+            if (!cancelled)
+                setReviewsLoading(false);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [listing.id]);
+    const handleShowPhone = () => {
+        if (captchaAnswer.trim() !== CAPTCHA_EXPECTED_ANSWER) {
+            toast.error(`Неверный ответ. Сколько будет ${CAPTCHA_QUESTION}?`);
+            return;
+        }
+        setShowPhone(true);
+        toast.success('Контакт открыт');
+    };
+    const handleCaptchaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setCaptchaAnswer(event.target.value);
+    };
+    const handleReportClick = async () => {
+        try {
+            await reportListing(listing.id);
+            toast.success('Жалоба отправлена модератору');
+        }
+        catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Не удалось отправить жалобу');
+        }
+    };
+    const handleReviewsToggle = () => {
+        setShowReviews((current) => !current);
+    };
+    return (<>
+      <PageMeta title={listing.title} description={`${listing.description.slice(0, META_DESCRIPTION_MAX_LENGTH)}. Цена от ${listing.priceFrom}₽ за ${listing.unit}.`} keywords={`${listing.category}, ${listing.subcategory}, Нагаево, услуги`} canonical={serviceDetailPath(listing.id)}/>
 
       <div className={pageStyles.page}>
         <div className="container">
@@ -106,61 +86,33 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
               <span className={styles.price}>
                 от {listing.priceFrom} ₽ / {listing.unit}
               </span>
-              <button
-                type="button"
-                className={styles.ratingButton}
-                onClick={handleReviewsToggle}
-                aria-expanded={showReviews}
-              >
+              <button type="button" className={styles.ratingButton} onClick={handleReviewsToggle} aria-expanded={showReviews}>
                 ★ {listing.rating} ({listing.reviewsCount} отзывов)
               </button>
             </div>
 
-            {showReviews && (
-              <section className={styles.reviews} aria-label="Отзывы клиентов">
+            {showReviews && (<section className={styles.reviews} aria-label="Отзывы клиентов">
                 <h2 className={styles.reviewsTitle}>Отзывы</h2>
-                {reviewsLoading ? (
-                  <p className="textMuted">Загрузка отзывов…</p>
-                ) : (
-                  <ReviewList reviews={listingReviews} />
-                )}
-              </section>
-            )}
+                {reviewsLoading ? (<p className="textMuted">Загрузка отзывов…</p>) : (<ReviewList reviews={listingReviews}/>)}
+              </section>)}
 
             <p className={styles.desc}>{listing.description}</p>
             <p className={styles.address}>📍 {listing.location.address}</p>
 
             <div className={styles.contact}>
-              {!showPhone ? (
-                <form
-                  className={styles.captcha}
-                  action={ECHO_FORM_ACTION}
-                  onSubmit={(event) => {
-                    event.preventDefault()
-                    handleShowPhone()
-                  }}
-                >
+              {!showPhone ? (<form className={styles.captcha} action={ECHO_FORM_ACTION} onSubmit={(event) => {
+                event.preventDefault();
+                handleShowPhone();
+            }}>
                   <p>Для показа телефона решите: {CAPTCHA_QUESTION} = ?</p>
                   <label className="sr-only" htmlFor="captcha-answer">
                     Ответ на капчу
                   </label>
-                  <input
-                    id="captcha-answer"
-                    name="captcha"
-                    type="text"
-                    required
-                    value={captchaAnswer}
-                    onChange={handleCaptchaChange}
-                    className={pageStyles.input}
-                    placeholder="Ответ"
-                  />
+                  <input id="captcha-answer" name="captcha" type="text" required value={captchaAnswer} onChange={handleCaptchaChange} className={pageStyles.input} placeholder="Ответ"/>
                   <Button type="submit">Показать контакты</Button>
-                </form>
-              ) : (
-                <p className={styles.phone}>
+                </form>) : (<p className={styles.phone}>
                   📞 <a href={`tel:${listing.phone.replace(/\s/g, '')}`}>{listing.phone}</a>
-                </p>
-              )}
+                </p>)}
             </div>
 
             <div className={styles.actions}>
@@ -170,59 +122,50 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
             </div>
           </article>
 
-          {similarListings.length > 0 && (
-            <section className={styles.similar}>
+          {similarListings.length > 0 && (<section className={styles.similar}>
               <h2 className="titleSection">Похожие услуги</h2>
               <div className={styles.similarGrid}>
-                {similarListings.map((item) => (
-                  <ListingCard key={item.id} listing={item} />
-                ))}
+                {similarListings.map((item) => (<ListingCard key={item.id} listing={item}/>))}
               </div>
-            </section>
-          )}
+            </section>)}
         </div>
       </div>
-    </>
-  )
+    </>);
 }
-
-export function ServiceDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const dispatch = useAppDispatch()
-  const listing = useAppSelector(selectCurrentListing)
-  const isLoading = useAppSelector(selectListingsLoading)
-  const similarListings = useAppSelector((state) =>
-    id ? selectSimilarListings(id)(state) : [],
-  )
-
-  useEffect(() => {
-    if (!id) return
-    dispatch(fetchListingByIdThunk(id))
-    dispatch(fetchListingsThunk({}))
-  }, [id, dispatch])
-
-  if (isLoading && !listing) {
-    return (
-      <div className={pageStyles.page}>
+function ServiceDetailPage() {
+    const { id } = useParams<{
+        id: string;
+    }>();
+    const dispatch = useAppDispatch();
+    const listing = useAppSelector(selectCurrentListing);
+    const isLoading = useAppSelector(selectListingsLoading);
+    const similarListings = useAppSelector((state) => id ? selectSimilarListings(id)(state) : []);
+    useEffect(() => {
+        if (!id)
+            return;
+        dispatch(fetchListingByIdThunk(id));
+        dispatch(fetchListingsThunk({}));
+    }, [id, dispatch]);
+    if (isLoading && !listing) {
+        return (<div className={pageStyles.page}>
         <div className="container">
-          <Skeleton variant="title" />
-          <Skeleton variant="text" />
-          <Skeleton variant="card" />
+          <Skeleton variant="title"/>
+          <Skeleton variant="text"/>
+          <Skeleton variant="card"/>
         </div>
-      </div>
-    )
-  }
-
-  if (!listing || !id) {
-    return (
-      <div className={pageStyles.page}>
+      </div>);
+    }
+    if (!listing || !id) {
+        return (<div className={pageStyles.page}>
         <div className="container">
           <p className={pageStyles.emptyTitle}>Объявление не найдено</p>
           <Link to={ROUTES.SERVICES}>← К каталогу</Link>
         </div>
-      </div>
-    )
-  }
+      </div>);
+    }
+    return <ServiceDetailView key={id} listing={listing} similarListings={similarListings}/>;
+}
 
-  return <ServiceDetailView key={id} listing={listing} similarListings={similarListings} />
+export {
+  ServiceDetailPage,
 }
