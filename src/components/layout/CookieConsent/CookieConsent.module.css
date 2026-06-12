@@ -1,0 +1,114 @@
+.banner {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  right: var(--spacing-md);
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  background: rgb(255 252 246 / 98%);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 12px 32px rgb(8 31 24 / 18%),
+    inset 0 1px 0 rgb(255 255 255 / 90%);
+  backdrop-filter: blur(16px);
+  animation: cookie-slide-in 0.35s var(--ease-out-expo) both;
+}
+
+@keyframes cookie-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.detailsToggle {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.detailsToggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.details {
+  max-height: 6rem;
+  margin: 0.5rem 0 0;
+  padding-right: 0.25rem;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.acceptButton {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .banner {
+    right: var(--spacing-xl);
+    bottom: var(--spacing-xl);
+    left: auto;
+    width: min(400px, calc(100vw - 2 * var(--spacing-xl)));
+    max-width: 400px;
+    margin: 0;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem 1.1rem;
+  }
+
+  .text {
+    font-size: 0.8125rem;
+  }
+
+  .acceptButton {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+}
+
+@media (width <= 640px) {
+  .banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+    padding: 0.75rem;
+  }
+
+  .acceptButton {
+    width: 100%;
+  }
+}

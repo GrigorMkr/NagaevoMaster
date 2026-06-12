@@ -1,0 +1,64 @@
+
+.badge {
+  display: inline-block;
+  padding: 0.5rem 1.125rem;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-ui);
+  letter-spacing: var(--letter-badge);
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+  background: var(--badge-green-bg);
+  border: 1px solid var(--badge-green-border);
+  border-radius: var(--radius-full);
+}
+
+.badge.badgeGold,
+.badgeGold {
+  color: #8a6520;
+  background: var(--badge-gold-bg);
+  border-color: var(--badge-gold-border);
+}
+
+.titleSection {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--letter-display);
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.titlePage {
+  font-family: var(--font-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--letter-display);
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.textMuted {
+  font-family: var(--font-body);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-body);
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.textBody {
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-body);
+  color: var(--color-text-muted);
+  line-height: 1.8;
+}
+
+.cardSurface {
+  background: var(--color-bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}

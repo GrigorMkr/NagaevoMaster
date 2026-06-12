@@ -1,0 +1,141 @@
+﻿:root {
+  --color-primary: #17624a;
+  --color-primary-dark: #0a3d2e;
+  --color-primary-light: #2d9a74;
+  --color-secondary: #c0782a;
+  --color-secondary-dark: #9a5f1e;
+  --color-accent: #f0b429;
+  --color-accent-soft: #fde68a;
+  --color-accent-glow: rgba(240, 180, 41, 0.4);
+  --color-coral: #e8a87c;
+  --color-mint: #7ec8a8;
+
+  --color-bg: #faf5eb;
+  --color-bg-warm: #f3ead8;
+  --color-bg-card: rgba(255, 252, 246, 0.82);
+  --color-bg-elevated: rgba(255, 252, 246, 0.78);
+  --color-bg-glass: rgba(255, 252, 246, 0.68);
+  --color-bg-dark: #081f18;
+  --color-bg-dark-mid: #0f3328;
+  --color-bg-dark-soft: #163d30;
+  --color-hero-green: #1a4d3c;
+
+  --gradient-surface: linear-gradient(
+    165deg,
+    #fdf8ee 0%,
+    #faf5eb 25%,
+    #f5efe3 55%,
+    #f0ebe0 100%
+  );
+
+  --color-text: #152019;
+  --color-text-muted: #3d4f45;
+  --color-text-light: #6b7d72;
+  --color-text-on-dark: #f2ece4;
+  --color-text-on-dark-muted: rgba(242, 236, 228, 0.55);
+  --color-text-on-dark-subtle: rgba(242, 236, 228, 0.35);
+
+  --color-border: rgba(21, 32, 25, 0.08);
+  --color-border-strong: rgba(21, 32, 25, 0.14);
+  --color-border-glow: rgba(240, 180, 41, 0.35);
+  --color-border-on-dark: rgba(255, 255, 255, 0.07);
+
+  --badge-green-bg: rgba(23, 98, 74, 0.1);
+  --badge-green-border: rgba(23, 98, 74, 0.15);
+  --badge-gold-bg: rgba(240, 180, 41, 0.15);
+  --badge-gold-border: rgba(240, 180, 41, 0.3);
+
+  --gradient-hero: linear-gradient(
+    165deg,
+    #061a14 0%,
+    var(--color-bg-dark-mid) 35%,
+    var(--color-primary) 70%,
+    var(--color-hero-green) 100%
+  );
+  --gradient-cta: linear-gradient(
+    135deg,
+    var(--color-bg-dark) 0%,
+    var(--color-primary-dark) 50%,
+    var(--color-primary) 100%
+  );
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 100%
+  );
+  --gradient-gold: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-soft) 50%,
+    #fff 100%
+  );
+  --gradient-gold-btn: linear-gradient(
+    135deg,
+    var(--color-secondary) 0%,
+    var(--color-accent) 100%
+  );
+  --gradient-card-icon: linear-gradient(
+    145deg,
+    rgba(23, 98, 74, 0.12) 0%,
+    rgba(240, 180, 41, 0.14) 100%
+  );
+
+  --font-display: 'Loos Wide', 'Loos Normal', system-ui, sans-serif;
+  --font-body: 'Loos Normal', 'Manrope', system-ui, sans-serif;
+  --font-ui: 'Manrope', 'Loos Normal', system-ui, sans-serif;
+  --font-weight-display: 500;
+  --font-weight-body: 500;
+  --font-weight-ui: 600;
+  --letter-display: -0.03em;
+  --letter-badge: 0.08em;
+
+  --font-size-xs: 0.875rem;
+  --font-size-sm: 1rem;
+  --font-size-base: 1.125rem;
+  --font-size-lg: 1.3125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2.25rem;
+  --font-size-3xl: 3rem;
+  --font-size-4xl: 4.5rem;
+  --font-size-hero: clamp(3rem, 6.5vw, 5rem);
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3.5rem;
+  --spacing-3xl: 6rem;
+  --spacing-4xl: 8rem;
+  --section-gap: 5rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 2px 8px rgba(8, 31, 24, 0.05);
+  --shadow-md: 0 12px 32px rgba(8, 31, 24, 0.09);
+  --shadow-lg: 0 24px 56px rgba(8, 31, 24, 0.14);
+  --shadow-xl: 0 32px 80px rgba(8, 31, 24, 0.18);
+  --shadow-glow: 0 12px 40px var(--color-accent-glow);
+  --shadow-card:
+    0 4px 24px rgba(23, 98, 74, 0.08),
+    0 1px 3px rgba(192, 120, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --shadow-card-hover:
+    0 20px 48px rgba(23, 98, 74, 0.14),
+    0 6px 16px rgba(240, 180, 41, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(16px) saturate(1.4);
+
+  --header-height: 76px;
+  --container-max: 1440px;
+  --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}

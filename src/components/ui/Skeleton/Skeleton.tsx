@@ -1,0 +1,16 @@
+import classNames from 'classnames'
+import styles from './Skeleton.module.css'
+
+interface SkeletonProps {
+  variant?: 'text' | 'title' | 'card' | 'map'
+  className?: string
+}
+
+export function Skeleton({ variant = 'text', className }: SkeletonProps) {
+  return (
+    <div
+      className={classNames(styles.skeleton, styles[variant], className)}
+      aria-hidden="true"
+    />
+  )
+}

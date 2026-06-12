@@ -1,0 +1,137 @@
+.back {
+  display: inline-block;
+  margin-bottom: var(--spacing-xl);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.card {
+  padding: var(--spacing-2xl);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.verified {
+  padding: 0.35rem 0.75rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  background: var(--badge-green-bg);
+  border-radius: var(--radius-full);
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.price {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.ratingButton {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ratingButton:hover {
+  color: var(--color-primary-dark);
+}
+
+.ratingButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.reviews {
+  margin-bottom: var(--spacing-lg);
+}
+
+.reviewsTitle {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-lg);
+}
+
+.desc {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  line-height: 1.75;
+  margin-bottom: var(--spacing-md);
+}
+
+.address {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xl);
+}
+
+.contact {
+  padding: var(--spacing-lg);
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.captcha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.captcha input {
+  max-width: 120px;
+}
+
+.phone {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.similar {
+  margin-top: var(--spacing-3xl);
+}
+
+.similarGrid {
+  display: grid;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .similarGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .similarGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

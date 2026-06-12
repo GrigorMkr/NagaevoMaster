@@ -1,0 +1,8 @@
+:root {
+  --landscape-church: url('../assets/landscapes/nagaevo-church.png');
+  --landscape-river: url('../assets/landscapes/nagaevo-river.png');
+  --landscape-aerial: url('../assets/landscapes/nagaevo-aerial.png');
+  --landscape-street: url('../assets/landscapes/nagaevo-street.png');
+  --landscape-mosque: url('../assets/landscapes/nagaevo-mosque.png');
+  --landscape-houses: url('../assets/landscapes/nagaevo-houses.png');
+}

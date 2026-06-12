@@ -1,0 +1,77 @@
+﻿.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.mark {
+  flex-shrink: 0;
+  border-radius: 13px;
+  box-shadow:
+    0 4px 14px rgba(23, 98, 74, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  transition:
+    transform 0.35s var(--ease-out-expo),
+    box-shadow 0.35s var(--ease-out-expo);
+}
+
+.logo:hover .mark {
+  transform: scale(1.04) rotate(-2deg);
+  box-shadow:
+    0 8px 24px rgba(23, 98, 74, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  gap: 0.15rem;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--letter-display);
+  color: var(--color-text);
+}
+
+.master {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.footer .name {
+  color: var(--color-text-on-dark);
+}
+
+.footer .master {
+  color: var(--color-accent);
+}
+
+.footer .mark {
+  box-shadow:
+    0 4px 16px rgba(240, 180, 41, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+}
+
+.footer:hover .mark {
+  box-shadow:
+    0 8px 28px rgba(240, 180, 41, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.iconOnly {
+  gap: 0;
+}
+
+@media (max-width: 420px) {
+  .logo:not(.footer) .wordmark {
+    display: none;
+  }
+}

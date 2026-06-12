@@ -1,0 +1,24 @@
+.header {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.header .badge {
+  margin-bottom: var(--spacing-lg);
+}
+
+.header .textMuted {
+  margin-top: var(--spacing-lg);
+  max-width: 640px;
+  font-size: var(--font-size-xl);
+  line-height: 1.75;
+}
+
+@media (max-width: 640px) {
+  .header .titlePage {
+    font-size: var(--font-size-2xl);
+  }
+
+  .header .textMuted {
+    font-size: var(--font-size-base);
+  }
+}

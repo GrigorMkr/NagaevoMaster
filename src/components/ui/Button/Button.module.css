@@ -1,0 +1,172 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-weight: var(--font-weight-ui);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 0.3s var(--ease-out-expo),
+    box-shadow 0.3s var(--ease-out-expo),
+    border-color 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.button:not(:disabled):hover::after {
+  transform: translateX(100%);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:not(:disabled):hover {
+  transform: translateY(-3px);
+}
+
+.button:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+
+.sm {
+  padding: 0.55rem 1.25rem;
+  font-size: var(--font-size-sm);
+}
+
+.md {
+  padding: 0.8rem 1.625rem;
+  font-size: var(--font-size-base);
+}
+
+.lg {
+  padding: 1rem 2.125rem;
+  font-size: var(--font-size-lg);
+}
+
+.primary {
+  background: var(--gradient-primary);
+  background-size: 200% 200%;
+  color: #fff;
+  box-shadow:
+    0 4px 20px rgba(23, 98, 74, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.primary:not(:disabled):hover {
+  box-shadow:
+    0 12px 36px rgba(23, 98, 74, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  animation: gradient-shift 3s ease infinite;
+}
+
+.secondary {
+  background: var(--gradient-gold-btn);
+  background-size: 200% 200%;
+  color: var(--color-bg-dark);
+  box-shadow:
+    0 4px 20px rgba(192, 120, 42, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.secondary:not(:disabled):hover {
+  box-shadow: var(--shadow-glow);
+  animation: gradient-shift 3s ease infinite;
+}
+
+.outline {
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.outline:not(:disabled):hover {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(23, 98, 74, 0.25);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.ghost:not(:disabled):hover {
+  background: var(--color-bg-warm);
+}
+
+.light {
+  background: var(--color-bg-card);
+  color: var(--color-primary-dark);
+  box-shadow:
+    0 8px 32px rgba(8, 31, 24, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.light:not(:disabled):hover {
+  box-shadow:
+    0 16px 48px rgba(8, 31, 24, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.danger {
+  background: #c62828;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(198, 40, 40, 0.3);
+}
+
+.danger:not(:disabled):hover {
+  box-shadow: 0 8px 28px rgba(198, 40, 40, 0.4);
+}
+
+.loading {
+  pointer-events: none;
+}
+
+.spinnerIcon {
+  border-top-color: currentColor;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fullWidth {
+  width: 100%;
+}
