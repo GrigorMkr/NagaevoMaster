@@ -15,6 +15,7 @@ import {
 } from '@/features/listings/listingsSelectors'
 import { fetchListingReviews } from '@/services/reviewsApi'
 import { reportListing } from '@/services/listingsWriteApi'
+import type { Listing } from '@/types/listing'
 import { META_DESCRIPTION_MAX_LENGTH } from '@/constants'
 import {
   CAPTCHA_EXPECTED_ANSWER,
@@ -25,41 +26,36 @@ import { ROUTES, serviceDetailPath } from '@/utils/constants'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ServiceDetailPage.module.css'
 
-export function ServiceDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const dispatch = useAppDispatch()
-  const listing = useAppSelector(selectCurrentListing)
-  const isLoading = useAppSelector(selectListingsLoading)
-  const similarListings = useAppSelector((state) =>
-    id ? selectSimilarListings(id)(state) : [],
-  )
+interface ServiceDetailViewProps {
+  listing: Listing
+  similarListings: Listing[]
+}
+
+function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps) {
   const [showPhone, setShowPhone] = useState(false)
   const [showReviews, setShowReviews] = useState(false)
   const [captchaAnswer, setCaptchaAnswer] = useState('')
   const [listingReviews, setListingReviews] = useState<Awaited<ReturnType<typeof fetchListingReviews>>>([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) return
-    dispatch(fetchListingByIdThunk(id))
-    dispatch(fetchListingsThunk({}))
-  }, [id, dispatch])
-
-  useEffect(() => {
-    setShowReviews(false)
-    setShowPhone(false)
-    setCaptchaAnswer('')
-  }, [id])
-
-  useEffect(() => {
-    if (!listing?.id) {
-      setListingReviews([])
-      return
-    }
+    let cancelled = false
 
     fetchListingReviews(listing.id)
-      .then(setListingReviews)
-      .catch(() => setListingReviews([]))
-  }, [listing?.id])
+      .then((reviews) => {
+        if (!cancelled) setListingReviews(reviews)
+      })
+      .catch(() => {
+        if (!cancelled) setListingReviews([])
+      })
+      .finally(() => {
+        if (!cancelled) setReviewsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [listing.id])
 
   const handleShowPhone = () => {
     if (captchaAnswer.trim() !== CAPTCHA_EXPECTED_ANSWER) {
@@ -75,7 +71,6 @@ export function ServiceDetailPage() {
   }
 
   const handleReportClick = async () => {
-    if (!listing) return
     try {
       await reportListing(listing.id)
       toast.success('Жалоба отправлена модератору')
@@ -86,29 +81,6 @@ export function ServiceDetailPage() {
 
   const handleReviewsToggle = () => {
     setShowReviews((current) => !current)
-  }
-
-  if (isLoading && !listing) {
-    return (
-      <div className={pageStyles.page}>
-        <div className="container">
-          <Skeleton variant="title" />
-          <Skeleton variant="text" />
-          <Skeleton variant="card" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!listing) {
-    return (
-      <div className={pageStyles.page}>
-        <div className="container">
-          <p className={pageStyles.emptyTitle}>Объявление не найдено</p>
-          <Link to={ROUTES.SERVICES}>← К каталогу</Link>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -147,7 +119,11 @@ export function ServiceDetailPage() {
             {showReviews && (
               <section className={styles.reviews} aria-label="Отзывы клиентов">
                 <h2 className={styles.reviewsTitle}>Отзывы</h2>
-                <ReviewList reviews={listingReviews} />
+                {reviewsLoading ? (
+                  <p className="textMuted">Загрузка отзывов…</p>
+                ) : (
+                  <ReviewList reviews={listingReviews} />
+                )}
               </section>
             )}
 
@@ -208,4 +184,45 @@ export function ServiceDetailPage() {
       </div>
     </>
   )
+}
+
+export function ServiceDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const dispatch = useAppDispatch()
+  const listing = useAppSelector(selectCurrentListing)
+  const isLoading = useAppSelector(selectListingsLoading)
+  const similarListings = useAppSelector((state) =>
+    id ? selectSimilarListings(id)(state) : [],
+  )
+
+  useEffect(() => {
+    if (!id) return
+    dispatch(fetchListingByIdThunk(id))
+    dispatch(fetchListingsThunk({}))
+  }, [id, dispatch])
+
+  if (isLoading && !listing) {
+    return (
+      <div className={pageStyles.page}>
+        <div className="container">
+          <Skeleton variant="title" />
+          <Skeleton variant="text" />
+          <Skeleton variant="card" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!listing || !id) {
+    return (
+      <div className={pageStyles.page}>
+        <div className="container">
+          <p className={pageStyles.emptyTitle}>Объявление не найдено</p>
+          <Link to={ROUTES.SERVICES}>← К каталогу</Link>
+        </div>
+      </div>
+    )
+  }
+
+  return <ServiceDetailView key={id} listing={listing} similarListings={similarListings} />
 }

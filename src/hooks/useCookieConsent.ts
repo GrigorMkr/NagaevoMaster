@@ -1,27 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { COOKIE_CONSENT_STORAGE_KEY } from '@/constants/cookie-consent'
 
+function readConsentVisibility(): boolean {
+  try {
+    return localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) !== 'accepted'
+  } catch {
+    return true
+  }
+}
+
 export function useCookieConsent() {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-
-    try {
-      const isAccepted = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY) === 'accepted'
-      if (!cancelled && !isAccepted) {
-        setIsVisible(true)
-      }
-    } catch {
-      if (!cancelled) {
-        setIsVisible(true)
-      }
-    }
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const [isVisible, setIsVisible] = useState(readConsentVisibility)
 
   const handleAccept = useCallback(() => {
     try {

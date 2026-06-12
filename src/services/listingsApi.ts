@@ -3,6 +3,7 @@ import type { SearchParams } from '@/types/search'
 import { DEGREES_IN_SEMICIRCLE, EARTH_RADIUS_KM } from '@/constants/geo'
 import { NAGAEVO_CENTER } from '@/constants/geo-data'
 import { MOCK_LISTINGS } from '@/data/mockListings'
+import { USE_MOCK_FALLBACK } from '@/config/runtime'
 import { SortBy } from '@/enums/sort'
 import { api } from './api'
 
@@ -113,8 +114,6 @@ function mockListingsResponse(params: Partial<SearchParams>): ListingsResponse {
     page: params.page ?? 1,
   }
 }
-
-const USE_MOCK_FALLBACK = import.meta.env.VITE_USE_MOCK_FALLBACK === 'true'
 
 export async function fetchListings(params: Partial<SearchParams> = {}): Promise<ListingsResponse> {
   try {

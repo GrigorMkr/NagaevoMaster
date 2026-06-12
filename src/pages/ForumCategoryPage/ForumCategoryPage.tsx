@@ -10,20 +10,58 @@ import { ROUTES, forumCategoryPath, forumTopicPath } from '@/utils/constants'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ForumCategoryPage.module.css'
 
-export function ForumCategoryPage() {
-  const { category } = useParams<{ category: string }>()
-  const forumCat = FORUM_CATEGORIES.find((c) => c.slug === category)
+function ForumCategoryTopicList({ category }: { category: string }) {
   const [topics, setTopics] = useState<ForumTopicListItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!category) return
-    setIsLoading(true)
+    let cancelled = false
+
     fetchForumTopics(category)
-      .then(setTopics)
-      .catch(() => setTopics([]))
-      .finally(() => setIsLoading(false))
+      .then((data) => {
+        if (!cancelled) setTopics(data)
+      })
+      .catch(() => {
+        if (!cancelled) setTopics([])
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [category])
+
+  return (
+    <>
+      <ul className={styles.list}>
+        {topics.map((topic) => (
+          <li key={topic.id}>
+            <Link to={forumTopicPath(topic.id)} className={styles.topic}>
+              <span className={styles.topicTitle}>
+                {topic.isPinned && '📌 '}{topic.title}
+              </span>
+              <span className={styles.meta}>
+                {topic.authorName} · {topic.postsCount} ответов ·{' '}
+                {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      {isLoading && <p className="textMuted">Загрузка…</p>}
+      {!isLoading && topics.length === 0 && (
+        <p className={pageStyles.emptyHint}>Тем в этой категории пока нет</p>
+      )}
+    </>
+  )
+}
+
+export function ForumCategoryPage() {
+  const { category } = useParams<{ category: string }>()
+  const forumCat = FORUM_CATEGORIES.find((c) => c.slug === category)
 
   if (!forumCat) {
     return (
@@ -49,26 +87,7 @@ export function ForumCategoryPage() {
 
           <Link to={ROUTES.FORUM} className={styles.back}>← Все категории</Link>
 
-          <ul className={styles.list}>
-            {topics.map((topic) => (
-              <li key={topic.id}>
-                <Link to={forumTopicPath(topic.id)} className={styles.topic}>
-                  <span className={styles.topicTitle}>
-                    {topic.isPinned && '📌 '}{topic.title}
-                  </span>
-                  <span className={styles.meta}>
-                    {topic.authorName} · {topic.postsCount} ответов ·{' '}
-                    {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {isLoading && <p className="textMuted">Загрузка…</p>}
-          {!isLoading && topics.length === 0 && (
-            <p className={pageStyles.emptyHint}>Тем в этой категории пока нет</p>
-          )}
+          {category && <ForumCategoryTopicList key={category} category={category} />}
         </div>
       </div>
     </>

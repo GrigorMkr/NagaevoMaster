@@ -1,11 +1,26 @@
+import { USE_MOCK_FALLBACK } from '@/config/runtime'
+import { getReviewsForListing } from '@/data/mock/reviews'
 import type { Review } from '@/types/listing'
 import { api } from './api'
 
-export interface ReviewListItem extends Review {}
+export type ReviewListItem = Review
 
 export async function fetchListingReviews(listingId: string): Promise<ReviewListItem[]> {
-  const response = await api.get<ReviewListItem[]>(`/listings/${listingId}/reviews`)
-  return response.data
+  try {
+    const response = await api.get<ReviewListItem[]>(`/listings/${listingId}/reviews`)
+    return response.data
+  } catch (error) {
+    if (!USE_MOCK_FALLBACK) throw error
+    return getReviewsForListing(listingId).map((review) => ({
+      id: review.id,
+      listingId: review.listingId,
+      userId: 'mock',
+      authorName: review.authorName,
+      rating: review.rating,
+      text: review.text,
+      createdAt: review.createdAt,
+    }))
+  }
 }
 
 export async function createListingReview(
