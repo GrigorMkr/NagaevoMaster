@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { Logo } from '@/components/ui/Logo/Logo'
 import { Button } from '@/components/ui/Button/Button'
@@ -15,13 +15,6 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
   const [accessKey, setAccessKey] = useState('')
   const [error, setError] = useState('')
 
-  const previewLink = useMemo(() => {
-    const params = new URLSearchParams(window.location.search)
-    params.set('preview', import.meta.env.VITE_PREVIEW_ACCESS_KEY ?? 'nagaevo-preview')
-    const query = params.toString()
-    return `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
-  }, [])
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (grantPreviewAccess(accessKey)) {
@@ -29,7 +22,7 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
       onAccessGranted()
       return
     }
-    setError('Неверный ключ. Нужен ключ команды, не пароль от аккаунта.')
+    setError('Неверный ключ доступа')
   }
 
   return (
@@ -65,12 +58,6 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
 
           {showTeamForm && (
             <form className={styles.teamForm} onSubmit={handleSubmit}>
-              <p className={styles.teamHint}>
-                Ключ команды: <strong>nagaevo-preview</strong>
-                <br />
-                Это не пароль от страницы «Вход». Его вводят здесь, на заглушке.
-              </p>
-
               <label className={styles.teamLabel} htmlFor="preview-access-key">
                 Ключ доступа
               </label>
@@ -78,7 +65,7 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
                 id="preview-access-key"
                 value={accessKey}
                 onChange={(event) => setAccessKey(event.target.value)}
-                placeholder="nagaevo-preview"
+                placeholder="Введите ключ"
                 autoComplete="off"
                 autoCapitalize="off"
                 spellCheck={false}
@@ -87,10 +74,6 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
               <Button type="submit" fullWidth>
                 Открыть сайт
               </Button>
-
-              <a className={styles.teamLink} href={previewLink}>
-                Или открыть по секретной ссылке
-              </a>
             </form>
           )}
         </div>

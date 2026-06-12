@@ -84,21 +84,6 @@
   text-align: left;
 }
 
-.teamHint {
-  margin: 0;
-  padding: var(--spacing-md);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg-warm);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-
-.teamHint strong {
-  color: var(--color-primary-dark);
-  font-family: var(--font-ui);
-}
-
 .teamLabel {
   font-family: var(--font-ui);
   font-size: var(--font-size-sm);
@@ -109,15 +94,4 @@
   color: #b42318;
   font-size: var(--font-size-sm);
   margin: 0;
-}
-
-.teamLink {
-  text-align: center;
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-}
-
-.teamLink:hover {
-  color: var(--color-primary-dark);
 }
