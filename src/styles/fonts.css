@@ -1,7 +1,6 @@
 ﻿@font-face {
   font-family: 'Loos Wide';
-  src:
-    url('/NagaevoMaster/fonts/loos-wide-regular.woff2') format('woff2');
+  src: url('../assets/fonts/loos-wide-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -10,8 +9,8 @@
 @font-face {
   font-family: 'Loos Wide';
   src:
-    url('/NagaevoMaster/fonts/loos-wide-medium.woff2') format('woff2'),
-    url('/NagaevoMaster/fonts/loos-wide-medium.woff') format('woff');
+    url('../assets/fonts/loos-wide-medium.woff2') format('woff2'),
+    url('../assets/fonts/loos-wide-medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -19,8 +18,7 @@
 
 @font-face {
   font-family: 'Loos Normal';
-  src:
-    url('/NagaevoMaster/fonts/loos-normal-regular.woff2') format('woff2');
+  src: url('../assets/fonts/loos-normal-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -29,8 +27,8 @@
 @font-face {
   font-family: 'Loos Normal';
   src:
-    url('/NagaevoMaster/fonts/loos-normal-medium.woff2') format('woff2'),
-    url('/NagaevoMaster/fonts/loos-normal-medium.woff') format('woff');
+    url('../assets/fonts/loos-normal-medium.woff2') format('woff2'),
+    url('../assets/fonts/loos-normal-medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -38,7 +36,7 @@
 
 @font-face {
   font-family: 'Manrope';
-  src: url('/NagaevoMaster/fonts/manrope-regular.woff2') format('woff2');
+  src: url('../assets/fonts/manrope-regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -47,8 +45,8 @@
 @font-face {
   font-family: 'Manrope';
   src:
-    url('/NagaevoMaster/fonts/manrope-medium.woff2') format('woff2'),
-    url('/NagaevoMaster/fonts/manrope-medium.woff') format('woff');
+    url('../assets/fonts/manrope-medium.woff2') format('woff2'),
+    url('../assets/fonts/manrope-medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -56,7 +54,7 @@
 
 @font-face {
   font-family: 'Manrope';
-  src: url('/NagaevoMaster/fonts/manrope-semibold.woff2') format('woff2');
+  src: url('../assets/fonts/manrope-semibold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -64,7 +62,7 @@
 
 @font-face {
   font-family: 'Manrope';
-  src: url('/NagaevoMaster/fonts/manrope-bold.woff2') format('woff2');
+  src: url('../assets/fonts/manrope-bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;

@@ -3,10 +3,10 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 /** GitHub Pages project site: https://grigormkr.github.io/NagaevoMaster/ */
-const repositoryBase = '/NagaevoMaster/'
+const pagesBase = '/NagaevoMaster/'
 
-export default defineConfig({
-  base: repositoryBase,
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? pagesBase : '/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -25,4 +25,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))
