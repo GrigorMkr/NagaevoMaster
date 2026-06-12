@@ -1,5 +1,6 @@
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
+import { SKELETON_COUNT_NEWS } from '@/constants'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { NewsCard } from '@/components/news/NewsCard/NewsCard'
 import { useNews } from '@/hooks/useNews'
@@ -38,7 +39,7 @@ export function NewsPage() {
 
             {loading ? (
               <div className={styles.grid}>
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (
                   <Skeleton key={i} variant="card" />
                 ))}
               </div>
@@ -61,7 +62,7 @@ export function NewsPage() {
 
             {loading ? (
               <div className={styles.grid}>
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, i) => (
                   <Skeleton key={`ext-${i}`} variant="card" />
                 ))}
               </div>

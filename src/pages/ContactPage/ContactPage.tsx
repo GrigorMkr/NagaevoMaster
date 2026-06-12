@@ -4,16 +4,21 @@ import { z } from 'zod'
 import toast from 'react-hot-toast'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { CONTACT_EMAIL, GEO } from '@/utils/constants'
+import { sendContactMessage } from '@/services/contactApi'
 import { ECHO_FORM_ACTION } from '@/constants/forms'
+import { VALIDATION } from '@/constants/validation'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { Button } from '@/components/ui/Button/Button'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ContactPage.module.css'
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'Введите имя (минимум 2 символа)'),
+  name: z.string().min(VALIDATION.MIN_NAME_LENGTH, `Введите имя (минимум ${VALIDATION.MIN_NAME_LENGTH} символа)`),
   email: z.string().email('Введите корректный email'),
-  message: z.string().min(10, 'Сообщение должно быть не менее 10 символов'),
+  message: z.string().min(
+    VALIDATION.MIN_MESSAGE_LENGTH,
+    `Сообщение должно быть не менее ${VALIDATION.MIN_MESSAGE_LENGTH} символов`,
+  ),
 })
 
 type ContactFormData = z.infer<typeof contactSchema>
@@ -29,9 +34,13 @@ export function ContactPage() {
   })
 
   const onSubmit = async (data: ContactFormData) => {
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    toast.success(`Спасибо, ${data.name}! Мы свяжемся с вами.`)
-    reset()
+    try {
+      await sendContactMessage(data)
+      toast.success(`Спасибо, ${data.name}! Мы свяжемся с вами.`)
+      reset()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Не удалось отправить сообщение')
+    }
   }
 
   return (

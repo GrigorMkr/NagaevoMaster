@@ -1,3 +1,30 @@
+.locationCard {
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.locationTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.locationText {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.locationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

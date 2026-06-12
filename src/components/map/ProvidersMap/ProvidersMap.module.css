@@ -1,4 +1,4 @@
-.wrap {
+.mapWrapper {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -22,7 +22,7 @@
   background: var(--color-bg-card);
 }
 
-.filterBtn {
+.filterButton {
   padding: 0.4rem 0.9rem;
   font-family: var(--font-ui);
   font-size: var(--font-size-sm);
@@ -38,12 +38,12 @@
     border-color var(--transition);
 }
 
-.filterBtn:hover {
+.filterButton:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.filterBtnActive {
+.filterButtonActive {
   background: var(--badge-green-bg);
   border-color: var(--badge-green-border);
   color: var(--color-primary-dark);
@@ -92,4 +92,9 @@
   .map {
     height: 320px;
   }
+}
+
+.locateButton {
+  margin: var(--spacing-sm);
+  z-index: 1000;
 }

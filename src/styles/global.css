@@ -96,7 +96,6 @@ img {
 
 :where(
   .popularCard,
-  .categoryCard,
   .stepCard,
   .featureCard,
   .reviewCard,

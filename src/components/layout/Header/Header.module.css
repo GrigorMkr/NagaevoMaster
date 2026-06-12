@@ -99,7 +99,7 @@
   background-color: rgba(23, 98, 74, 0.1);
 }
 
-.navCta {
+.navActionItem {
   margin-left: var(--spacing-md);
 }
 
@@ -168,7 +168,7 @@
     font-size: var(--font-size-base);
   }
 
-  .navCta {
+  .navActionItem {
     margin-left: 0;
     margin-top: var(--spacing-sm);
   }

@@ -5,12 +5,12 @@ import styles from '../HomePage.module.css'
 
 export const CtaSection = memo(function CtaSection() {
   return (
-    <div className={styles.cta}>
-      <div className={styles.ctaCard}>
-        <div className={styles.ctaContent}>
+    <div className={styles.callToActionSection}>
+      <div className={styles.callToActionCard}>
+        <div className={styles.callToActionContent}>
           <span className="badge">Для мастеров и бизнеса</span>
           <h2 className="titleSection">Разместите услугу в каталоге</h2>
-          <p className={styles.ctaText}>
+          <p className={styles.callToActionText}>
             Добавьте объявление — мы поможем найти клиентов в Нагаево.
           </p>
         </div>

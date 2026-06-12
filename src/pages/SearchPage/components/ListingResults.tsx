@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { SKELETON_COUNT_DEFAULT } from '@/constants'
 import type { Listing } from '@/types/listing'
 import pageStyles from '@/styles/page.module.css'
 import styles from '../SearchPage.module.css'
@@ -17,7 +18,7 @@ export const ListingResults = memo(function ListingResults({
   if (isLoading) {
     return (
       <div className={styles.grid}>
-        {[1, 2, 3].map((i) => (
+        {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (
           <Skeleton key={i} variant="card" />
         ))}
       </div>

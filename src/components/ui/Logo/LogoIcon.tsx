@@ -1,10 +1,12 @@
+import { LOGO_ICON_SIZE_DEFAULT } from '@/constants'
+
 interface LogoIconProps {
   size?: number
   className?: string
   ariaHidden?: boolean
 }
 
-export function LogoIcon({ size = 44, className, ariaHidden = true }: LogoIconProps) {
+export function LogoIcon({ size = LOGO_ICON_SIZE_DEFAULT, className, ariaHidden = true }: LogoIconProps) {
   return (
     <svg
       width={size}

@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { AccountLocation } from '@/types/location'
 import type { User } from '@/types/user'
 
 interface UserState {
@@ -6,6 +7,8 @@ interface UserState {
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
+  accountLocation: AccountLocation | null
+  isLocating: boolean
 }
 
 const initialState: UserState = {
@@ -13,6 +16,8 @@ const initialState: UserState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  accountLocation: null,
+  isLocating: false,
 }
 
 const userSlice = createSlice({
@@ -35,8 +40,27 @@ const userSlice = createSlice({
       state.isAuthenticated = false
       state.error = null
     },
+    setAccountLocation(state, action: PayloadAction<AccountLocation | null>) {
+      state.accountLocation = action.payload
+      state.isLocating = false
+    },
+    setLocating(state, action: PayloadAction<boolean>) {
+      state.isLocating = action.payload
+    },
+    clearAccountLocation(state) {
+      state.accountLocation = null
+      state.isLocating = false
+    },
   },
 })
 
-export const { setUserLoading, setUser, setUserError, logout } = userSlice.actions
+export const {
+  setUserLoading,
+  setUser,
+  setUserError,
+  logout,
+  setAccountLocation,
+  setLocating,
+  clearAccountLocation,
+} = userSlice.actions
 export default userSlice.reducer

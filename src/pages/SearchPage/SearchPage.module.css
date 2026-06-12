@@ -82,8 +82,8 @@
   margin-bottom: var(--spacing-xl);
 }
 
-.sortBtn,
-.sortActive {
+.sortButton,
+.sortButtonActive {
   padding: 0.4rem 1rem;
   font-family: var(--font-ui);
   font-size: var(--font-size-sm);
@@ -95,10 +95,26 @@
   color: var(--color-text-muted);
 }
 
-.sortActive {
+.sortButtonActive {
   background: var(--badge-green-bg);
   border-color: var(--badge-green-border);
   color: var(--color-primary-dark);
+}
+
+.mapSection {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.mapTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.mapHint {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.6;
 }
 
 .grid {

@@ -2,6 +2,9 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
+import { AccountLocationBootstrap } from '@/components/user/AccountLocationBootstrap'
+import { AuthBootstrap } from '@/components/user/AuthBootstrap'
+import { TOAST_DURATION_MS } from '@/constants'
 import { store } from './store'
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -9,11 +12,13 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <Provider store={store}>
       <HelmetProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <AccountLocationBootstrap />
+          <AuthBootstrap />
           {children}
           <Toaster
             position="top-right"
             toastOptions={{
-              duration: 4000,
+              duration: TOAST_DURATION_MS,
               style: {
                 fontFamily: 'inherit',
               },

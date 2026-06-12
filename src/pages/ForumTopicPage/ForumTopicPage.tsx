@@ -1,15 +1,35 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { MOCK_FORUM_TOPICS } from '@/data/mockListings'
+import { fetchForumTopic, type ForumTopicDetail } from '@/services/forumApi'
 import { ROUTES, forumTopicPath } from '@/utils/constants'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ForumTopicPage.module.css'
 
 export function ForumTopicPage() {
   const { id } = useParams<{ id: string }>()
-  const topic = MOCK_FORUM_TOPICS.find((t) => t.id === id)
+  const [topic, setTopic] = useState<ForumTopicDetail | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) return
+    fetchForumTopic(id)
+      .then(setTopic)
+      .catch(() => setTopic(null))
+      .finally(() => setIsLoading(false))
+  }, [id])
+
+  if (isLoading) {
+    return (
+      <div className={pageStyles.page}>
+        <div className="container">
+          <p className="textMuted">Загрузка темы…</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!topic) {
     return (
@@ -33,16 +53,33 @@ export function ForumTopicPage() {
           <article className={styles.card}>
             <h1 className="titlePage">{topic.title}</h1>
             <p className={styles.meta}>
-              {topic.authorName} · {format(new Date(topic.lastPostAt), 'd MMMM yyyy', { locale: ru })}
+              {topic.authorName} · {format(new Date(topic.createdAt), 'd MMMM yyyy', { locale: ru })}
             </p>
 
             <div className={styles.post}>
-              <p>Обсуждение на форуме Нагаево. Подключите API для постов с Markdown, лайками и вложениями.</p>
+              <p>{topic.content}</p>
             </div>
 
             <div className={styles.replies}>
-              <h2>Ответы ({topic.postsCount})</h2>
-              <p className="textMuted">Ветка ответов — только для авторизованных пользователей</p>
+              <h2>Ответы ({topic.posts.length})</h2>
+              {topic.posts.length === 0 ? (
+                <p className="textMuted">Пока нет ответов</p>
+              ) : (
+                <ul className={styles.replyList}>
+                  {topic.posts.map((post) => (
+                    <li key={post.id} className={styles.replyItem}>
+                      <p className={styles.replyMeta}>
+                        {post.authorName} ·{' '}
+                        {format(new Date(post.createdAt), 'd MMM yyyy, HH:mm', { locale: ru })}
+                      </p>
+                      <p>{post.content}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="textMuted">
+                <Link to={ROUTES.AUTH}>Войдите</Link>, чтобы ответить в теме
+              </p>
             </div>
           </article>
         </div>

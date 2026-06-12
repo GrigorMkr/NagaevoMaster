@@ -1,11 +1,11 @@
-.subGrid {
+.subcategoryGrid {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-2xl);
 }
 
-.subLink {
+.subcategoryLink {
   padding: 0.45rem 1rem;
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -16,12 +16,12 @@
   transition: background var(--transition);
 }
 
-.subLink:hover {
+.subcategoryLink:hover {
   background: rgba(23, 98, 74, 0.15);
   color: var(--color-primary-dark);
 }
 
-.subTag {
+.subcategoryTag {
   padding: 0.35rem 0.85rem;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);

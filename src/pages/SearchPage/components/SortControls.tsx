@@ -20,7 +20,7 @@ export const SortControls = memo(function SortControls({ activeSort, onSort }: S
         <button
           key={sort}
           type="button"
-          className={activeSort === sort ? styles.sortActive : styles.sortBtn}
+          className={activeSort === sort ? styles.sortButtonActive : styles.sortButton}
           onClick={handleClick(sort)}
         >
           {SORT_BY_LABELS[sort]}

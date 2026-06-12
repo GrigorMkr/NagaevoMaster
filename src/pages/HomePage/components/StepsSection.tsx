@@ -10,7 +10,7 @@ export const StepsSection = memo(function StepsSection() {
       <div className={styles.stepsGrid}>
         {HOME_STEPS.map((step) => (
           <article key={step.num} className={styles.stepCard}>
-            <span className={styles.stepNum}>{step.num}</span>
+            <span className={styles.stepNumber}>{step.num}</span>
             <h3>{step.title}</h3>
             <p>{step.text}</p>
           </article>

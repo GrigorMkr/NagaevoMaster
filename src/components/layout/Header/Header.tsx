@@ -49,12 +49,12 @@ export const Header = memo(function Header() {
                 </NavLink>
               </li>
             ))}
-            <li className={styles.navCta}>
+            <li className={styles.navActionItem}>
               <ButtonLink to={ROUTES.ADD_LISTING} size="sm" variant="secondary" onClick={closeMenu}>
                 + Объявление
               </ButtonLink>
             </li>
-            <li className={styles.navCta}>
+            <li className={styles.navActionItem}>
               <Link to={ROUTES.PROFILE} onClick={closeMenu} className={styles.profileLink}>
                 Профиль
                 {hasNotifications && (
@@ -62,7 +62,7 @@ export const Header = memo(function Header() {
                 )}
               </Link>
             </li>
-            <li className={styles.navCta}>
+            <li className={styles.navActionItem}>
               <ButtonLink to={ROUTES.AUTH} size="sm" variant="outline" onClick={closeMenu}>
                 Войти
               </ButtonLink>

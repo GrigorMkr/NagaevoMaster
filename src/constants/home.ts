@@ -24,11 +24,6 @@ export const HOME_FEATURES = [
   },
 ] as const
 
-export const CATEGORY_CARD_STYLE = {
-  '--cat-hue': '#17624a',
-  '--cat-grad': 'rgba(23,98,74,0.12)',
-} as const
-
 export const HERO_SUBTITLE =
   'Специалисты, техника и услуги рядом с домом — форум для жителей и дачников'
 

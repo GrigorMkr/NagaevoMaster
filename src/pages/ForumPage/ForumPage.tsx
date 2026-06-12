@@ -1,15 +1,27 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
+import { CategoryCard } from '@/components/categories/CategoryCard/CategoryCard'
 import { FORUM_CATEGORIES } from '@/data/categories'
-import { MOCK_FORUM_TOPICS } from '@/data/mockListings'
+import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi'
 import { forumCategoryPath, forumTopicPath, ROUTES } from '@/utils/constants'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ForumPage.module.css'
 
 export function ForumPage() {
+  const [topics, setTopics] = useState<ForumTopicListItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchForumTopics()
+      .then(setTopics)
+      .catch(() => setTopics([]))
+      .finally(() => setIsLoading(false))
+  }, [])
+
   return (
     <>
       <PageMeta
@@ -28,20 +40,18 @@ export function ForumPage() {
 
           <div className={styles.categoryGrid}>
             {FORUM_CATEGORIES.map((cat) => (
-              <Link
+              <CategoryCard
                 key={cat.slug}
                 to={forumCategoryPath(cat.slug)}
-                className={styles.categoryCard}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.name}</span>
-              </Link>
+                icon={cat.icon}
+                name={cat.name}
+              />
             ))}
           </div>
 
           <h2 className={styles.sectionTitle}>Актуальные темы</h2>
           <ul className={styles.list}>
-            {MOCK_FORUM_TOPICS.map((topic) => (
+            {topics.map((topic) => (
               <li key={topic.id}>
                 <Link to={forumTopicPath(topic.id)} className={styles.topic}>
                   <span className={styles.topicTitle}>
@@ -56,7 +66,12 @@ export function ForumPage() {
             ))}
           </ul>
 
-          <p className={styles.hint}>
+          {isLoading && <p className="textMuted">Загрузка тем…</p>}
+          {!isLoading && topics.length === 0 && (
+            <p className={pageStyles.emptyHint}>Тем пока нет</p>
+          )}
+
+          <p className={pageStyles.emptyHint}>
             <Link to={ROUTES.AUTH}>Войдите</Link> чтобы создать новую тему
           </p>
         </div>

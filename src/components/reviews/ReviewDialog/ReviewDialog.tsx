@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import { MAX_RATING } from '@/constants'
 import type { MockReview } from '@/data/mock/reviews'
 import styles from './ReviewDialog.module.css'
 
@@ -71,9 +72,9 @@ export const ReviewDialog = memo(function ReviewDialog({ review, onClose }: Revi
           </button>
         </div>
 
-        <div className={styles.stars} aria-label={`Оценка ${review.rating} из 5`}>
+        <div className={styles.stars} aria-label={`Оценка ${review.rating} из ${MAX_RATING}`}>
           {'★'.repeat(review.rating)}
-          {'☆'.repeat(5 - review.rating)}
+          {'☆'.repeat(MAX_RATING - review.rating)}
         </div>
 
         <p className={styles.text}>{review.text}</p>

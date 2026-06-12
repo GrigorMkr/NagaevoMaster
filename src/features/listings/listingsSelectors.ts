@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
+import { SIMILAR_LISTINGS_LIMIT } from '@/constants'
 import type { Listing } from '@/types/listing'
 
 const selectListingsState = (state: RootState) => state.listings
@@ -24,7 +25,7 @@ export const selectListingsError = createSelector(
   (listings) => listings.error,
 )
 
-export const selectSimilarListings = (listingId: string, limit = 3) =>
+export const selectSimilarListings = (listingId: string, limit = SIMILAR_LISTINGS_LIMIT) =>
   createSelector(selectListingsItems, (items): Listing[] => {
     const current = items.find((item) => item.id === listingId)
     if (!current) {

@@ -1,3 +1,4 @@
+import { NEWS_LOCAL_LIMIT, NEWS_SUMMARY_MAX_LENGTH } from '@/constants'
 import type { NewsCategory, NewsItem } from '@/types/news'
 import {
   NAGAEVO_ARTICLE_IMAGES,
@@ -44,7 +45,7 @@ function parseRssItems(xml: string, category: NewsCategory, sourceName: string):
         return null
       }
 
-      const summary = stripHtml(description).slice(0, 180)
+      const summary = stripHtml(description).slice(0, NEWS_SUMMARY_MAX_LENGTH)
       const id = `${category}-${articlePath(link).replace(/\W/g, '') || index}`
 
       return {
@@ -131,14 +132,14 @@ function mergeWithReal(
 
 export async function fetchLocalNews(): Promise<NewsItem[]> {
   if (!import.meta.env.DEV) {
-    return REAL_LOCAL_NEWS.slice(0, 8)
+    return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT)
   }
 
   try {
     const live = await fetchRssFeed(LOCAL_RSS, 'local', 'ДК с. Нагаево')
     return mergeWithReal(live, REAL_LOCAL_NEWS, 8)
   } catch {
-    return REAL_LOCAL_NEWS.slice(0, 8)
+    return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT)
   }
 }
 

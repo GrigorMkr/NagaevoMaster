@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
+import { SKELETON_COUNT_DEFAULT } from '@/constants'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import {
@@ -81,12 +82,12 @@ export function ServicesCategoryPage() {
           />
 
           {cat.slug === 'beauty' && !subcategory && (
-            <div className={styles.subGrid}>
+            <div className={styles.subcategoryGrid}>
               {cat.subcategories.map((sub) => (
                 <Link
                   key={sub.slug}
                   to={servicesBeautyPath(sub.slug)}
-                  className={styles.subLink}
+                  className={styles.subcategoryLink}
                 >
                   {sub.name}
                 </Link>
@@ -95,12 +96,12 @@ export function ServicesCategoryPage() {
           )}
 
           {cat.slug !== 'beauty' && (
-            <div className={styles.subGrid}>
+            <div className={styles.subcategoryGrid}>
               {cat.subcategories.map((sub) => (
                 <Link
                   key={sub.slug}
                   to={searchPath(undefined, { category: cat.slug, subcategory: sub.slug })}
-                  className={styles.subLink}
+                  className={styles.subcategoryLink}
                 >
                   {sub.name}
                 </Link>
@@ -110,7 +111,9 @@ export function ServicesCategoryPage() {
 
           {isLoading && (
             <div className={styles.grid}>
-              {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" />)}
+              {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (
+                <Skeleton key={i} variant="card" />
+              ))}
             </div>
           )}
 

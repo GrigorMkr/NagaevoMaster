@@ -52,17 +52,17 @@
   transform: translateY(0) scale(0.97);
 }
 
-.sm {
+.sizeSmall {
   padding: 0.55rem 1.25rem;
   font-size: var(--font-size-sm);
 }
 
-.md {
+.sizeMedium {
   padding: 0.8rem 1.625rem;
   font-size: var(--font-size-base);
 }
 
-.lg {
+.sizeLarge {
   padding: 1rem 2.125rem;
   font-size: var(--font-size-lg);
 }

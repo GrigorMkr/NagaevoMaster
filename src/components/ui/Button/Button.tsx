@@ -13,6 +13,12 @@ type ButtonVariant =
   | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
+const BUTTON_SIZE_CLASS: Record<ButtonSize, string> = {
+  sm: styles.sizeSmall as string,
+  md: styles.sizeMedium as string,
+  lg: styles.sizeLarge as string,
+}
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
@@ -35,7 +41,7 @@ export function Button({
       className={classNames(
         styles.button,
         styles[variant],
-        styles[size],
+        BUTTON_SIZE_CLASS[size],
         fullWidth && styles.fullWidth,
         loading && styles.loading,
         className,

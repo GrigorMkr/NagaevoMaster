@@ -1,5 +1,8 @@
 import { NAGAEVO_CENTER, NAGAEVO_MAP_BOUNDS } from './geo-data'
 
+export const EARTH_RADIUS_KM = 6371
+export const DEGREES_IN_SEMICIRCLE = 180
+
 export const GEO = {
   settlement: 'Нагаево',
   region: 'Республика Башкортостан',

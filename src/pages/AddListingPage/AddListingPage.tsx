@@ -56,7 +56,7 @@ export function AddListingPage() {
                   <button
                     key={cat.slug}
                     type="button"
-                    className={category === cat.slug ? styles.catActive : styles.catBtn}
+                    className={category === cat.slug ? styles.categoryButtonActive : styles.categoryButton}
                     onClick={() => setCategory(cat.slug)}
                   >
                     {cat.icon} {cat.name}
@@ -68,7 +68,7 @@ export function AddListingPage() {
             {step === 1 && selectedCat && (
               <div className={styles.categoryGrid}>
                 {selectedCat.subcategories.map((sub) => (
-                  <span key={sub.slug} className={styles.subTag}>{sub.name}</span>
+                  <span key={sub.slug} className={styles.subcategoryTag}>{sub.name}</span>
                 ))}
               </div>
             )}

@@ -30,6 +30,8 @@ import { ListingResults } from './components/ListingResults'
 
 import { SearchFilters } from './components/SearchFilters'
 
+import { SearchMapSection } from './components/SearchMapSection'
+
 import { SortControls } from './components/SortControls'
 
 import styles from './SearchPage.module.css'
@@ -59,6 +61,8 @@ export function SearchPage() {
   const items = useAppSelector(selectListingsItems)
 
   const isLoading = useAppSelector(selectListingsLoading)
+
+  const accountLocation = useAppSelector((state) => state.user.accountLocation)
 
 
 
@@ -154,11 +158,19 @@ export function SearchPage() {
 
       event.preventDefault()
 
-      setUrlParams(buildUrlParams())
+      if (accountLocation && filters.query.trim()) {
+        dispatch(setSearchParams({ sortBy: SortBy.Distance }))
+      }
+
+      const params = buildUrlParams()
+      if (accountLocation && filters.query.trim()) {
+        params.sortBy = SortBy.Distance
+      }
+      setUrlParams(params)
 
     },
 
-    [buildUrlParams, setUrlParams],
+    [accountLocation, buildUrlParams, dispatch, filters.query, setUrlParams],
 
   )
 
@@ -285,6 +297,10 @@ export function SearchPage() {
           <SearchFilters onApply={handleApplyFilters} />
 
           <SortControls activeSort={filters.sortBy} onSort={handleSort} />
+
+          {!isLoading && filters.query && (
+            <SearchMapSection listings={items ?? []} userLocation={accountLocation} />
+          )}
 
           <ListingResults items={items ?? []} isLoading={isLoading} />
 

@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import classNames from 'classnames'
+import { MAP_CATEGORY_FILTER_LIMIT } from '@/constants'
 import { SERVICE_CATEGORIES } from '@/data/categories'
 import styles from './ProvidersMap.module.css'
 
@@ -16,18 +17,18 @@ export const MapFilters = memo(function MapFilters({
     <div className={styles.controls}>
       <button
         type="button"
-        className={classNames(styles.filterBtn, !categoryFilter && styles.filterBtnActive)}
+        className={classNames(styles.filterButton, !categoryFilter && styles.filterButtonActive)}
         onClick={() => onFilterChange(null)}
       >
         Все на карте
       </button>
-      {SERVICE_CATEGORIES.slice(0, 6).map((cat) => (
+      {SERVICE_CATEGORIES.slice(0, MAP_CATEGORY_FILTER_LIMIT).map((cat) => (
         <button
           key={cat.slug}
           type="button"
           className={classNames(
-            styles.filterBtn,
-            categoryFilter === cat.slug && styles.filterBtnActive,
+            styles.filterButton,
+            categoryFilter === cat.slug && styles.filterButtonActive,
           )}
           onClick={() => onFilterChange(cat.slug)}
         >

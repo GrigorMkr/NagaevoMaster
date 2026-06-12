@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { FORUM_CATEGORIES } from '@/data/categories'
-import { MOCK_FORUM_TOPICS } from '@/data/mockListings'
+import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi'
 import { ROUTES, forumCategoryPath, forumTopicPath } from '@/utils/constants'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ForumCategoryPage.module.css'
@@ -12,7 +13,17 @@ import styles from './ForumCategoryPage.module.css'
 export function ForumCategoryPage() {
   const { category } = useParams<{ category: string }>()
   const forumCat = FORUM_CATEGORIES.find((c) => c.slug === category)
-  const topics = MOCK_FORUM_TOPICS.filter((t) => t.category === category)
+  const [topics, setTopics] = useState<ForumTopicListItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!category) return
+    setIsLoading(true)
+    fetchForumTopics(category)
+      .then(setTopics)
+      .catch(() => setTopics([]))
+      .finally(() => setIsLoading(false))
+  }, [category])
 
   if (!forumCat) {
     return (
@@ -54,7 +65,8 @@ export function ForumCategoryPage() {
             ))}
           </ul>
 
-          {topics.length === 0 && (
+          {isLoading && <p className="textMuted">Загрузка…</p>}
+          {!isLoading && topics.length === 0 && (
             <p className={pageStyles.emptyHint}>Тем в этой категории пока нет</p>
           )}
         </div>

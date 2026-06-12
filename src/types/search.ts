@@ -15,6 +15,8 @@ export interface SearchParams {
   distance: DistanceFilter
   sortBy: SortBy
   page: number
+  originLat: number | null
+  originLng: number | null
 }
 
 export const DEFAULT_SEARCH_PARAMS: SearchParams = {
@@ -27,4 +29,6 @@ export const DEFAULT_SEARCH_PARAMS: SearchParams = {
   distance: null,
   sortBy: SortBy.Rating,
   page: 1,
+  originLat: null,
+  originLng: null,
 }

@@ -6,17 +6,17 @@
   animation: spin 0.7s linear infinite;
 }
 
-.sm {
+.sizeSmall {
   width: 18px;
   height: 18px;
 }
 
-.md {
+.sizeMedium {
   width: 28px;
   height: 28px;
 }
 
-.lg {
+.sizeLarge {
   width: 40px;
   height: 40px;
 }

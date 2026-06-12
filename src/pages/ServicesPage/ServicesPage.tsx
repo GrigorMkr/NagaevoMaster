@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { CategoryCard } from '@/components/categories/CategoryCard/CategoryCard'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
+import { SKELETON_COUNT_DEFAULT } from '@/constants'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchListingsThunk } from '@/features/listings/listingsThunks'
@@ -75,25 +77,25 @@ export function ServicesPage() {
               className={pageStyles.input}
               {...register('search')}
             />
-            <button type="submit" className={styles.searchBtn}>Найти</button>
+            <button type="submit" className={styles.searchButton}>Найти</button>
           </form>
 
           <div className={styles.categoryGrid}>
             {SERVICE_CATEGORIES.map((cat) => (
-              <Link
+              <CategoryCard
                 key={cat.slug}
                 to={servicesCategoryPath(cat.slug)}
-                className={styles.categoryCard}
-              >
-                <span className={styles.categoryIcon}>{cat.icon}</span>
-                <span className={styles.categoryName}>{cat.name}</span>
-              </Link>
+                icon={cat.icon}
+                name={cat.name}
+              />
             ))}
           </div>
 
           {isLoading && (
             <div className={styles.list}>
-              {[1, 2, 3].map((i) => <Skeleton key={i} variant="card" />)}
+              {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (
+                <Skeleton key={i} variant="card" />
+              ))}
             </div>
           )}
 

@@ -416,5 +416,4 @@ export const MOCK_LISTINGS: Listing[] = [
 ]
 
 export { POPULAR_SERVICES } from '@/data/mock/popularServices'
-export { MOCK_REVIEWS } from '@/data/mock/reviews'
 export { MOCK_FORUM_TOPICS } from '@/data/mock/forumTopics'

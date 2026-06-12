@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  phone        String?
+  avatarUrl    String?
+  role         String        @default("user")
+  createdAt    DateTime      @default(now())
+  listings     Listing[]
+  reviews      Review[]
+  favorites    Favorite[]
+  forumTopics  ForumTopic[]
+  forumPosts   ForumPost[]
+  reports      Report[]
+}
+
+model Listing {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  category     String
+  subcategory  String
+  description  String
+  priceFrom    Float
+  priceTo      Float?
+  unit         String
+  rating       Float      @default(0)
+  reviewsCount Int        @default(0)
+  images       String     @default("[]")
+  lat          Float
+  lng          Float
+  address      String
+  phone        String
+  isVerified   Boolean    @default(false)
+  status       String     @default("published")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  reviews      Review[]
+  favorites    Favorite[]
+  reports      Report[]
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int
+  text        String
+  masterReply String?
+  createdAt   DateTime @default(now())
+}
+
+model Favorite {
+  userId    String
+  listingId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+}
+
+model ForumTopic {
+  id        String      @id @default(uuid())
+  title     String
+  content   String
+  category  String
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  isPinned  Boolean     @default(false)
+  isClosed  Boolean     @default(false)
+  viewCount Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  posts     ForumPost[]
+}
+
+model ForumPost {
+  id        String     @id @default(uuid())
+  topicId   String
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  likes     Int        @default(0)
+  createdAt DateTime   @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+}

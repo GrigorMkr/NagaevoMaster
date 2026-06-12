@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
@@ -13,7 +13,9 @@ import {
   selectListingsLoading,
   selectSimilarListings,
 } from '@/features/listings/listingsSelectors'
-import { getReviewsForListing } from '@/data/mock/reviews'
+import { fetchListingReviews } from '@/services/reviewsApi'
+import { reportListing } from '@/services/listingsWriteApi'
+import { META_DESCRIPTION_MAX_LENGTH } from '@/constants'
 import {
   CAPTCHA_EXPECTED_ANSWER,
   CAPTCHA_QUESTION,
@@ -34,11 +36,7 @@ export function ServiceDetailPage() {
   const [showPhone, setShowPhone] = useState(false)
   const [showReviews, setShowReviews] = useState(false)
   const [captchaAnswer, setCaptchaAnswer] = useState('')
-
-  const listingReviews = useMemo(
-    () => (listing ? getReviewsForListing(listing.id, listing.title) : []),
-    [listing],
-  )
+  const [listingReviews, setListingReviews] = useState<Awaited<ReturnType<typeof fetchListingReviews>>>([])
 
   useEffect(() => {
     if (!id) return
@@ -51,6 +49,17 @@ export function ServiceDetailPage() {
     setShowPhone(false)
     setCaptchaAnswer('')
   }, [id])
+
+  useEffect(() => {
+    if (!listing?.id) {
+      setListingReviews([])
+      return
+    }
+
+    fetchListingReviews(listing.id)
+      .then(setListingReviews)
+      .catch(() => setListingReviews([]))
+  }, [listing?.id])
 
   const handleShowPhone = () => {
     if (captchaAnswer.trim() !== CAPTCHA_EXPECTED_ANSWER) {
@@ -65,8 +74,14 @@ export function ServiceDetailPage() {
     setCaptchaAnswer(event.target.value)
   }
 
-  const handleReportClick = () => {
-    toast.success('Жалоба отправлена модератору')
+  const handleReportClick = async () => {
+    if (!listing) return
+    try {
+      await reportListing(listing.id)
+      toast.success('Жалоба отправлена модератору')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Не удалось отправить жалобу')
+    }
   }
 
   const handleReviewsToggle = () => {
@@ -100,7 +115,7 @@ export function ServiceDetailPage() {
     <>
       <PageMeta
         title={listing.title}
-        description={`${listing.description.slice(0, 160)}. Цена от ${listing.priceFrom}₽ за ${listing.unit}.`}
+        description={`${listing.description.slice(0, META_DESCRIPTION_MAX_LENGTH)}. Цена от ${listing.priceFrom}₽ за ${listing.unit}.`}
         keywords={`${listing.category}, ${listing.subcategory}, Нагаево, услуги`}
         canonical={serviceDetailPath(listing.id)}
       />

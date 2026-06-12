@@ -1,4 +1,5 @@
 import { memo, useCallback } from 'react'
+import classNames from 'classnames'
 import { useMap } from 'react-leaflet'
 import { GEO } from '@/constants'
 import styles from './ProvidersMap.module.css'
@@ -13,9 +14,8 @@ export const LocateButton = memo(function LocateButton() {
   return (
     <button
       type="button"
-      className={styles.filterBtn}
+      className={classNames(styles.filterButton, styles.locateButton)}
       onClick={handleLocate}
-      style={{ margin: '8px', zIndex: 1000 }}
     >
       Моё местоположение
     </button>

@@ -41,8 +41,8 @@
   gap: var(--spacing-sm);
 }
 
-.catBtn,
-.catActive {
+.categoryButton,
+.categoryButtonActive {
   padding: 0.6rem 1rem;
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -52,13 +52,13 @@
   cursor: pointer;
 }
 
-.catActive {
+.categoryButtonActive {
   background: var(--badge-green-bg);
   border-color: var(--badge-green-border);
   color: var(--color-primary-dark);
 }
 
-.subTag {
+.subcategoryTag {
   padding: 0.4rem 0.9rem;
   font-size: var(--font-size-sm);
   background: var(--color-bg-warm);

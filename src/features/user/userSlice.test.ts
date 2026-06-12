@@ -8,6 +8,8 @@ describe('user reducer', () => {
     isAuthenticated: false,
     isLoading: false,
     error: null,
+    accountLocation: null,
+    isLocating: false,
   }
 
   it('returns initial state', () => {

@@ -8,6 +8,15 @@ const pagesBase = '/NagaevoMaster/'
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? pagesBase : '/',
   plugins: [react()],
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+      generateScopedName: (className, filePath) => {
+        const moduleName = path.basename(filePath).replace(/\.module\.css$/, '')
+        return `${moduleName}__${className}`
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -22,6 +31,14 @@ export default defineConfig(({ command }) => ({
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/api\/news/, ''),
+      },
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
       },
     },
   },

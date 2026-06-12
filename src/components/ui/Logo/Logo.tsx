@@ -1,4 +1,5 @@
 import classNames from 'classnames'
+import { LOGO_ICON_SIZE_COMPACT, LOGO_ICON_SIZE_DEFAULT } from '@/constants'
 import { LogoIcon } from './LogoIcon'
 import styles from './Logo.module.css'
 
@@ -24,7 +25,11 @@ export function Logo({ variant = 'default', className }: LogoProps) {
       role={isIconOnly ? 'img' : undefined}
       aria-label={isIconOnly ? 'NagaevoMaster' : undefined}
     >
-      <LogoIcon size={isFooter ? 40 : 44} className={styles.mark} ariaHidden={!isIconOnly} />
+      <LogoIcon
+        size={isFooter ? LOGO_ICON_SIZE_COMPACT : LOGO_ICON_SIZE_DEFAULT}
+        className={styles.logomark}
+        ariaHidden={!isIconOnly}
+      />
       {!isIconOnly && (
         <span className={styles.wordmark}>
           <span className={styles.name}>Nagaevo</span>

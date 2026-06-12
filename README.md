@@ -47,10 +47,24 @@ src/
 └── utils/         # Константы и утилиты
 ```
 
+## Backend API
+
+Полный REST API в папке `backend/`. См. [backend/README.md](backend/README.md).
+
+```bash
+# Терминал 1 — API
+cd backend && npm install && npm run db:setup && npm run dev
+
+# Терминал 2 — фронтенд
+npm run dev
+```
+
 ## Переменные окружения
 
 Скопируйте `.env.example` в `.env`:
 
 ```
-VITE_API_BASE_URL=/api
+VITE_API_URL=/api
 ```
+
+Для GitHub Pages без сервера: `VITE_USE_MOCK_FALLBACK=true`
