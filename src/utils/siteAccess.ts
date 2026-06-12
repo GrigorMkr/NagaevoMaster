@@ -17,8 +17,12 @@ export function isSiteOpenForUser(): boolean {
   }
 }
 
+function normalizeAccessKey(value: string): string {
+  return value.trim().toLowerCase()
+}
+
 export function grantPreviewAccess(key: string): boolean {
-  if (key.trim() !== PREVIEW_ACCESS_KEY) return false
+  if (normalizeAccessKey(key) !== normalizeAccessKey(PREVIEW_ACCESS_KEY)) return false
 
   try {
     localStorage.setItem(PREVIEW_STORAGE_KEY, 'granted')

@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { Logo } from '@/components/ui/Logo/Logo'
 import { Button } from '@/components/ui/Button/Button'
+import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput'
 import { COMING_SOON_COPY, grantPreviewAccess } from '@/utils/siteAccess'
-import pageStyles from '@/styles/page.module.css'
 import styles from './ComingSoonPage.module.css'
 
 interface ComingSoonPageProps {
@@ -15,6 +15,13 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
   const [accessKey, setAccessKey] = useState('')
   const [error, setError] = useState('')
 
+  const previewLink = useMemo(() => {
+    const params = new URLSearchParams(window.location.search)
+    params.set('preview', import.meta.env.VITE_PREVIEW_ACCESS_KEY ?? 'nagaevo-preview')
+    const query = params.toString()
+    return `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+  }, [])
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (grantPreviewAccess(accessKey)) {
@@ -22,7 +29,7 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
       onAccessGranted()
       return
     }
-    setError('Неверный ключ доступа')
+    setError('Неверный ключ. Нужен ключ команды, не пароль от аккаунта.')
   }
 
   return (
@@ -58,22 +65,32 @@ export function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
 
           {showTeamForm && (
             <form className={styles.teamForm} onSubmit={handleSubmit}>
-              <label className="sr-only" htmlFor="preview-access-key">
+              <p className={styles.teamHint}>
+                Ключ команды: <strong>nagaevo-preview</strong>
+                <br />
+                Это не пароль от страницы «Вход». Его вводят здесь, на заглушке.
+              </p>
+
+              <label className={styles.teamLabel} htmlFor="preview-access-key">
                 Ключ доступа
               </label>
-              <input
+              <PasswordInput
                 id="preview-access-key"
-                type="password"
                 value={accessKey}
                 onChange={(event) => setAccessKey(event.target.value)}
-                placeholder="Ключ доступа"
-                className={pageStyles.input}
+                placeholder="nagaevo-preview"
                 autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
               />
               {error && <p className={styles.teamError}>{error}</p>}
               <Button type="submit" fullWidth>
                 Открыть сайт
               </Button>
+
+              <a className={styles.teamLink} href={previewLink}>
+                Или открыть по секретной ссылке
+              </a>
             </form>
           )}
         </div>
