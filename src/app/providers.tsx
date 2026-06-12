@@ -8,7 +8,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <HelmetProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           {children}
           <Toaster
             position="top-right"

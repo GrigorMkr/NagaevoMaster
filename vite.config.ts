@@ -2,7 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+/** GitHub Pages project site: https://grigormkr.github.io/NagaevoMaster/ */
+const repositoryBase = '/NagaevoMaster/'
+
 export default defineConfig({
+  base: repositoryBase,
   plugins: [react()],
   resolve: {
     alias: {
