@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useAppDispatch } from '@/app/hooks'
 import { setUser, setUserError, setUserLoading } from '@/features/user/userSlice'
-import { fetchCurrentUser } from '@/services/authApi'
+import { clearAuthToken, fetchCurrentUser, getAuthToken } from '@/services/authApi'
 import { fetchFavorites } from '@/services/favoritesApi'
 import { setFavorites } from '@/features/favorites/favoritesSlice'
 
@@ -9,20 +9,21 @@ export function AuthBootstrap() {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = getAuthToken()
     if (!token) return
 
     dispatch(setUserLoading(true))
     fetchCurrentUser()
       .then((user) => {
         dispatch(setUser(user))
+        if (token.startsWith('mock:')) return null
         return fetchFavorites()
       })
       .then((ids) => {
-        dispatch(setFavorites(ids))
+        if (ids) dispatch(setFavorites(ids))
       })
       .catch(() => {
-        localStorage.removeItem('token')
+        clearAuthToken()
         dispatch(setUserError('Сессия истекла'))
       })
       .finally(() => {

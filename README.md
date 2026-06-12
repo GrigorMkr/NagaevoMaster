@@ -68,3 +68,17 @@ VITE_API_URL=/api
 ```
 
 Для GitHub Pages без сервера: `VITE_USE_MOCK_FALLBACK=true`
+
+## Закрытый режим (сайт в разработке)
+
+На GitHub Pages включён режим «Скоро запуск» для посетителей. Команда может тестировать полный сайт.
+
+| Кто | Как открыть |
+|-----|-------------|
+| Посетители | https://grigormkr.github.io/NagaevoMaster/ — страница «Сайт в разработке» |
+| Команда (онлайн) | `https://grigormkr.github.io/NagaevoMaster/?preview=nagaevo-preview` |
+| Команда (локально) | `npm run dev` — полный сайт без ограничений |
+
+Сменить ключ: `VITE_PREVIEW_ACCESS_KEY` в `.github/workflows/deploy.yml`.
+
+Открыть сайт для всех: уберите `VITE_SITE_CLOSED: 'true'` из deploy workflow.

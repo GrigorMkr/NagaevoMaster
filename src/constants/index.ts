@@ -1,4 +1,5 @@
 export * from './app'
+export * from './auth'
 export * from './geo'
 export * from './geo-data'
 export * from './routes'

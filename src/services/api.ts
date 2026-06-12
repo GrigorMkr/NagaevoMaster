@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { API_TIMEOUT_MS } from '@/constants'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth'
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '/api'
@@ -13,7 +14,7 @@ export const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

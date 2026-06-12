@@ -16,6 +16,7 @@ import { ROUTES } from '@/utils/constants'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { Button } from '@/components/ui/Button/Button'
+import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput'
 import { ECHO_FORM_ACTION } from '@/constants/forms'
 import { VALIDATION } from '@/constants/validation'
 import pageStyles from '@/styles/page.module.css'
@@ -149,13 +150,15 @@ export function AuthPage() {
                   <span className={styles.error}>{loginForm.formState.errors.user.message}</span>
                 )}
                 <label htmlFor="login-password">Пароль</label>
-                <input
+                <PasswordInput
                   id="login-password"
-                  type="password"
                   required
-                  className={pageStyles.input}
+                  autoComplete="current-password"
                   {...loginForm.register('password')}
                 />
+                {loginForm.formState.errors.password && (
+                  <span className={styles.error}>{loginForm.formState.errors.password.message}</span>
+                )}
                 <Button type="submit" fullWidth>Войти</Button>
               </form>
             </section>
@@ -195,13 +198,15 @@ export function AuthPage() {
                   {...registerForm.register('phone')}
                 />
                 <label htmlFor="register-password">Пароль</label>
-                <input
+                <PasswordInput
                   id="register-password"
-                  type="password"
                   required
-                  className={pageStyles.input}
+                  autoComplete="new-password"
                   {...registerForm.register('password')}
                 />
+                {registerForm.formState.errors.password && (
+                  <span className={styles.error}>{registerForm.formState.errors.password.message}</span>
+                )}
                 <Button type="submit" fullWidth variant="secondary">
                   Зарегистрироваться
                 </Button>
