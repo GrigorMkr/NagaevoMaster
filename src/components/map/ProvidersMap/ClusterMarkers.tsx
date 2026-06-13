@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import type { Listing } from '@/types/listing';
 import { serviceDetailPath } from '@/constants';
-import { getListingImages } from '@/data/mock/listingImages';
+import { getMapMarkerImage } from '@/data/mock/listingImages';
 import { createListingMarkerIcon } from './mapIcons';
 interface ClusterMarkersProps {
     listings: Listing[];
@@ -14,9 +14,7 @@ const ClusterMarkers = memo(function ClusterMarkers({ listings }: ClusterMarkers
     useEffect(() => {
         const cluster = L.markerClusterGroup({ chunkedLoading: true });
         listings.forEach((listing) => {
-            const imageUrl = listing.images[0]
-                ?? getListingImages(listing.category, listing.subcategory, listing.id)[0]
-                ?? '';
+            const imageUrl = getMapMarkerImage(listing.category, listing.subcategory, listing.id);
             const marker = L.marker([listing.location.lat, listing.location.lng], {
                 icon: createListingMarkerIcon(imageUrl),
             });

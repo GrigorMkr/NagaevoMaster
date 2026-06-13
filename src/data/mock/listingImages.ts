@@ -1,140 +1,50 @@
-const LISTING_IMAGE_BASE = `${import.meta.env.BASE_URL || '/'}`.replace(/\/$/, '') + '/listings';
+import { listingStemFile, listingSvgThumb } from '@/utils/listingImageUrl';
 
-function localImage(name: string): string {
-  return `${LISTING_IMAGE_BASE}/${name}`.replace(/\/{2,}/g, '/');
+function img(stem: string): string {
+  return listingStemFile(stem);
 }
 
 const SUBCATEGORY_IMAGES: Record<string, string[]> = {
-  electricians: [
-    localImage('electricians-1.jpg'),
-    localImage('electricians-2.jpg'),
-  ],
-  'agri-machinery': [
-    localImage('agri-machinery-1.png'),
-    localImage('agri-machinery-2.jpg'),
-  ],
-  earthmoving: [
-    localImage('earthmoving-1.jpg'),
-    localImage('earthmoving-2.jpg'),
-  ],
-  hairdresser: [
-    localImage('hairdresser-1.jpg'),
-    localImage('hairdresser-2.jpg'),
-  ],
-  barber: [
-    localImage('barber-1.jpg'),
-    localImage('barber-2.jpg'),
-  ],
-  nails: [
-    localImage('nails-1.jpg'),
-    localImage('nails-2.jpg'),
-  ],
-  roofers: [
-    localImage('roofers-1.jpg'),
-    localImage('roofers-2.jpg'),
-  ],
-  plumbers: [
-    localImage('plumbers-1.jpg'),
-    localImage('plumbers-2.jpg'),
-  ],
-  'septic-service': [
-    localImage('septic-service-1.jpg'),
-  ],
-  mowing: [
-    localImage('mowing-1.jpg'),
-    localImage('mowing-2.jpg'),
-  ],
-  cleaners: [
-    localImage('cleaners-1.jpg'),
-  ],
-  'country-move': [
-    localImage('country-move-1.jpg'),
-  ],
-  plowing: [
-    localImage('plowing-1.jpg'),
-  ],
-  lawyers: [
-    localImage('lawyers-1.jpg'),
-  ],
-  'firewood-sales': [
-    localImage('firewood-sales-1.jpg'),
-  ],
-  water: [
-    localImage('water-1.png'),
-  ],
-  waste: [
-    localImage('waste-1.jpg'),
-  ],
-  gardeners: [
-    localImage('gardeners-1.jpg'),
-  ],
-  glazing: [
-    localImage('glazing-1.jpg'),
-  ],
-  evacuator: [
-    localImage('evacuator-1.jpg'),
-  ],
-  'septic-install': [
-    localImage('septic-install-1.jpg'),
-  ],
-  tutors: [
-    localImage('tutors-1.jpg'),
-  ],
-  'bulk-materials': [
-    localImage('bulk-materials-1.webp'),
-  ],
-  builders: [
-    localImage('builders-1.jpg'),
-    localImage('builders-2.jpg'),
-  ],
-  photographers: [
-    localImage('photographers-1.jpg'),
-  ],
+  electricians: [img('electricians-1'), img('electricians-2')],
+  'agri-machinery': [img('agri-machinery-1'), img('agri-machinery-2')],
+  earthmoving: [img('earthmoving-1'), img('earthmoving-2')],
+  hairdresser: [img('hairdresser-1'), img('hairdresser-2')],
+  barber: [img('barber-1'), img('barber-2')],
+  nails: [img('nails-1'), img('nails-2')],
+  roofers: [img('roofers-1'), img('roofers-2')],
+  plumbers: [img('plumbers-1'), img('plumbers-2')],
+  'septic-service': [img('septic-service-1')],
+  mowing: [img('mowing-1'), img('mowing-2')],
+  cleaners: [img('cleaners-1')],
+  'country-move': [img('country-move-1')],
+  plowing: [img('plowing-1')],
+  lawyers: [img('lawyers-1')],
+  'firewood-sales': [img('firewood-sales-1')],
+  water: [img('water-1')],
+  waste: [img('waste-1')],
+  gardeners: [img('gardeners-1')],
+  glazing: [img('glazing-1')],
+  evacuator: [img('evacuator-1')],
+  'septic-install': [img('septic-install-1')],
+  tutors: [img('tutors-1')],
+  'bulk-materials': [img('bulk-materials-1')],
+  builders: [img('builders-1'), img('builders-2')],
+  photographers: [img('photographers-1')],
 };
 
 const CATEGORY_IMAGES: Record<string, string[]> = {
-  construction: [
-    localImage('construction-1.jpg'),
-    localImage('construction-2.jpg'),
-  ],
-  machinery: [
-    localImage('machinery-1.png'),
-    localImage('agri-machinery-1.png'),
-  ],
-  utility: [
-    localImage('utility-1.png'),
-    localImage('septic-service-1.jpg'),
-  ],
-  beauty: [
-    localImage('beauty-1.jpg'),
-    localImage('beauty-2.jpg'),
-  ],
-  farming: [
-    localImage('farming-1.png'),
-    localImage('farming-2.jpg'),
-  ],
-  staff: [
-    localImage('cleaners-1.jpg'),
-    localImage('gardeners-1.jpg'),
-  ],
-  logistics: [
-    localImage('country-move-1.jpg'),
-    localImage('evacuator-1.jpg'),
-  ],
-  pro: [
-    localImage('lawyers-1.jpg'),
-    localImage('photographers-1.jpg'),
-  ],
-  sales: [
-    localImage('bulk-materials-1.webp'),
-    localImage('firewood-sales-1.jpg'),
-  ],
+  construction: [img('construction-1'), img('construction-2')],
+  machinery: [img('machinery-1'), img('agri-machinery-1')],
+  utility: [img('utility-1'), img('septic-service-1')],
+  beauty: [img('beauty-1'), img('beauty-2')],
+  farming: [img('farming-1'), img('farming-2')],
+  staff: [img('cleaners-1'), img('gardeners-1')],
+  logistics: [img('country-move-1'), img('evacuator-1')],
+  pro: [img('lawyers-1'), img('photographers-1')],
+  sales: [img('bulk-materials-1'), img('firewood-sales-1')],
 };
 
-const DEFAULT_IMAGES = [
-  localImage('default-1.jpg'),
-  localImage('default-2.png'),
-];
+const DEFAULT_IMAGES = [img('default-1'), img('default-2')];
 
 function getListingImages(category: string, subcategory: string, listingId: string): string[] {
   const specific = SUBCATEGORY_IMAGES[subcategory];
@@ -153,6 +63,12 @@ function getListingImages(category: string, subcategory: string, listingId: stri
   return primary === secondary ? [primary] : [primary, secondary];
 }
 
+/** Lightweight SVG thumb for map markers (avoids loading full photos). */
+function getMapMarkerImage(category: string, subcategory: string, listingId: string): string {
+  const photo = getListingImages(category, subcategory, listingId)[0] ?? DEFAULT_IMAGES[0]!;
+  return listingSvgThumb(photo);
+}
+
 const CATEGORY_COVER_KEYS: Record<string, [string, string]> = {
   construction: ['construction', 'builders'],
   machinery: ['machinery', 'agri-machinery'],
@@ -164,19 +80,19 @@ const CATEGORY_COVER_KEYS: Record<string, [string, string]> = {
 };
 
 const CATEGORY_COVER_DIRECT: Record<string, string> = {
-  logistics: localImage('evacuator-1.jpg'),
-  pro: localImage('tutors-1.jpg'),
+  logistics: img('evacuator-1'),
+  pro: img('tutors-1'),
 };
 
 const FORUM_COVER_FILES: Record<string, string> = {
-  construction: 'construction-1.jpg',
-  plumbing: 'plumbers-1.jpg',
-  electric: 'electricians-1.jpg',
-  machinery: 'earthmoving-1.jpg',
-  septic: 'septic-service-1.jpg',
-  cleaning: 'waste-1.jpg',
-  beauty: 'beauty-1.jpg',
-  general: 'default-1.jpg',
+  construction: 'construction-1',
+  plumbing: 'plumbers-1',
+  electric: 'electricians-1',
+  machinery: 'earthmoving-1',
+  septic: 'septic-service-1',
+  cleaning: 'waste-1',
+  beauty: 'beauty-1',
+  general: 'default-1',
 };
 
 function getCategoryCover(slug: string): string {
@@ -194,12 +110,13 @@ function getCategoryCover(slug: string): string {
 }
 
 function getForumCategoryCover(slug: string): string {
-  const file = FORUM_COVER_FILES[slug];
-  return file ? localImage(file) : DEFAULT_IMAGES[0]!;
+  const stem = FORUM_COVER_FILES[slug];
+  return stem ? listingStemFile(stem) : DEFAULT_IMAGES[0]!;
 }
 
 export {
   getListingImages,
+  getMapMarkerImage,
   getCategoryCover,
   getForumCategoryCover,
 }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AddListingPage.module.css';
 const STEPS = [
@@ -43,7 +44,7 @@ function AddListingPage() {
             {step === 0 && (<div className={`${styles.categoryGrid} motion-stagger`}>
                 {SERVICE_CATEGORIES.map((cat) => (<button key={cat.slug} type="button" className={category === cat.slug ? styles.categoryButtonActive : styles.categoryButton} onClick={() => setCategory(cat.slug)}>
                     <span className={styles.categoryThumb}>
-                      <img className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
+                      <ListingPhoto className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
                     </span>
                     <span className={styles.categoryName}>{cat.name}</span>
                   </button>))}

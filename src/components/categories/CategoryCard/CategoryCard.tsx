@@ -1,5 +1,6 @@
 import { memo, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
+import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import styles from './CategoryCard.module.css';
 type CategoryCardVariant = 'tile' | 'row';
 interface CategoryCardProps {
@@ -22,7 +23,7 @@ const CategoryCard = memo(function CategoryCard({ to, icon, name, cover, variant
     return (<Link to={to} data-ui="card" className={cardClassName} style={style}>
       {cover ? (
         <span className={styles.categoryThumb}>
-          <img className={styles.categoryThumbImage} src={cover} alt="" loading="lazy" />
+          <ListingPhoto className={styles.categoryThumbImage} src={cover} alt="" loading="lazy" />
         </span>
       ) : (
         <span className={styles.categoryIcon}>{icon}</span>

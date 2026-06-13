@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import classNames from 'classnames';
+import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import styles from './ListingGallery.module.css';
 
 interface ListingGalleryProps {
@@ -14,12 +15,12 @@ function ListingGallery({ images, title }: ListingGalleryProps) {
     return null;
   }
 
-  const activeImage = images[activeIndex] ?? images[0];
+  const activeImage = images[activeIndex] ?? images[0]!;
 
   return (
     <section className={styles.gallery} aria-label="Фото работ и техники">
       <div className={styles.mainFrame}>
-        <img
+        <ListingPhoto
           className={styles.mainImage}
           src={activeImage}
           alt={`${title} — фото ${activeIndex + 1}`}
@@ -37,7 +38,7 @@ function ListingGallery({ images, title }: ListingGalleryProps) {
               aria-label={`Показать фото ${index + 1}`}
               aria-pressed={index === activeIndex}
             >
-              <img className={styles.thumbImage} src={image} alt="" loading="lazy" />
+              <ListingPhoto className={styles.thumbImage} src={image} alt="" loading="lazy" />
             </button>
           ))}
         </div>

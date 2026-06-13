@@ -1,8 +1,9 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Listing } from '@/types/listing';
 import { serviceDetailPath } from '@/constants';
 import { ListingAuthorRow } from '@/components/listings/ListingAuthorRow/ListingAuthorRow';
+import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import styles from './ListingCard.module.css';
 
 interface ListingCardProps {
@@ -10,20 +11,17 @@ interface ListingCardProps {
 }
 
 const ListingCard = memo(function ListingCard({ listing }: ListingCardProps) {
-  const [coverFailed, setCoverFailed] = useState(false);
   const coverImage = listing.images[0];
-  const showCover = Boolean(coverImage) && !coverFailed;
 
   return (
     <Link to={serviceDetailPath(listing.id)} data-ui="card" className={styles.card}>
-      {showCover && (
+      {coverImage && (
         <div className={styles.media}>
-          <img
+          <ListingPhoto
             className={styles.cover}
             src={coverImage}
             alt=""
             loading="lazy"
-            onError={() => setCoverFailed(true)}
           />
         </div>
       )}
