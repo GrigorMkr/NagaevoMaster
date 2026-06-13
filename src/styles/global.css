@@ -25,14 +25,14 @@ body {
   font-weight: var(--font-weight-body);
   line-height: 1.75;
   color: var(--color-text);
-  background: var(--color-bg-warm);
+  background: var(--color-bg-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(23, 98, 74, 0.18);
-  color: var(--color-primary-dark);
+  background: rgba(240, 180, 41, 0.35);
+  color: #ffffff;
 }
 
 #root h1,
@@ -54,13 +54,13 @@ body {
 }
 
 #root a:not([data-ui='button'], [data-ui='card']) {
-  color: var(--color-primary);
+  color: var(--color-mint);
   text-decoration: none;
   transition: color var(--transition);
 }
 
 #root a:not([data-ui='button'], [data-ui='card']):hover {
-  color: var(--color-primary-dark);
+  color: var(--color-accent);
 }
 
 #root a[data-ui='card'],
@@ -122,7 +122,7 @@ img {
 ) {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: var(--color-border-strong);
 }
 
 .sr-only {

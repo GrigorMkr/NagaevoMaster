@@ -9,7 +9,7 @@
   position: relative;
   aspect-ratio: 16 / 10;
   border-radius: var(--radius-xl);
-  background: #fff;
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -57,9 +57,9 @@
   border-radius: inherit;
   background: linear-gradient(
     180deg,
-    rgba(255, 252, 246, 0) 0%,
-    rgba(255, 252, 246, 0.94) 36%,
-    rgba(255, 252, 246, 0.98) 100%
+    rgba(8, 31, 24, 0) 0%,
+    rgba(8, 31, 24, 0.82) 30%,
+    rgba(8, 31, 24, 0.94) 100%
   );
   transform: translateY(calc(100% - 3rem));
   transition:
@@ -74,7 +74,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  background: rgba(255, 252, 246, 0.96);
+  background: rgba(8, 31, 24, 0.92);
   padding: var(--spacing-lg);
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -91,7 +91,7 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-display);
   letter-spacing: var(--letter-display);
-  color: var(--color-primary-dark);
+  color: var(--color-text);
   margin: 0;
   line-height: 1.3;
 }

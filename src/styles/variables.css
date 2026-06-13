@@ -10,11 +10,8 @@
   --color-coral: #e8a87c;
   --color-mint: #7ec8a8;
 
-  --color-bg: #faf5eb;
-  --color-bg-warm: #f3ead8;
-  --color-bg-card: rgba(255, 252, 246, 0.82);
-  --color-bg-elevated: rgba(255, 252, 246, 0.78);
-  --color-bg-glass: rgba(255, 252, 246, 0.68);
+  --color-bg: #081f18;
+  --color-bg-warm: #0f3328;
   --color-bg-dark: #081f18;
   --color-bg-dark-mid: #0f3328;
   --color-bg-dark-soft: #163d30;
@@ -22,35 +19,38 @@
 
   --gradient-surface: linear-gradient(
     165deg,
-    #fdf8ee 0%,
-    #faf5eb 25%,
-    #f5efe3 55%,
-    #f0ebe0 100%
+    #061a14 0%,
+    #0a2820 45%,
+    #0f3328 100%
   );
 
-  --color-text: #152019;
-  --color-text-muted: #3d4f45;
-  --color-text-light: #6b7d72;
-  --color-error: #c62828;
-  --color-button-label: #152019;
+  --color-text: #ffffff;
+  --color-text-muted: rgba(255, 255, 255, 0.84);
+  --color-text-light: rgba(255, 255, 255, 0.62);
+  --color-error: #ff8a80;
+  --color-button-label: #081f18;
   --color-button-label-muted: #3d4f45;
   --color-button-active-bg: var(--color-primary);
   --color-button-active-text: #fff;
-  --color-button-active-border: #fff;
-  --color-button-border: #fff;
-  --color-text-on-dark: #f2ece4;
-  --color-text-on-dark-muted: rgba(242, 236, 228, 0.55);
-  --color-text-on-dark-subtle: rgba(242, 236, 228, 0.35);
+  --color-button-active-border: rgba(255, 255, 255, 0.85);
+  --color-button-border: rgba(255, 255, 255, 0.72);
+  --color-text-on-dark: #ffffff;
+  --color-text-on-dark-muted: rgba(255, 255, 255, 0.78);
+  --color-text-on-dark-subtle: rgba(255, 255, 255, 0.58);
 
-  --color-border: rgba(21, 32, 25, 0.08);
-  --color-border-strong: rgba(21, 32, 25, 0.14);
-  --color-border-glow: rgba(240, 180, 41, 0.35);
-  --color-border-on-dark: rgba(255, 255, 255, 0.07);
+  --color-border: rgba(255, 255, 255, 0.14);
+  --color-border-strong: rgba(255, 255, 255, 0.22);
+  --color-border-glow: rgba(240, 180, 41, 0.45);
+  --color-border-on-dark: rgba(255, 255, 255, 0.1);
 
-  --badge-green-bg: rgba(23, 98, 74, 0.1);
-  --badge-green-border: rgba(23, 98, 74, 0.15);
-  --badge-gold-bg: rgba(240, 180, 41, 0.15);
-  --badge-gold-border: rgba(240, 180, 41, 0.3);
+  --badge-green-bg: rgba(23, 98, 74, 0.38);
+  --badge-green-border: rgba(126, 200, 168, 0.35);
+  --badge-gold-bg: rgba(240, 180, 41, 0.22);
+  --badge-gold-border: rgba(240, 180, 41, 0.42);
+
+  --color-bg-card: rgba(8, 31, 24, 0.58);
+  --color-bg-elevated: rgba(8, 31, 24, 0.66);
+  --color-bg-glass: rgba(8, 31, 24, 0.48);
 
   --gradient-hero: linear-gradient(
     165deg,
@@ -93,8 +93,9 @@
   --font-weight-display: 500;
   --font-weight-body: 500;
   --font-weight-ui: 600;
-  --letter-display: -0.03em;
-  --letter-badge: 0.08em;
+  --letter-display: -0.02em;
+  --letter-badge: 0.1em;
+  --letter-button: 0.04em;
 
   --font-size-xs: 0.875rem;
   --font-size-sm: 1rem;
@@ -130,15 +131,14 @@
   --shadow-xl: 0 32px 80px rgba(8, 31, 24, 0.18);
   --shadow-glow: 0 12px 40px var(--color-accent-glow);
   --shadow-card:
-    0 4px 24px rgba(23, 98, 74, 0.08),
-    0 1px 3px rgba(192, 120, 42, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    0 8px 32px rgba(0, 0, 0, 0.28),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
   --shadow-card-hover:
-    0 20px 48px rgba(23, 98, 74, 0.14),
-    0 6px 16px rgba(240, 180, 41, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --glass-blur: blur(16px) saturate(1.4);
+    0 20px 48px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(240, 180, 41, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.12) inset;
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(18px) saturate(1.35);
 
   --header-height: 76px;
   --container-max: 1440px;

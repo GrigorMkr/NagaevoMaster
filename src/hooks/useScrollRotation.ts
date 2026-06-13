@@ -7,6 +7,8 @@ const PARALLAX_FACTOR = 0.05;
 
 interface ScrollTilt {
   rotate: number;
+  rotateX: number;
+  rotateY: number;
   scale: number;
 }
 
@@ -68,8 +70,14 @@ function useScrollRotation(
         const targetParallax = window.scrollY * PARALLAX_FACTOR;
         smoothParallax.current += (targetParallax - smoothParallax.current) * PARALLAX_SMOOTHING;
 
-        const { rotate, scale } = tiltRef.current;
-        element.style.transform = `translate3d(0, ${smoothParallax.current}px, 0) rotate(${smoothRotation.current + rotate}deg) scale(${scale})`;
+        const { rotate, rotateX, rotateY, scale } = tiltRef.current;
+        element.style.transform = [
+          `translate3d(0, ${smoothParallax.current}px, 0)`,
+          `rotateX(${rotateX}deg)`,
+          `rotateY(${rotateY}deg)`,
+          `rotate(${smoothRotation.current + rotate}deg)`,
+          `scale(${scale})`,
+        ].join(' ');
       }
 
       frameId = window.requestAnimationFrame(tick);

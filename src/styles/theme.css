@@ -7,15 +7,16 @@
   font-weight: var(--font-weight-ui);
   letter-spacing: var(--letter-badge);
   text-transform: uppercase;
-  color: var(--color-primary-dark);
+  color: #ffffff;
   background: var(--badge-green-bg);
   border: 1px solid var(--badge-green-border);
   border-radius: var(--radius-full);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
 }
 
 .badge.badgeGold,
 .badgeGold {
-  color: #8a6520;
+  color: #fff8e8;
   background: var(--badge-gold-bg);
   border-color: var(--badge-gold-border);
 }
@@ -25,8 +26,9 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-display);
   letter-spacing: var(--letter-display);
-  line-height: 1.15;
+  line-height: 1.12;
   color: var(--color-text);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
 }
 
 .titlePage {
@@ -34,8 +36,9 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-display);
   letter-spacing: var(--letter-display);
-  line-height: 1.15;
+  line-height: 1.12;
   color: var(--color-text);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
 }
 
 .textMuted {
@@ -58,7 +61,7 @@
   background: var(--color-bg-card);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
 }
