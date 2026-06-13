@@ -94,9 +94,13 @@ async function fetchListings(params: Partial<SearchParams> = {}): Promise<Listin
         if (!isListingsResponse(response.data)) {
             throw new Error('Invalid listings response');
         }
+        const items = enrichListings(response.data.items);
+        if (USE_MOCK_FALLBACK && items.length === 0) {
+            return mockListingsResponse(params);
+        }
         return {
             ...response.data,
-            items: enrichListings(response.data.items),
+            items,
         };
     }
     catch (error) {

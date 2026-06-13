@@ -14,6 +14,7 @@ import { fetchListingsThunk } from '@/features/listings/listingsThunks';
 import { selectListingsItems, selectListingsLoading } from '@/features/listings/listingsSelectors';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { SERVICE_CATEGORIES } from '@/data/categories';
+import { getCategoryCover } from '@/data/mock/listingImages';
 import { servicesCategoryPath, searchPath, ROUTES } from '@/utils/constants';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ServicesPage.module.css';
@@ -53,7 +54,7 @@ function ServicesPage() {
           </form>
 
           <div className={styles.categoryGrid}>
-            {SERVICE_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name}/>))}
+            {SERVICE_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name} cover={getCategoryCover(cat.slug)}/>))}
           </div>
 
           {isLoading && (<div className={styles.list}>

@@ -6,11 +6,12 @@ interface CategoryCardProps {
     to: string;
     icon: string;
     name: string;
+    cover?: string;
     variant?: CategoryCardVariant;
     className?: string;
     style?: CSSProperties;
 }
-const CategoryCard = memo(function CategoryCard({ to, icon, name, variant = 'row', className, style, }: CategoryCardProps) {
+const CategoryCard = memo(function CategoryCard({ to, icon, name, cover, variant = 'row', className, style, }: CategoryCardProps) {
     const cardClassName = [
         styles.categoryCard,
         variant === 'tile' ? styles.categoryCardTile : styles.categoryCardRow,
@@ -19,7 +20,13 @@ const CategoryCard = memo(function CategoryCard({ to, icon, name, variant = 'row
         .filter(Boolean)
         .join(' ');
     return (<Link to={to} data-ui="card" className={cardClassName} style={style}>
-      <span className={styles.categoryIcon}>{icon}</span>
+      {cover ? (
+        <span className={styles.categoryThumb}>
+          <img className={styles.categoryThumbImage} src={cover} alt="" loading="lazy" />
+        </span>
+      ) : (
+        <span className={styles.categoryIcon}>{icon}</span>
+      )}
       <span className={styles.categoryName}>{name}</span>
     </Link>);
 });

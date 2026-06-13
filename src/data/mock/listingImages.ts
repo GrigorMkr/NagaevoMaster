@@ -1,4 +1,4 @@
-const LISTING_IMAGE_BASE = `${import.meta.env.BASE_URL}listings`.replace(/\/{2,}/g, '/');
+const LISTING_IMAGE_BASE = `${import.meta.env.BASE_URL || '/'}`.replace(/\/$/, '') + '/listings';
 
 function localImage(name: string): string {
   return `${LISTING_IMAGE_BASE}/${name}`.replace(/\/{2,}/g, '/');
@@ -6,134 +6,134 @@ function localImage(name: string): string {
 
 const SUBCATEGORY_IMAGES: Record<string, string[]> = {
   electricians: [
-    localImage('electricians-1.svg'),
-    localImage('electricians-2.svg'),
+    localImage('electricians-1.jpg'),
+    localImage('electricians-2.jpg'),
   ],
   'agri-machinery': [
-    localImage('agri-machinery-1.svg'),
-    localImage('agri-machinery-2.svg'),
+    localImage('agri-machinery-1.png'),
+    localImage('agri-machinery-2.jpg'),
   ],
   earthmoving: [
-    localImage('earthmoving-1.svg'),
-    localImage('earthmoving-2.svg'),
+    localImage('earthmoving-1.jpg'),
+    localImage('earthmoving-2.jpg'),
   ],
   hairdresser: [
-    localImage('hairdresser-1.svg'),
-    localImage('hairdresser-2.svg'),
+    localImage('hairdresser-1.jpg'),
+    localImage('hairdresser-2.jpg'),
   ],
   barber: [
-    localImage('barber-1.svg'),
-    localImage('barber-2.svg'),
+    localImage('barber-1.jpg'),
+    localImage('barber-2.jpg'),
   ],
   nails: [
-    localImage('nails-1.svg'),
-    localImage('nails-2.svg'),
+    localImage('nails-1.jpg'),
+    localImage('nails-2.jpg'),
   ],
   roofers: [
-    localImage('roofers-1.svg'),
-    localImage('roofers-2.svg'),
+    localImage('roofers-1.jpg'),
+    localImage('roofers-2.jpg'),
   ],
   plumbers: [
-    localImage('plumbers-1.svg'),
-    localImage('plumbers-2.svg'),
+    localImage('plumbers-1.jpg'),
+    localImage('plumbers-2.jpg'),
   ],
   'septic-service': [
-    localImage('septic-service-1.svg'),
+    localImage('septic-service-1.jpg'),
   ],
   mowing: [
-    localImage('mowing-1.svg'),
-    localImage('mowing-2.svg'),
+    localImage('mowing-1.jpg'),
+    localImage('mowing-2.jpg'),
   ],
   cleaners: [
-    localImage('cleaners-1.svg'),
+    localImage('cleaners-1.jpg'),
   ],
   'country-move': [
-    localImage('country-move-1.svg'),
+    localImage('country-move-1.jpg'),
   ],
   plowing: [
-    localImage('plowing-1.svg'),
+    localImage('plowing-1.jpg'),
   ],
   lawyers: [
-    localImage('lawyers-1.svg'),
+    localImage('lawyers-1.jpg'),
   ],
   'firewood-sales': [
-    localImage('firewood-sales-1.svg'),
+    localImage('firewood-sales-1.jpg'),
   ],
   water: [
-    localImage('water-1.svg'),
+    localImage('water-1.png'),
   ],
   waste: [
-    localImage('waste-1.svg'),
+    localImage('waste-1.jpg'),
   ],
   gardeners: [
-    localImage('gardeners-1.svg'),
+    localImage('gardeners-1.jpg'),
   ],
   glazing: [
-    localImage('glazing-1.svg'),
+    localImage('glazing-1.jpg'),
   ],
   evacuator: [
-    localImage('evacuator-1.svg'),
+    localImage('evacuator-1.jpg'),
   ],
   'septic-install': [
-    localImage('septic-install-1.svg'),
+    localImage('septic-install-1.jpg'),
   ],
   tutors: [
-    localImage('tutors-1.svg'),
+    localImage('tutors-1.jpg'),
   ],
   'bulk-materials': [
-    localImage('bulk-materials-1.svg'),
+    localImage('bulk-materials-1.webp'),
   ],
   builders: [
-    localImage('builders-1.svg'),
-    localImage('builders-2.svg'),
+    localImage('builders-1.jpg'),
+    localImage('builders-2.jpg'),
   ],
   photographers: [
-    localImage('photographers-1.svg'),
+    localImage('photographers-1.jpg'),
   ],
 };
 
 const CATEGORY_IMAGES: Record<string, string[]> = {
   construction: [
-    localImage('construction-1.svg'),
-    localImage('construction-2.svg'),
+    localImage('construction-1.jpg'),
+    localImage('construction-2.jpg'),
   ],
   machinery: [
-    localImage('machinery-1.svg'),
-    localImage('agri-machinery-1.svg'),
+    localImage('machinery-1.png'),
+    localImage('agri-machinery-1.png'),
   ],
   utility: [
-    localImage('utility-1.svg'),
-    localImage('septic-service-1.svg'),
+    localImage('utility-1.png'),
+    localImage('septic-service-1.jpg'),
   ],
   beauty: [
-    localImage('beauty-1.svg'),
-    localImage('beauty-2.svg'),
+    localImage('beauty-1.jpg'),
+    localImage('beauty-2.jpg'),
   ],
   farming: [
-    localImage('farming-1.svg'),
-    localImage('farming-2.svg'),
+    localImage('farming-1.png'),
+    localImage('farming-2.jpg'),
   ],
   staff: [
-    localImage('cleaners-1.svg'),
-    localImage('gardeners-1.svg'),
+    localImage('cleaners-1.jpg'),
+    localImage('gardeners-1.jpg'),
   ],
   logistics: [
-    localImage('country-move-1.svg'),
-    localImage('evacuator-1.svg'),
+    localImage('country-move-1.jpg'),
+    localImage('evacuator-1.jpg'),
   ],
   pro: [
-    localImage('lawyers-1.svg'),
-    localImage('photographers-1.svg'),
+    localImage('lawyers-1.jpg'),
+    localImage('photographers-1.jpg'),
   ],
   sales: [
-    localImage('bulk-materials-1.svg'),
-    localImage('firewood-sales-1.svg'),
+    localImage('bulk-materials-1.webp'),
+    localImage('firewood-sales-1.jpg'),
   ],
 };
 
 const DEFAULT_IMAGES = [
-  localImage('default-1.svg'),
-  localImage('default-2.svg'),
+  localImage('default-1.jpg'),
+  localImage('default-2.png'),
 ];
 
 function getListingImages(category: string, subcategory: string, listingId: string): string[] {
@@ -153,6 +153,28 @@ function getListingImages(category: string, subcategory: string, listingId: stri
   return primary === secondary ? [primary] : [primary, secondary];
 }
 
+const CATEGORY_COVER_KEYS: Record<string, [string, string]> = {
+  construction: ['construction', 'builders'],
+  machinery: ['machinery', 'agri-machinery'],
+  utility: ['utility', 'septic-service'],
+  staff: ['staff', 'cleaners'],
+  logistics: ['logistics', 'country-move'],
+  farming: ['farming', 'mowing'],
+  pro: ['pro', 'lawyers'],
+  sales: ['sales', 'firewood-sales'],
+  beauty: ['beauty', 'hairdresser'],
+};
+
+function getCategoryCover(slug: string): string {
+  const keys = CATEGORY_COVER_KEYS[slug];
+  if (!keys) {
+    return DEFAULT_IMAGES[0]!;
+  }
+
+  return getListingImages(keys[0], keys[1], slug)[0] ?? DEFAULT_IMAGES[0]!;
+}
+
 export {
   getListingImages,
+  getCategoryCover,
 }

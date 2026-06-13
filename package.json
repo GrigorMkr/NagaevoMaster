@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "type-check": "tsc -b",
     "preview": "vite preview",
-    "images:listings": "node scripts/download-listing-images.mjs || node scripts/generate-listing-placeholders.mjs",
+    "images:listings": "node scripts/import-user-listing-images.mjs || node scripts/download-listing-images.mjs || node scripts/generate-listing-placeholders.mjs",
+    "images:listings:import": "node scripts/import-user-listing-images.mjs",
     "images:listings:local": "node scripts/generate-listing-placeholders.mjs",
     "images:listings:landscapes": "node scripts/copy-listing-images.mjs"
   },

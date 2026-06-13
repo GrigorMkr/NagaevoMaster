@@ -4,7 +4,8 @@ import type { Listing } from '@/types/listing';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
 
 function enrichListing(listing: Listing): Listing {
-  const images = listing.images.length > 0
+  const hasImages = listing.images.some((image) => typeof image === 'string' && image.trim().length > 0);
+  const images = hasImages
     ? listing.images
     : getListingImages(listing.category, listing.subcategory, listing.id);
 
