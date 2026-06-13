@@ -138,16 +138,17 @@ const DEFAULT_IMAGES = [
 
 function getListingImages(category: string, subcategory: string, listingId: string): string[] {
   const specific = SUBCATEGORY_IMAGES[subcategory];
-  const pool = specific?.length
+  const pool: string[] = specific?.length
     ? specific
     : CATEGORY_IMAGES[category]?.length
-      ? CATEGORY_IMAGES[category]
+      ? (CATEGORY_IMAGES[category] ?? DEFAULT_IMAGES)
       : DEFAULT_IMAGES;
 
   const seed = Number.parseInt(listingId, 10) || listingId.charCodeAt(0);
   const offset = seed % pool.length;
-  const primary = pool[offset];
-  const secondary = pool[(offset + 1) % pool.length];
+  const fallback = DEFAULT_IMAGES[0]!;
+  const primary = pool[offset] ?? pool[0] ?? fallback;
+  const secondary = pool[(offset + 1) % pool.length] ?? pool[0] ?? fallback;
 
   return primary === secondary ? [primary] : [primary, secondary];
 }
