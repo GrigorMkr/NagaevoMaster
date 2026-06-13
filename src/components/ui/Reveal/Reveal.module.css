@@ -1,39 +1,18 @@
 .reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.75s var(--ease-out-expo),
-    transform 0.75s var(--ease-out-expo);
-}
-
-.visible {
-  opacity: 1;
-  transform: translateY(0);
+  animation: fadeInUp 0.75s var(--ease-out-expo) both;
 }
 
 .revealStagger {
-  opacity: 1;
-  transform: none;
+  display: contents;
 }
 
 .staggerItem {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.72s var(--ease-out-expo),
-    transform 0.72s var(--ease-out-expo);
-}
-
-.revealStagger.visible .staggerItem {
-  opacity: 1;
-  transform: translateY(0);
+  animation: fadeInUp 0.72s var(--ease-out-expo) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .staggerItem {
-    opacity: 1;
-    transform: none;
-    transition: none;
+    animation: none;
   }
 }

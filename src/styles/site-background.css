@@ -324,13 +324,3 @@
     animation: none;
   }
 }
-
-@media (max-width: 768px) {
-  .siteSurface__veil {
-    background: linear-gradient(
-      180deg,
-      rgba(253, 248, 238, 0.45) 0%,
-      rgba(245, 239, 227, 0.72) 100%
-    );
-  }
-}

@@ -136,10 +136,9 @@
   }
 }
 
-/* Staggered grid/list entrances (on page load, inside Reveal or after header) */
+/* Staggered grid/list entrances */
 .motion-stagger > * {
-  opacity: 0;
-  animation: fadeInUp 0.72s var(--ease-out-expo) forwards;
+  animation: fadeInUp 0.72s var(--ease-out-expo) both;
 }
 
 .motion-stagger > :nth-child(1) { animation-delay: 0.04s; }

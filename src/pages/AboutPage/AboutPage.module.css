@@ -147,6 +147,35 @@
   background: var(--color-primary);
 }
 
+@media (max-width: 768px) {
+  .card {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cardMedia {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    flex-shrink: 0;
+  }
+
+  .cardPanel {
+    position: static;
+    inset: auto;
+    transform: none;
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    padding: var(--spacing-md) 0 0;
+  }
+
+  .cardContent {
+    opacity: 1;
+    overflow: visible;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cardImage,
   .cardPanel,
