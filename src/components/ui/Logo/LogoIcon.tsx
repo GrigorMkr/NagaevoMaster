@@ -1,49 +1,115 @@
+import { useId } from 'react';
 import { LOGO_ICON_SIZE_DEFAULT } from '@/constants';
+
 interface LogoIconProps {
-    size?: number;
-    className?: string;
-    ariaHidden?: boolean;
+  size?: number;
+  className?: string;
+  ariaHidden?: boolean;
 }
+
 function LogoIcon({ size = LOGO_ICON_SIZE_DEFAULT, className, ariaHidden = true }: LogoIconProps) {
-    return (<svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden={ariaHidden}>
+  const rawId = useId().replace(/:/g, '');
+  const topArc = `${rawId}-top`;
+  const bottomArc = `${rawId}-bottom`;
+  const paper = `${rawId}-paper`;
+  const ink = `${rawId}-ink`;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden={ariaHidden}
+    >
       <defs>
-        <linearGradient id="logo-bg" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2d9a74"/>
-          <stop offset="1" stopColor="#0a3d2e"/>
-        </linearGradient>
-        <linearGradient id="logo-gold" x1="8" y1="14" x2="40" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#fde68a"/>
-          <stop offset="0.5" stopColor="#f0b429"/>
-          <stop offset="1" stopColor="#c0782a"/>
-        </linearGradient>
-        <linearGradient id="logo-hill" x1="0" y1="30" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#1a6b52" stopOpacity="0.55"/>
-          <stop offset="1" stopColor="#0f4d3a" stopOpacity="0.85"/>
-        </linearGradient>
-        <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.5" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+        <path id={topArc} d="M 20 50 A 30 30 0 0 1 80 50" fill="none" />
+        <path id={bottomArc} d="M 80 50 A 30 30 0 0 1 20 50" fill="none" />
+        <radialGradient id={paper} cx="42%" cy="38%" r="62%">
+          <stop offset="0%" stopColor="#fffaf2" />
+          <stop offset="55%" stopColor="#f5efe3" />
+          <stop offset="100%" stopColor="#e8dfd0" />
+        </radialGradient>
+        <filter id={ink} x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" />
         </filter>
       </defs>
 
-      <rect width="48" height="48" rx="13" fill="url(#logo-bg)"/>
-      <rect width="48" height="48" rx="13" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.75"/>
+      <circle cx="50" cy="50" r="48" fill={`url(#${paper})`} />
+      <circle
+        cx="50"
+        cy="50"
+        r="47"
+        fill="none"
+        stroke="#17624a"
+        strokeWidth="3"
+        strokeDasharray="1.5 2.2"
+        opacity="0.85"
+        filter={`url(#${ink})`}
+      />
+      <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" strokeWidth="1.4" opacity="0.9" />
+      <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" strokeWidth="0.8" opacity="0.45" />
 
-      <path d="M0 36 C10 28 18 34 24 31 C30 28 38 26 48 32 V48 H0 Z" fill="url(#logo-hill)"/>
-      <path d="M0 40 C14 33 20 37 28 34 C36 31 42 30 48 34 V48 H0 Z" fill="#17624a" opacity="0.35"/>
+      <circle cx="50" cy="9.5" r="1.4" fill="#c0782a" opacity="0.85" />
+      <circle cx="90.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
+      <circle cx="50" cy="90.5" r="1.4" fill="#c0782a" opacity="0.85" />
+      <circle cx="9.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
+      <circle cx="78" cy="22" r="1" fill="#f0b429" opacity="0.7" />
+      <circle cx="22" cy="78" r="1" fill="#f0b429" opacity="0.7" />
+      <circle cx="78" cy="78" r="1" fill="#f0b429" opacity="0.7" />
+      <circle cx="22" cy="22" r="1" fill="#f0b429" opacity="0.7" />
 
-      <rect x="15" y="23" width="18" height="13" rx="2.5" fill="white" opacity="0.95"/>
-      <path d="M11 23 L24 11.5 L37 23 Z" fill="url(#logo-gold)" filter="url(#logo-glow)"/>
-      <rect x="21.5" y="28.5" width="7" height="7.5" rx="1.5" fill="#0a3d2e" opacity="0.22"/>
-      <rect x="17" y="26" width="4" height="4" rx="1" fill="#0a3d2e" opacity="0.12"/>
-      <rect x="29" y="26" width="4" height="4" rx="1" fill="#0a3d2e" opacity="0.12"/>
-      <circle cx="38" cy="14" r="3.5" fill="#f0b429"/>
-      <circle cx="38" cy="14" r="5.5" fill="#f0b429" opacity="0.25"/>
-      <path d="M34.5 14 H31.5" stroke="#fde68a" strokeWidth="1.5" strokeLinecap="round" opacity="0.8"/>
-    </svg>);
+      <text
+        fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
+        fontSize="7.2"
+        fontWeight="700"
+        fill="#0a3d2e"
+        letterSpacing="0.2em"
+      >
+        <textPath href={`#${topArc}`} startOffset="50%" textAnchor="middle">
+          НАГАЕВО
+        </textPath>
+      </text>
+      <text
+        fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
+        fontSize="6.8"
+        fontWeight="700"
+        fill="#17624a"
+        letterSpacing="0.26em"
+      >
+        <textPath href={`#${bottomArc}`} startOffset="50%" textAnchor="middle">
+          МАСТЕР
+        </textPath>
+      </text>
+
+      <g transform="translate(50 49)" filter={`url(#${ink})`}>
+        <path
+          d="M -12 5 L 0 -11 L 12 5 Z"
+          fill="#f0b429"
+          stroke="#0a3d2e"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+        <rect
+          x="-10"
+          y="5"
+          width="20"
+          height="13"
+          rx="1.2"
+          fill="#fffdf8"
+          stroke="#0a3d2e"
+          strokeWidth="1"
+        />
+        <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.45" />
+        <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
+        <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
+        <path d="M -1 5 V 2.5" stroke="#c0782a" strokeWidth="1.2" strokeLinecap="round" />
+      </g>
+    </svg>
+  );
 }
 
 export {

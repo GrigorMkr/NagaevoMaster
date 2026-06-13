@@ -8,6 +8,14 @@ import { getDistanceKm } from '../utils/geo.js';
 import { toListingResponse } from '../utils/mappers.js';
 import { routeParam } from '../utils/params.js';
 const listingsRouter = Router();
+const listingUserSelect = {
+    select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+    },
+} as const;
 const NAGAEVO_CENTER = { lat: 54.6245, lng: 56.1082 };
 const PAGE_SIZE = 24;
 const createListingSchema = z.object({
@@ -78,7 +86,10 @@ listingsRouter.get('/', async (req, res, next) => {
         if (query.priceMax !== undefined && query.priceMax !== '') {
             where.priceFrom = { ...(where.priceFrom as object), lte: Number(query.priceMax) };
         }
-        let items = await prisma.listing.findMany({ where: where as never });
+        let items = await prisma.listing.findMany({
+            where: where as never,
+            include: { user: listingUserSelect },
+        });
         if (typeof query.query === 'string' && query.query.trim()) {
             const q = query.query.toLowerCase();
             items = items.filter((listing) => listing.title.toLowerCase().includes(q) ||
@@ -94,7 +105,7 @@ listingsRouter.get('/', async (req, res, next) => {
         const start = (page - 1) * PAGE_SIZE;
         const pageItems = items.slice(start, start + PAGE_SIZE);
         res.json({
-            items: pageItems.map(toListingResponse),
+            items: pageItems.map((item) => toListingResponse(item, item.user)),
             totalPages,
             page,
         });
@@ -107,11 +118,12 @@ listingsRouter.get('/:id', async (req, res, next) => {
     try {
         const listing = await prisma.listing.findFirst({
             where: { id: routeParam(req.params.id), status: 'published' },
+            include: { user: listingUserSelect },
         });
         if (!listing) {
             throw new HttpError(404, 'Объявление не найдено');
         }
-        res.json(toListingResponse(listing));
+        res.json(toListingResponse(listing, listing.user));
     }
     catch (error) {
         next(error);
@@ -139,7 +151,7 @@ listingsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
                 isVerified: false,
             },
         });
-        res.status(201).json(toListingResponse(listing));
+        res.status(201).json(toListingResponse(listing, req.user!));
     }
     catch (error) {
         next(error);
@@ -174,8 +186,9 @@ listingsRouter.patch('/:id', requireAuth, async (req: AuthRequest, res, next) =>
                 address: data.location?.address,
                 images: data.imageIds ? JSON.stringify(data.imageIds) : undefined,
             },
+            include: { user: listingUserSelect },
         });
-        res.json(toListingResponse(updated));
+        res.json(toListingResponse(updated, updated.user));
     }
     catch (error) {
         next(error);

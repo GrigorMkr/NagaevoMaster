@@ -25,9 +25,17 @@
   padding: 0.35rem 0.75rem;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-primary-dark);
-  background: var(--badge-green-bg);
+  color: var(--color-button-active-text);
+  background: var(--color-button-active-bg);
   border-radius: var(--radius-full);
+}
+
+.authorBlock {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-warm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
 }
 
 .priceRow {
@@ -50,18 +58,26 @@
   font: inherit;
   font-weight: 600;
   color: var(--color-secondary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .ratingButton:hover {
-  color: var(--color-primary-dark);
+  color: var(--color-secondary-dark);
 }
 
 .ratingButton:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+.ratingStatic {
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.reviewsGate {
+  margin-bottom: var(--spacing-lg);
 }
 
 .reviews {

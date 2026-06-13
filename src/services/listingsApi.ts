@@ -5,6 +5,7 @@ import { NAGAEVO_CENTER } from '@/constants/geo-data';
 import { MOCK_LISTINGS } from '@/data/mockListings';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { SortBy } from '@/enums/sort';
+import { enrichListing, enrichListings } from '@/utils/listingEnrich';
 import { api } from './api';
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const toRadians = (value: number) => (value * Math.PI) / DEGREES_IN_SEMICIRCLE;
@@ -82,7 +83,7 @@ function isListingsResponse(data: unknown): data is ListingsResponse {
 }
 function mockListingsResponse(params: Partial<SearchParams>): ListingsResponse {
     return {
-        items: filterMockListings(params),
+        items: enrichListings(filterMockListings(params)),
         totalPages: 1,
         page: params.page ?? 1,
     };
@@ -93,12 +94,26 @@ async function fetchListings(params: Partial<SearchParams> = {}): Promise<Listin
         if (!isListingsResponse(response.data)) {
             throw new Error('Invalid listings response');
         }
-        return response.data;
+        return {
+            ...response.data,
+            items: enrichListings(response.data.items),
+        };
     }
     catch (error) {
         if (!USE_MOCK_FALLBACK)
             throw error;
         return mockListingsResponse(params);
+    }
+}
+async function fetchMyListings(userId: string): Promise<Listing[]> {
+    try {
+        const response = await api.get<Listing[]>('/users/me/listings');
+        return enrichListings(response.data);
+    }
+    catch (error) {
+        if (!USE_MOCK_FALLBACK)
+            throw error;
+        return enrichListings(MOCK_LISTINGS.filter((listing) => listing.userId === userId));
     }
 }
 async function fetchListingById(id: string): Promise<Listing | null> {
@@ -108,18 +123,20 @@ async function fetchListingById(id: string): Promise<Listing | null> {
         if (!listing || typeof listing !== 'object' || !('id' in listing)) {
             throw new Error('Invalid listing response');
         }
-        return listing;
+        return enrichListing(listing);
     }
     catch (error) {
         if (!USE_MOCK_FALLBACK)
             throw error;
-        return MOCK_LISTINGS.find((l) => l.id === id) ?? null;
+        const listing = MOCK_LISTINGS.find((item) => item.id === id);
+        return listing ? enrichListing(listing) : null;
     }
 }
 
 export {
   fetchListings,
   fetchListingById,
+  fetchMyListings,
 }
 
 export type {

@@ -1,4 +1,5 @@
 import type { Listing, Review, User } from '@prisma/client';
+
 function parseImages(images: string): string[] {
     try {
         const parsed = JSON.parse(images) as unknown;
@@ -8,6 +9,17 @@ function parseImages(images: string): string[] {
         return [];
     }
 }
+
+function toListingAuthor(user: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl'>) {
+    const login = user.email.split('@')[0]?.replace(/\./g, '_') ?? user.id;
+    return {
+        id: user.id,
+        name: user.name,
+        login,
+        avatarUrl: user.avatarUrl ?? undefined,
+    };
+}
+
 function toUserResponse(user: User) {
     return {
         id: user.id,
@@ -19,7 +31,7 @@ function toUserResponse(user: User) {
         createdAt: user.createdAt.toISOString(),
     };
 }
-function toListingResponse(listing: Listing) {
+function toListingResponse(listing: Listing, user?: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl'>) {
     return {
         id: listing.id,
         userId: listing.userId,
@@ -42,6 +54,7 @@ function toListingResponse(listing: Listing) {
         isVerified: listing.isVerified,
         createdAt: listing.createdAt.toISOString(),
         updatedAt: listing.updatedAt.toISOString(),
+        author: user ? toListingAuthor(user) : undefined,
     };
 }
 function toReviewResponse(review: Review & {
@@ -63,5 +76,6 @@ export {
   parseImages,
   toUserResponse,
   toListingResponse,
+  toListingAuthor,
   toReviewResponse,
 }

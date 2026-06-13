@@ -1,0 +1,31 @@
+.row,
+.rowCompact {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.rowCompact .name {
+  font-size: var(--font-size-xs);
+}
+
+.login {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}

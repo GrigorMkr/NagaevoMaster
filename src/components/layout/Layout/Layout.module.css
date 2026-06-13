@@ -18,3 +18,13 @@
 .mainInner {
   position: relative;
 }
+
+.mainInner > * {
+  animation: page-enter 0.65s var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mainInner > * {
+    animation: none;
+  }
+}

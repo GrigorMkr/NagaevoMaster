@@ -51,9 +51,8 @@
   font: inherit;
   font-size: inherit;
   font-weight: 600;
-  color: var(--color-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: var(--color-button-label-muted);
+  text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
 }

@@ -10,7 +10,7 @@ const MOCK_AUTH_ACCOUNTS: MockAuthAccount[] = [
         email: 'demo@nagaevomaster.ru',
         password: 'master123',
         user: {
-            id: 'mock-demo',
+            id: 'u1',
             email: 'demo@nagaevomaster.ru',
             name: 'Демо Пользователь',
             phone: '+7 (900) 000-00-00',

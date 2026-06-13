@@ -16,7 +16,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
 }
 function Button({ variant = 'primary', size = 'md', fullWidth = false, loading = false, className, children, disabled, ...props }: ButtonProps) {
-    return (<button className={classNames(styles.button, styles[variant], BUTTON_SIZE_CLASS[size], fullWidth && styles.fullWidth, loading && styles.loading, className)} disabled={disabled || loading} {...props}>
+    return (<button data-ui="button" className={classNames(styles.button, styles[variant], BUTTON_SIZE_CLASS[size], fullWidth && styles.fullWidth, loading && styles.loading, className)} disabled={disabled || loading} {...props}>
       {loading && <Spinner size="sm" className={styles.spinnerIcon}/>}
       {children}
     </button>);

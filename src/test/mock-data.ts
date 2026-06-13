@@ -8,12 +8,12 @@ const mockListing: Listing = {
     title: 'Ремонт кровли',
     description: 'Качественный ремонт кровли в Нагаево',
     category: 'construction',
-    subcategory: 'roof',
+    subcategory: 'roofers',
     priceFrom: 5000,
     unit: 'м²',
     rating: 4.8,
     reviewsCount: 12,
-    images: [],
+    images: ['/listings/roofers-1.png'],
     phone: '+7 987 654-32-10',
     isVerified: true,
     createdAt: '2025-01-15T10:00:00.000Z',
@@ -22,6 +22,12 @@ const mockListing: Listing = {
         lat: 54.6247,
         lng: 56.1194,
         address: 'с. Нагаево, ул. Советская, д. 1',
+    },
+    author: {
+        id: 'user-1',
+        name: 'Иван Петров',
+        login: 'ivan_roof',
+        avatarUrl: 'https://ui-avatars.com/api/?name=Ivan&background=17624a&color=fff',
     },
 };
 const mockUser: User = {

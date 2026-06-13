@@ -56,12 +56,13 @@
 
 .filterApply {
   padding: 0.65rem 1rem;
-  border: none;
+  border: 2px solid var(--color-button-border);
   border-radius: var(--radius-full);
   background: var(--gradient-primary);
   color: #fff;
   font-family: var(--font-ui);
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -89,16 +90,17 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
+  text-decoration: none;
   cursor: pointer;
   background: var(--color-bg-card);
   color: var(--color-text-muted);
 }
 
 .sortButtonActive {
-  background: var(--badge-green-bg);
-  border-color: var(--badge-green-border);
-  color: var(--color-primary-dark);
+  background: var(--color-button-active-bg);
+  border-color: var(--color-button-active-border);
+  color: var(--color-button-active-text);
 }
 
 .mapSection {

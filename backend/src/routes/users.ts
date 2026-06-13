@@ -4,10 +4,18 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { toListingResponse, toUserResponse } from '../utils/mappers.js';
 const usersRouter = Router();
+const listingUserSelect = {
+    select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+    },
+} as const;
 const updateProfileSchema = z.object({
     name: z.string().min(2).optional(),
     phone: z.string().min(10).optional(),
-    avatarUrl: z.string().url().optional(),
+    avatarUrl: z.string().url().or(z.string().startsWith('data:image/')).optional(),
 });
 usersRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
     try {
@@ -34,9 +42,10 @@ usersRouter.get('/me/listings', requireAuth, async (req: AuthRequest, res, next)
     try {
         const listings = await prisma.listing.findMany({
             where: { userId: req.user!.id },
+            include: { user: listingUserSelect },
             orderBy: { updatedAt: 'desc' },
         });
-        res.json(listings.map(toListingResponse));
+        res.json(listings.map((listing) => toListingResponse(listing, listing.user)));
     }
     catch (error) {
         next(error);

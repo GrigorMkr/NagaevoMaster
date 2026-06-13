@@ -9,16 +9,19 @@
   padding: 0.45rem 1rem;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-primary);
-  background: var(--badge-green-bg);
-  border: 1px solid var(--badge-green-border);
+  color: var(--color-button-active-text);
+  background: var(--color-button-active-bg);
+  border: 2px solid var(--color-button-border);
   border-radius: var(--radius-full);
-  transition: background var(--transition);
+  text-decoration: none;
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
 .subcategoryLink:hover {
-  background: rgba(23, 98, 74, 0.15);
-  color: var(--color-primary-dark);
+  background: var(--color-primary-dark);
+  color: var(--color-button-active-text);
 }
 
 .subcategoryTag {

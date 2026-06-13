@@ -18,7 +18,7 @@ const CategoryCard = memo(function CategoryCard({ to, icon, name, variant = 'row
     ]
         .filter(Boolean)
         .join(' ');
-    return (<Link to={to} className={cardClassName} style={style}>
+    return (<Link to={to} data-ui="card" className={cardClassName} style={style}>
       <span className={styles.categoryIcon}>{icon}</span>
       <span className={styles.categoryName}>{name}</span>
     </Link>);

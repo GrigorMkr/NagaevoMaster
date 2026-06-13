@@ -1,4 +1,5 @@
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { useNews } from '@/hooks/useNews';
 import { APP_DESCRIPTION } from '@/constants';
 import { CategoriesSection } from './components/CategoriesSection';
@@ -12,26 +13,64 @@ import { PopularServicesSection } from './components/PopularServicesSection';
 import { ReviewsSection } from './components/ReviewsSection';
 import { StepsSection } from './components/StepsSection';
 import styles from './HomePage.module.css';
+
 function HomePage() {
-    const { local, external, loading: newsLoading } = useNews();
-    return (<>
-      <PageMeta description={APP_DESCRIPTION} canonical="/"/>
+  const { local, external, loading: newsLoading } = useNews();
+
+  return (
+    <div className={styles.homeShell}>
+      <PageMeta description={APP_DESCRIPTION} canonical="/" />
       <HeroSection />
       <section className={styles.mainContent}>
         <div className="container">
-          <NewsSection badge="Новости" title="Новости Нагаево" description="События микрорайона — концерты, праздники и жизнь поселка" items={local} loading={newsLoading} moreLinkLabel="Все новости поселка →"/>
-          <NewsSection badge="Регион" title="Новости из интернета" description="Материалы о Нагаево и Башкортостане из региональных СМИ" items={external} loading={newsLoading} moreLinkLabel="Все региональные новости →"/>
-          <PopularServicesSection />
-          <MapSection />
-          <CategoriesSection />
-          <ForumSection />
-          <ReviewsSection />
-          <StepsSection />
-          <FeaturesSection />
-          <CtaSection />
+          <Reveal>
+            <NewsSection
+              badge="Новости"
+              title="Новости Нагаево"
+              description="События микрорайона — концерты, праздники и жизнь поселка"
+              items={local}
+              loading={newsLoading}
+              moreLinkLabel="Все новости поселка →"
+            />
+          </Reveal>
+          <Reveal delay={80}>
+            <NewsSection
+              badge="Регион"
+              title="Новости из интернета"
+              description="Материалы о Нагаево и Башкортостане из региональных СМИ"
+              items={external}
+              loading={newsLoading}
+              moreLinkLabel="Все региональные новости →"
+            />
+          </Reveal>
+          <Reveal delay={120}>
+            <PopularServicesSection />
+          </Reveal>
+          <Reveal delay={100}>
+            <MapSection />
+          </Reveal>
+          <Reveal delay={80}>
+            <CategoriesSection />
+          </Reveal>
+          <Reveal delay={100}>
+            <ForumSection />
+          </Reveal>
+          <Reveal delay={80}>
+            <ReviewsSection />
+          </Reveal>
+          <Reveal delay={100}>
+            <StepsSection />
+          </Reveal>
+          <Reveal delay={80}>
+            <FeaturesSection />
+          </Reveal>
+          <Reveal delay={120}>
+            <CtaSection />
+          </Reveal>
         </div>
       </section>
-    </>);
+    </div>
+  );
 }
 
 export {

@@ -2,6 +2,7 @@
 @import './variables.css';
 @import './landscapes.css';
 @import './theme.css';
+@import './motion.css';
 @import './site-background.css';
 
 *,
@@ -51,14 +52,32 @@ body {
   margin: 0;
 }
 
-#root a {
+#root a:not([data-ui='button'], [data-ui='card']) {
   color: var(--color-primary);
   text-decoration: none;
   transition: color var(--transition);
 }
 
-#root a:hover {
+#root a:not([data-ui='button'], [data-ui='card']):hover {
   color: var(--color-primary-dark);
+}
+
+#root a[data-ui='card'],
+#root a[data-ui='card']:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+#root a[data-ui='button'],
+#root a[data-ui='button']:hover,
+#root a[data-ui='button']:focus,
+#root a[data-ui='button']:active {
+  text-decoration: none;
+}
+
+#root button {
+  font-family: inherit;
+  text-decoration: none;
 }
 
 #root a:focus-visible,
@@ -74,10 +93,6 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
-}
-
-#root button {
-  font-family: inherit;
 }
 
 #root ul,

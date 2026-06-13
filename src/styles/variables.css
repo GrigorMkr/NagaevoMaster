@@ -31,6 +31,13 @@
   --color-text: #152019;
   --color-text-muted: #3d4f45;
   --color-text-light: #6b7d72;
+  --color-error: #c62828;
+  --color-button-label: #152019;
+  --color-button-label-muted: #3d4f45;
+  --color-button-active-bg: var(--color-primary);
+  --color-button-active-text: #fff;
+  --color-button-active-border: #fff;
+  --color-button-border: #fff;
   --color-text-on-dark: #f2ece4;
   --color-text-on-dark-muted: rgba(242, 236, 228, 0.55);
   --color-text-on-dark-subtle: rgba(242, 236, 228, 0.35);

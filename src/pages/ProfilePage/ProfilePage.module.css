@@ -7,6 +7,19 @@
   box-shadow: var(--shadow-card);
 }
 
+.profileIntro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.profileIntro > :last-child {
+  flex: 1;
+  min-width: 220px;
+}
+
 .locationTitle {
   font-family: var(--font-display);
   font-size: var(--font-size-xl);
@@ -30,6 +43,51 @@
   flex-wrap: wrap;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-2xl);
+}
+
+.listingsSection {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.sectionHead {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-xs);
+}
+
+.sectionDesc {
+  color: var(--color-text-muted);
+}
+
+.sectionStatus {
+  color: var(--color-text-muted);
+}
+
+.listingsGrid {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .listingsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.emptyListings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background: var(--color-bg-card);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  color: var(--color-text-muted);
 }
 
 .grid {

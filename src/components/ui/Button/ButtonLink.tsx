@@ -14,7 +14,7 @@ interface ButtonLinkProps extends LinkProps {
     fullWidth?: boolean;
 }
 function ButtonLink({ variant = 'primary', size = 'md', fullWidth = false, className, children, ...props }: ButtonLinkProps) {
-    return (<Link className={classNames(styles.button, styles[variant], BUTTON_SIZE_CLASS[size], fullWidth && styles.fullWidth, className)} {...props}>
+    return (<Link data-ui="button" className={classNames(styles.button, styles[variant], BUTTON_SIZE_CLASS[size], fullWidth && styles.fullWidth, className)} {...props}>
       {children}
     </Link>);
 }
