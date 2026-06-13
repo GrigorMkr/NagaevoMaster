@@ -20,6 +20,7 @@ import { useMyListings } from '@/hooks/useMyListings'
 import { clearAuthToken } from '@/services/authApi'
 import { buildAvatarUrl } from '@/utils/avatarUrl'
 import { ROUTES } from '@/utils/constants'
+import { Reveal } from '@/components/ui/Reveal/Reveal'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ProfilePage.module.css'
 
@@ -74,9 +75,12 @@ function ProfilePage() {
             />
           </div>
 
-          <ProfileSettingsForm user={currentUser} />
+          <Reveal delay={60}>
+            <ProfileSettingsForm user={currentUser} />
+          </Reveal>
 
-          <section className={styles.locationCard} aria-label="Местоположение аккаунта">
+          <Reveal delay={100}>
+            <section className={styles.locationCard} aria-label="Местоположение аккаунта">
             <h2 className={styles.locationTitle}>Текущее местоположение</h2>
             {accountLocation ? (
               <p className={styles.locationText}>
@@ -99,50 +103,53 @@ function ProfilePage() {
               )}
             </div>
           </section>
+          </Reveal>
 
-          <div className={styles.actions}>
-            <ButtonLink to={ROUTES.ADD_LISTING}>Добавить объявление</ButtonLink>
-            <Button type="button" variant="outline" onClick={handleLogout}>
-              Выйти
-            </Button>
-          </div>
-
-          <section className={styles.listingsSection} aria-labelledby="my-listings-title">
-            <div className={styles.sectionHead}>
-              <h2 id="my-listings-title" className={styles.sectionTitle}>
-                Мои объявления
-              </h2>
-              <p className={styles.sectionDesc}>
-                Управляйте своими услугами в каталоге посёлка
-              </p>
+          <Reveal delay={120}>
+            <div className={styles.actions}>
+              <ButtonLink to={ROUTES.ADD_LISTING}>Добавить объявление</ButtonLink>
+              <Button type="button" variant="outline" onClick={handleLogout}>
+                Выйти
+              </Button>
             </div>
 
-            {listingsLoading ? (
-              <p className={styles.sectionStatus}>Загрузка объявлений…</p>
-            ) : myListings.length > 0 ? (
-              <div className={styles.listingsGrid}>
-                {myListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
+            <section className={styles.listingsSection} aria-labelledby="my-listings-title">
+              <div className={styles.sectionHead}>
+                <h2 id="my-listings-title" className={styles.sectionTitle}>
+                  Мои объявления
+                </h2>
+                <p className={styles.sectionDesc}>
+                  Управляйте своими услугами в каталоге посёлка
+                </p>
               </div>
-            ) : (
-              <div className={styles.emptyListings}>
-                <p>У вас пока нет объявлений.</p>
-                <ButtonLink to={ROUTES.ADD_LISTING} size="sm">
-                  Создать первое объявление
-                </ButtonLink>
-              </div>
-            )}
-          </section>
 
-          <div className={styles.grid}>
-            {otherSections.map((section) => (
-              <article key={section.title} className={styles.card}>
-                <h3>{section.title}</h3>
-                <p>{section.desc}</p>
-              </article>
-            ))}
-          </div>
+              {listingsLoading ? (
+                <p className={styles.sectionStatus}>Загрузка объявлений…</p>
+              ) : myListings.length > 0 ? (
+                <div className={`${styles.listingsGrid} motion-stagger`}>
+                  {myListings.map((listing) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.emptyListings}>
+                  <p>У вас пока нет объявлений.</p>
+                  <ButtonLink to={ROUTES.ADD_LISTING} size="sm">
+                    Создать первое объявление
+                  </ButtonLink>
+                </div>
+              )}
+            </section>
+
+            <div className={`${styles.grid} motion-stagger`}>
+              {otherSections.map((section) => (
+                <article key={section.title} className={styles.card}>
+                  <h3>{section.title}</h3>
+                  <p>{section.desc}</p>
+                </article>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </div>
     </>

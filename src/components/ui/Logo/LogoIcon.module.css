@@ -1,0 +1,24 @@
+.textRings {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: logo-stamp-text-spin 24s linear infinite;
+  filter: drop-shadow(0 0 0.35px rgba(240, 180, 41, 0.65))
+    drop-shadow(0 0 1.2px rgba(126, 200, 168, 0.35));
+}
+
+@keyframes logo-stamp-text-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .textRings {
+    animation: none;
+    filter: none;
+  }
+}

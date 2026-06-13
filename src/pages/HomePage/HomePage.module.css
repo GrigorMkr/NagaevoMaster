@@ -16,7 +16,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: min(88vw, 360px);
+  width: min(92vw, 440px);
   max-width: 100%;
   margin: var(--spacing-2xl) auto 0;
   margin-inline: auto;
@@ -80,8 +80,8 @@
 .heroStampInner {
   position: relative;
   z-index: 3;
-  width: 78%;
-  height: 78%;
+  width: 82%;
+  height: 82%;
   display: grid;
   place-items: center;
   transform-origin: center center;
@@ -1067,7 +1067,7 @@
   }
 
   .heroStampWrap {
-    width: min(72vw, 300px);
+    width: min(84vw, 360px);
     margin-inline: auto;
   }
 

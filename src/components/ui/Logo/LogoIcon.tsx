@@ -1,11 +1,14 @@
 import { useId } from 'react';
 import { LOGO_ICON_SIZE_DEFAULT } from '@/constants';
+import { usePrefersReducedMotion } from '@/hooks/useScrollRotation';
+import iconStyles from './LogoIcon.module.css';
 
 interface LogoIconProps {
   size?: number;
   className?: string;
   fluid?: boolean;
   ariaHidden?: boolean;
+  animatedText?: boolean;
 }
 
 function LogoIcon({
@@ -13,12 +16,17 @@ function LogoIcon({
   className,
   fluid = false,
   ariaHidden = true,
+  animatedText = true,
 }: LogoIconProps) {
+  const reducedMotion = usePrefersReducedMotion();
+  const motionEnabled = animatedText && !reducedMotion;
   const rawId = useId().replace(/:/g, '');
   const topArc = `${rawId}-top`;
   const bottomArc = `${rawId}-bottom`;
   const paper = `${rawId}-paper`;
   const ink = `${rawId}-ink`;
+  const textGradient = `${rawId}-text-gradient`;
+  const textGlow = `${rawId}-text-glow`;
 
   return (
     <svg
@@ -39,6 +47,43 @@ function LogoIcon({
           <stop offset="55%" stopColor="#f5efe3" />
           <stop offset="100%" stopColor="#e8dfd0" />
         </radialGradient>
+        <linearGradient id={textGradient} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#0a3d2e" />
+          <stop offset="10%" stopColor="#17624a" />
+          <stop offset="22%" stopColor="#2d9a74" />
+          <stop offset="34%" stopColor="#7ec8a8" />
+          <stop offset="44%" stopColor="#fffdf5" />
+          <stop offset="52%" stopColor="#fde68a" />
+          <stop offset="60%" stopColor="#f0b429" />
+          <stop offset="70%" stopColor="#fff3c4" />
+          <stop offset="78%" stopColor="#e8a87c" />
+          <stop offset="86%" stopColor="#c0782a" />
+          <stop offset="94%" stopColor="#2d9a74" />
+          <stop offset="100%" stopColor="#0a3d2e" />
+          {motionEnabled && (
+            <animateTransform
+              attributeName="gradientTransform"
+              type="rotate"
+              from="0 0.5 0.5"
+              to="360 0.5 0.5"
+              dur="4.5s"
+              repeatCount="indefinite"
+            />
+          )}
+        </linearGradient>
+        <filter id={textGlow} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="blur" />
+          <feColorMatrix
+            in="blur"
+            type="matrix"
+            values="1 0 0 0 0  0 0.85 0 0 0  0 0 0.35 0 0  0 0 0 0.55 0"
+            result="goldBlur"
+          />
+          <feMerge>
+            <feMergeNode in="goldBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
         <filter id={ink} x="-8%" y="-8%" width="116%" height="116%">
           <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" result="noise" />
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" />
@@ -69,28 +114,34 @@ function LogoIcon({
       <circle cx="78" cy="78" r="1" fill="#f0b429" opacity="0.7" />
       <circle cx="22" cy="22" r="1" fill="#f0b429" opacity="0.7" />
 
-      <text
-        fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
-        fontSize="7.2"
-        fontWeight="700"
-        fill="#0a3d2e"
-        letterSpacing="0.2em"
+      <g
+        className={motionEnabled ? iconStyles.textRings : undefined}
+        filter={motionEnabled ? `url(#${textGlow})` : undefined}
       >
-        <textPath href={`#${topArc}`} startOffset="50%" textAnchor="middle">
-          НАГАЕВО
-        </textPath>
-      </text>
-      <text
-        fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
-        fontSize="6.8"
-        fontWeight="700"
-        fill="#17624a"
-        letterSpacing="0.26em"
-      >
-        <textPath href={`#${bottomArc}`} startOffset="50%" textAnchor="middle">
-          МАСТЕР
-        </textPath>
-      </text>
+        <text
+          fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
+          fontSize="7.2"
+          fontWeight="700"
+          fill={motionEnabled ? `url(#${textGradient})` : '#0a3d2e'}
+          letterSpacing="0.2em"
+        >
+          <textPath href={`#${topArc}`} startOffset="50%" textAnchor="middle">
+            НАГАЕВО
+          </textPath>
+        </text>
+
+        <text
+          fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
+          fontSize="6.8"
+          fontWeight="700"
+          fill={motionEnabled ? `url(#${textGradient})` : '#17624a'}
+          letterSpacing="0.26em"
+        >
+          <textPath href={`#${bottomArc}`} startOffset="50%" textAnchor="middle">
+            МАСТЕР
+          </textPath>
+        </text>
+      </g>
 
       <g transform="translate(50 49)" filter={`url(#${ink})`}>
         <path

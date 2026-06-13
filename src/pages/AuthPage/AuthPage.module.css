@@ -3,6 +3,7 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
+  animation: fadeInUp 0.7s 0.12s var(--ease-out-expo) both;
 }
 
 .tab,
@@ -11,23 +12,40 @@
   border-radius: var(--radius-full);
   border: 2px solid var(--color-border);
   background: var(--color-bg-card);
-  color: var(--color-button-label-muted);
+  color: var(--color-text-muted);
   font-family: var(--font-ui);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition:
+    transform 0.25s var(--ease-out-expo),
+    box-shadow 0.25s var(--ease-out-expo),
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.tab:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-mint);
+  color: var(--color-text);
 }
 
 .tabActive {
   background: var(--color-button-active-bg);
   border-color: var(--color-button-active-border);
   color: var(--color-button-active-text);
+  box-shadow: 0 6px 22px rgba(23, 98, 74, 0.3);
 }
 
 .tab:focus-visible,
 .tabActive:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-mint);
   outline-offset: 2px;
+}
+
+.tabPanel {
+  animation: panel-step-in 0.45s var(--ease-out-expo) both;
 }
 
 .card {
@@ -36,6 +54,15 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
+  transition:
+    box-shadow 0.35s var(--ease-out-expo),
+    border-color var(--transition);
+}
+
+.tab:focus-visible,
+.tabActive:focus-visible {
+  outline: 2px solid var(--color-mint);
+  outline-offset: 2px;
 }
 
 .form {

@@ -11,6 +11,7 @@ import { selectListingsItems, selectListingsLoading } from '@/features/listings/
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { SortBy } from '@/enums/sort';
 import type { DistanceFilter, RatingFilter } from '@/types/search';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import { ListingResults } from './components/ListingResults';
 import { SearchFilters } from './components/SearchFilters';
@@ -113,35 +114,36 @@ function SearchPage() {
 
 
 
-          <form className={styles.searchForm} action={ECHO_FORM_ACTION} method="get" onSubmit={handleSearch}>
+          <Reveal delay={60}>
+            <form className={styles.searchForm} action={ECHO_FORM_ACTION} method="get" onSubmit={handleSearch}>
+              <label className="sr-only" htmlFor="search-query">
+                Поиск услуг
+              </label>
+              <input id="search-query" name="query" type="search" required className={pageStyles.input} placeholder="Ремонт, трактор, электрик..." value={filters.query} onChange={(event) => dispatch(setSearchParams({ query: event.target.value }))}/>
+              <Button type="submit">Найти</Button>
+              <Button type="button" variant="outline" onClick={handleReset}>
+                Сбросить
+              </Button>
+            </form>
+          </Reveal>
 
-            <label className="sr-only" htmlFor="search-query">
+          <Reveal delay={100}>
+            <SearchFilters onApply={handleApplyFilters}/>
+          </Reveal>
 
-              Поиск услуг
+          <Reveal delay={120}>
+            <SortControls activeSort={filters.sortBy} onSort={handleSort}/>
+          </Reveal>
 
-            </label>
+          {!isLoading && filters.query && (
+            <Reveal delay={140}>
+              <SearchMapSection listings={items ?? []} userLocation={accountLocation}/>
+            </Reveal>
+          )}
 
-            <input id="search-query" name="query" type="search" required className={pageStyles.input} placeholder="Ремонт, трактор, электрик..." value={filters.query} onChange={(event) => dispatch(setSearchParams({ query: event.target.value }))}/>
-
-            <Button type="submit">Найти</Button>
-
-            <Button type="button" variant="outline" onClick={handleReset}>
-
-              Сбросить
-
-            </Button>
-
-          </form>
-
-
-
-          <SearchFilters onApply={handleApplyFilters}/>
-
-          <SortControls activeSort={filters.sortBy} onSort={handleSort}/>
-
-          {!isLoading && filters.query && (<SearchMapSection listings={items ?? []} userLocation={accountLocation}/>)}
-
-          <ListingResults items={items ?? []} isLoading={isLoading}/>
+          <Reveal delay={160}>
+            <ListingResults items={items ?? []} isLoading={isLoading}/>
+          </Reveal>
 
         </div>
 

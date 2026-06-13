@@ -28,11 +28,14 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-ui);
   color: var(--color-text-on-dark-muted);
-  transition: color var(--transition);
+  transition:
+    color var(--transition),
+    transform 0.25s var(--ease-out-expo);
 }
 
 .nav a:hover {
   color: var(--color-accent);
+  transform: translateY(-2px);
 }
 
 .geo {

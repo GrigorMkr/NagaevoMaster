@@ -72,9 +72,105 @@
   }
 }
 
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes marker-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+
+  65% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes panel-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-card);
+  }
+
+  50% {
+    box-shadow:
+      var(--shadow-card-hover),
+      0 0 28px rgba(240, 180, 41, 0.12);
+  }
+}
+
+@keyframes map-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Staggered grid/list entrances (on page load, inside Reveal or after header) */
+.motion-stagger > * {
+  opacity: 0;
+  animation: fadeInUp 0.72s var(--ease-out-expo) forwards;
+}
+
+.motion-stagger > :nth-child(1) { animation-delay: 0.04s; }
+.motion-stagger > :nth-child(2) { animation-delay: 0.09s; }
+.motion-stagger > :nth-child(3) { animation-delay: 0.14s; }
+.motion-stagger > :nth-child(4) { animation-delay: 0.19s; }
+.motion-stagger > :nth-child(5) { animation-delay: 0.24s; }
+.motion-stagger > :nth-child(6) { animation-delay: 0.29s; }
+.motion-stagger > :nth-child(7) { animation-delay: 0.34s; }
+.motion-stagger > :nth-child(8) { animation-delay: 0.39s; }
+.motion-stagger > :nth-child(9) { animation-delay: 0.44s; }
+.motion-stagger > :nth-child(10) { animation-delay: 0.49s; }
+.motion-stagger > :nth-child(11) { animation-delay: 0.54s; }
+.motion-stagger > :nth-child(12) { animation-delay: 0.59s; }
+
+.motion-float {
+  animation: float-soft 5s ease-in-out infinite;
+}
+
+.motion-map-enter {
+  animation: map-rise 0.85s var(--ease-out-expo) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-page-enter,
-  .motion-header-enter {
+  .motion-header-enter,
+  .motion-stagger > *,
+  .motion-float,
+  .motion-map-enter {
     animation: none;
+    opacity: 1;
+    transform: none;
   }
 }

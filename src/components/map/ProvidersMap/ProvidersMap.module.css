@@ -5,6 +5,7 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
   background: var(--color-bg-card);
+  animation: map-rise 0.85s var(--ease-out-expo) both;
 }
 
 .map {
@@ -23,7 +24,10 @@
 }
 
 .filterButton {
-  padding: 0.4rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.9rem 0.35rem 0.35rem;
   font-family: var(--font-ui);
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -36,18 +40,37 @@
   transition:
     background var(--transition),
     color var(--transition),
-    border-color var(--transition);
+    border-color var(--transition),
+    transform 0.25s var(--ease-out-expo),
+    box-shadow 0.25s var(--ease-out-expo);
+}
+
+.filterThumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 .filterButton:hover {
-  border-color: var(--color-primary-dark);
-  color: var(--color-button-label);
+  border-color: var(--color-mint);
+  color: var(--color-text);
+  transform: translateY(-2px);
+}
+
+.filterButtonActive .filterThumb {
+  border-color: rgba(255, 255, 255, 0.85);
 }
 
 .filterButtonActive {
   background: var(--color-button-active-bg);
   border-color: var(--color-button-active-border);
   color: var(--color-button-active-text);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(23, 98, 74, 0.28);
 }
 
 .popup {
@@ -72,6 +95,31 @@
 .popupLink {
   font-weight: 600;
   color: var(--color-primary);
+}
+
+:global(.mapListingMarker) {
+  background: transparent;
+  border: none;
+}
+
+:global(.mapListingMarkerInner) {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #fff;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 2px rgba(23, 98, 74, 0.5);
+  background: var(--color-bg-warm);
+  animation: marker-pop 0.55s var(--ease-out-expo) both;
+}
+
+:global(.mapListingMarkerInner img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 :global(.mapCenterMarker) {

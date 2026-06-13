@@ -34,31 +34,72 @@
   box-shadow: var(--shadow-card);
   margin-bottom: var(--spacing-xl);
   min-height: 200px;
+  animation: panel-step-in 0.5s var(--ease-out-expo) both;
 }
 
 .categoryGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: var(--spacing-md);
 }
 
 .categoryButton,
 .categoryButtonActive {
-  padding: 0.6rem 1rem;
+  display: grid;
+  gap: var(--spacing-sm);
+  justify-items: center;
+  padding: var(--spacing-md);
   font-size: var(--font-size-sm);
   font-weight: 600;
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--color-bg-warm);
-  color: var(--color-button-label-muted);
-  text-decoration: none;
+  color: var(--color-text);
+  text-align: center;
   cursor: pointer;
+  transition:
+    transform 0.25s var(--ease-out-expo),
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
+}
+
+.categoryButton:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-mint);
+  box-shadow: var(--shadow-card);
 }
 
 .categoryButtonActive {
   background: var(--color-button-active-bg);
   border-color: var(--color-button-active-border);
   color: var(--color-button-active-text);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.categoryThumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.categoryThumbImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.categoryName {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 .subcategoryTag {

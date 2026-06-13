@@ -9,6 +9,7 @@ import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { VALIDATION } from '@/constants/validation';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { Button } from '@/components/ui/Button/Button';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ContactPage.module.css';
 const contactSchema = z.object({
@@ -37,56 +38,60 @@ function ContactPage() {
       <div className={pageStyles.page}>
         <div className="container">
           <div className={styles.layout}>
-            <div>
-              <PageHeader badge="Связь" title="Контакты" subtitle="Задайте вопрос или предложите улучшение платформы"/>
+            <Reveal delay={60}>
+              <div>
+                <PageHeader badge="Связь" title="Контакты" subtitle="Задайте вопрос или предложите улучшение платформы"/>
 
-              <div className={styles.info}>
-                <div className={styles.infoItem}>
-                  <span>📧</span>
-                  <div>
-                    <strong>Email</strong>
-                    <p>
-                      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-                    </p>
+                <div className={`${styles.info} motion-stagger`}>
+                  <div className={styles.infoItem}>
+                    <span>📧</span>
+                    <div>
+                      <strong>Email</strong>
+                      <p>
+                        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+                      </p>
+                    </div>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span>📍</span>
+                    <div>
+                      <strong>Адрес</strong>
+                      <p>
+                        с. Нагаево, {GEO.district}
+                        <br />
+                        {GEO.region}, {GEO.postalCode}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className={styles.infoItem}>
-                  <span>📍</span>
-                  <div>
-                    <strong>Адрес</strong>
-                    <p>
-                      с. Нагаево, {GEO.district}
-                      <br />
-                      {GEO.region}, {GEO.postalCode}
-                    </p>
-                  </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <form className={styles.form} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSubmit(onSubmit)} noValidate>
+                <div className={styles.field}>
+                  <label htmlFor="name">Имя</label>
+                  <input id="name" type="text" required className={pageStyles.input} {...register('name')}/>
+                  {errors.name && <span className={styles.error}>{errors.name.message}</span>}
                 </div>
-              </div>
-            </div>
 
-            <form className={styles.form} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSubmit(onSubmit)} noValidate>
-              <div className={styles.field}>
-                <label htmlFor="name">Имя</label>
-                <input id="name" type="text" required className={pageStyles.input} {...register('name')}/>
-                {errors.name && <span className={styles.error}>{errors.name.message}</span>}
-              </div>
+                <div className={styles.field}>
+                  <label htmlFor="email">Email</label>
+                  <input id="email" type="email" required className={pageStyles.input} {...register('email')}/>
+                  {errors.email && <span className={styles.error}>{errors.email.message}</span>}
+                </div>
 
-              <div className={styles.field}>
-                <label htmlFor="email">Email</label>
-                <input id="email" type="email" required className={pageStyles.input} {...register('email')}/>
-                {errors.email && <span className={styles.error}>{errors.email.message}</span>}
-              </div>
+                <div className={styles.field}>
+                  <label htmlFor="message">Сообщение</label>
+                  <textarea id="message" rows={5} required className={styles.textarea} {...register('message')}/>
+                  {errors.message && (<span className={styles.error}>{errors.message.message}</span>)}
+                </div>
 
-              <div className={styles.field}>
-                <label htmlFor="message">Сообщение</label>
-                <textarea id="message" rows={5} required className={styles.textarea} {...register('message')}/>
-                {errors.message && (<span className={styles.error}>{errors.message.message}</span>)}
-              </div>
-
-              <Button type="submit" disabled={isSubmitting} fullWidth size="lg">
-                {isSubmitting ? 'Отправка...' : 'Отправить сообщение'}
-              </Button>
-            </form>
+                <Button type="submit" disabled={isSubmitting} fullWidth size="lg">
+                  {isSubmitting ? 'Отправка...' : 'Отправить сообщение'}
+                </Button>
+              </form>
+            </Reveal>
           </div>
         </div>
       </div>

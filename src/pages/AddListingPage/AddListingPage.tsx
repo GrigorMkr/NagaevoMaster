@@ -4,6 +4,8 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { Button } from '@/components/ui/Button/Button';
 import { SERVICE_CATEGORIES } from '@/data/categories';
+import { getCategoryCover } from '@/data/mock/listingImages';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AddListingPage.module.css';
 const STEPS = [
@@ -28,16 +30,22 @@ function AddListingPage() {
         <div className="container">
           <PageHeader badge="Мастерам" title="Добавить объявление" subtitle="6 шагов — с модерацией перед публикацией"/>
 
-          <ol className={styles.steps}>
-            {STEPS.map((label, i) => (<li key={label} className={i === step ? styles.stepActive : i < step ? styles.stepDone : ''}>
-                {i + 1}. {label}
-              </li>))}
-          </ol>
+          <Reveal delay={60}>
+            <ol className={styles.steps}>
+              {STEPS.map((label, i) => (<li key={label} className={i === step ? styles.stepActive : i < step ? styles.stepDone : ''}>
+                  {i + 1}. {label}
+                </li>))}
+            </ol>
+          </Reveal>
 
-          <div className={styles.panel}>
-            {step === 0 && (<div className={styles.categoryGrid}>
+          <Reveal delay={100}>
+          <div className={styles.panel} key={step}>
+            {step === 0 && (<div className={`${styles.categoryGrid} motion-stagger`}>
                 {SERVICE_CATEGORIES.map((cat) => (<button key={cat.slug} type="button" className={category === cat.slug ? styles.categoryButtonActive : styles.categoryButton} onClick={() => setCategory(cat.slug)}>
-                    {cat.icon} {cat.name}
+                    <span className={styles.categoryThumb}>
+                      <img className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
+                    </span>
+                    <span className={styles.categoryName}>{cat.name}</span>
                   </button>))}
               </div>)}
 
@@ -64,6 +72,7 @@ function AddListingPage() {
                 Далее
               </Button>) : (<Button onClick={handlePublish}>Опубликовать</Button>)}
           </div>
+          </Reveal>
         </div>
       </div>
     </>);

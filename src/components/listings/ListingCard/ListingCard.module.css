@@ -28,11 +28,11 @@
 
 .card:hover {
 
-  transform: translateY(-3px);
+  transform: translateY(-5px);
 
   box-shadow: var(--shadow-card-hover);
 
-  border-color: rgba(23, 98, 74, 0.15);
+  border-color: rgba(126, 200, 168, 0.32);
 
 }
 

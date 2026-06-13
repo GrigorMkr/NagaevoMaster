@@ -148,7 +148,7 @@ function AuthPage() {
           </div>
 
           {activeTab === AuthTab.Login && (
-            <section className={styles.card}>
+            <section className={`${styles.card} ${styles.tabPanel}`} key="login">
               <h2 className="titleSection">Вход</h2>
               <form
                 className={styles.form}
@@ -193,7 +193,7 @@ function AuthPage() {
           )}
 
           {activeTab === AuthTab.Register && (
-            <section className={styles.card}>
+            <section className={`${styles.card} ${styles.tabPanel}`} key="register">
               <h2 className="titleSection">Регистрация</h2>
               <form
                 className={styles.form}
@@ -268,7 +268,7 @@ function AuthPage() {
           )}
 
           {activeTab === AuthTab.Recovery && (
-            <section className={styles.card}>
+            <section className={`${styles.card} ${styles.tabPanel}`} key="recovery">
               <h2 className="titleSection">Восстановление пароля</h2>
               <form
                 className={styles.form}

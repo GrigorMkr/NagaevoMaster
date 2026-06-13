@@ -9,6 +9,7 @@ import { FORUM_CATEGORIES } from '@/data/categories';
 import { getForumCategoryCover } from '@/data/mock/listingImages';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
 import { forumCategoryPath, forumTopicPath, ROUTES } from '@/utils/constants';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumPage.module.css';
 function ForumPage() {
@@ -27,21 +28,24 @@ function ForumPage() {
         <div className="container">
           <PageHeader badge="Сообщество" title="Форум Нагаево" subtitle="8 категорий — строительство, сантехника, спецтехника и общие вопросы"/>
 
-          <div className={styles.categoryGrid}>
-            {FORUM_CATEGORIES.map((cat) => (
-              <CategoryCard
-                key={cat.slug}
-                to={forumCategoryPath(cat.slug)}
-                icon={cat.icon}
-                name={cat.name}
-                cover={getForumCategoryCover(cat.slug)}
-                variant="tile"
-              />
-            ))}
-          </div>
+          <Reveal delay={80}>
+            <div className={`${styles.categoryGrid} motion-stagger`}>
+              {FORUM_CATEGORIES.map((cat) => (
+                <CategoryCard
+                  key={cat.slug}
+                  to={forumCategoryPath(cat.slug)}
+                  icon={cat.icon}
+                  name={cat.name}
+                  cover={getForumCategoryCover(cat.slug)}
+                  variant="tile"
+                />
+              ))}
+            </div>
+          </Reveal>
 
-          <h2 className={styles.sectionTitle}>Актуальные темы</h2>
-          <ul className={styles.list}>
+          <Reveal delay={120}>
+            <h2 className={styles.sectionTitle}>Актуальные темы</h2>
+            <ul className={`${styles.list} motion-stagger`}>
             {topics.map((topic) => (<li key={topic.id}>
                 <Link to={forumTopicPath(topic.id)} className={styles.topic}>
                   <span className={styles.topicTitle}>
@@ -61,6 +65,7 @@ function ForumPage() {
           <p className={pageStyles.emptyHint}>
             <Link to={ROUTES.AUTH}>Войдите</Link> чтобы создать новую тему
           </p>
+          </Reveal>
         </div>
       </div>
     </>);

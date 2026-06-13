@@ -33,29 +33,76 @@
   gap: 0.12rem;
 }
 
-.name {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-  color: var(--color-text);
+.name,
+.master {
+  background: linear-gradient(
+    105deg,
+    #0a3d2e 0%,
+    #17624a 8%,
+    #2d9a74 18%,
+    #7ec8a8 28%,
+    #fffdf5 36%,
+    #fde68a 44%,
+    #f0b429 52%,
+    #fff3c4 58%,
+    #e8a87c 66%,
+    #c0782a 74%,
+    #2d9a74 84%,
+    #17624a 92%,
+    #0a3d2e 100%
+  );
+  background-size: 420% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: logo-wordmark-flow 5.5s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(240, 180, 41, 0.18));
 }
 
 .master {
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-secondary);
 }
 
-.footer .name {
-  color: var(--color-text-on-dark);
+.name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
 }
 
+@keyframes logo-wordmark-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.footer .name,
 .footer .master {
-  color: var(--color-accent);
+  background: linear-gradient(
+    105deg,
+    #ffffff 0%,
+    #fff3c4 12%,
+    #fde68a 24%,
+    #f0b429 36%,
+    #7ec8a8 48%,
+    #ffffff 60%,
+    #fde68a 72%,
+    #f0b429 84%,
+    #ffffff 100%
+  );
+  background-size: 420% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 12px rgba(240, 180, 41, 0.22));
 }
 
 .footer .logomark {
@@ -83,6 +130,29 @@
   .logo:hover .logomark {
     animation: none;
     transform: rotate(-1deg) scale(1.02);
+  }
+
+  .name,
+  .master {
+    animation: none;
+    background: none;
+    color: var(--color-text);
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    filter: none;
+  }
+
+  .footer .name,
+  .footer .master {
+    background: none;
+    color: var(--color-text-on-dark);
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    filter: none;
+  }
+
+  .footer .master {
+    color: var(--color-accent);
   }
 }
 

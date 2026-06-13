@@ -2,6 +2,7 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ABOUT_IMAGES } from '@/data/aboutImages';
 import { APP_DESCRIPTION, APP_NAME, GEO } from '@/utils/constants';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AboutPage.module.css';
 
@@ -39,7 +40,8 @@ function AboutPage() {
             subtitle={APP_DESCRIPTION}
           />
 
-          <div className={styles.grid}>
+          <Reveal delay={80}>
+            <div className={`${styles.grid} motion-stagger`}>
             <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
@@ -144,6 +146,7 @@ function AboutPage() {
               </div>
             </article>
           </div>
+          </Reveal>
         </div>
       </div>
     </>

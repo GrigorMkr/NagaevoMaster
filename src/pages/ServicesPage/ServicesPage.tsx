@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchListingsThunk } from '@/features/listings/listingsThunks';
 import { selectListingsItems, selectListingsLoading } from '@/features/listings/listingsSelectors';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
+import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { servicesCategoryPath, searchPath, ROUTES } from '@/utils/constants';
@@ -45,36 +46,44 @@ function ServicesPage() {
         <div className="container">
           <PageHeader badge="Каталог" title="Услуги Нагаево" subtitle="9 категорий — от строительства до красоты и здоровья"/>
 
-          <form className={styles.searchForm} action={ECHO_FORM_ACTION} method="get" onSubmit={handleSubmit(onSubmit)}>
-            <label className="sr-only" htmlFor="services-search">
-              Поиск по каталогу
-            </label>
-            <input id="services-search" type="search" required placeholder="Поиск: ремонт, трактор, уборка..." className={pageStyles.input} {...register('search')}/>
-            <button type="submit" className={styles.searchButton}>Найти</button>
-          </form>
+          <Reveal delay={60}>
+            <form className={styles.searchForm} action={ECHO_FORM_ACTION} method="get" onSubmit={handleSubmit(onSubmit)}>
+              <label className="sr-only" htmlFor="services-search">
+                Поиск по каталогу
+              </label>
+              <input id="services-search" type="search" required placeholder="Поиск: ремонт, трактор, уборка..." className={pageStyles.input} {...register('search')}/>
+              <button type="submit" className={styles.searchButton}>Найти</button>
+            </form>
+          </Reveal>
 
-          <div className={styles.categoryGrid}>
-            {SERVICE_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name} cover={getCategoryCover(cat.slug)}/>))}
-          </div>
+          <Reveal delay={100}>
+            <div className={`${styles.categoryGrid} motion-stagger`}>
+              {SERVICE_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name} cover={getCategoryCover(cat.slug)}/>))}
+            </div>
+          </Reveal>
 
-          {isLoading && (<div className={styles.list}>
-              {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (<Skeleton key={i} variant="card"/>))}
-            </div>)}
-
-          {!isLoading && items.length > 0 && (<>
-              <h2 className={styles.listTitle}>Все объявления</h2>
+          {isLoading && (<Reveal delay={120}>
               <div className={styles.list}>
+                {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (<Skeleton key={i} variant="card"/>))}
+              </div>
+            </Reveal>)}
+
+          {!isLoading && items.length > 0 && (<Reveal delay={140}>
+              <h2 className={styles.listTitle}>Все объявления</h2>
+              <div className={`${styles.list} motion-stagger`}>
                 {items.map((listing) => (<ListingCard key={listing.id} listing={listing}/>))}
               </div>
-            </>)}
+            </Reveal>)}
 
-          {!isLoading && items.length === 0 && (<div className={pageStyles.empty}>
+          {!isLoading && items.length === 0 && (<Reveal delay={120}>
+              <div className={pageStyles.empty}>
               <span className={pageStyles.emptyIcon}>🔍</span>
               <p className={pageStyles.emptyTitle}>Каталог скоро наполнится</p>
               <p className={pageStyles.emptyHint}>
                 <Link to={ROUTES.ADD_LISTING}>Добавьте объявление</Link> или подключите backend API
               </p>
-            </div>)}
+            </div>
+          </Reveal>)}
         </div>
       </div>
     </>);

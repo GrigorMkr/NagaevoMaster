@@ -104,4 +104,5 @@ function useScrollRotation(
 
 export {
   useScrollRotation,
+  usePrefersReducedMotion,
 }

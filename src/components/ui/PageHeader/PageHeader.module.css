@@ -4,21 +4,35 @@
 
 .header .badge {
   margin-bottom: var(--spacing-lg);
+  animation: fadeInUp 0.7s var(--ease-out-expo) both;
 }
 
-.header .textMuted {
+.header :global(.titlePage) {
+  animation: fadeInUp 0.75s 0.08s var(--ease-out-expo) both;
+}
+
+.header :global(.textMuted) {
   margin-top: var(--spacing-lg);
   max-width: 640px;
   font-size: var(--font-size-xl);
   line-height: 1.75;
+  animation: fadeInUp 0.75s 0.16s var(--ease-out-expo) both;
 }
 
 @media (max-width: 640px) {
-  .header .titlePage {
+  .header :global(.titlePage) {
     font-size: var(--font-size-2xl);
   }
 
-  .header .textMuted {
+  .header :global(.textMuted) {
     font-size: var(--font-size-base);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header .badge,
+  .header :global(.titlePage),
+  .header :global(.textMuted) {
+    animation: none;
   }
 }

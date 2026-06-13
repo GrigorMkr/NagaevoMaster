@@ -11,8 +11,27 @@
   transform: translateY(0);
 }
 
+.revealStagger {
+  opacity: 1;
+  transform: none;
+}
+
+.staggerItem {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.72s var(--ease-out-expo),
+    transform 0.72s var(--ease-out-expo);
+}
+
+.revealStagger.visible .staggerItem {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal,
+  .staggerItem {
     opacity: 1;
     transform: none;
     transition: none;

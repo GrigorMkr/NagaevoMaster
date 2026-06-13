@@ -29,6 +29,7 @@ import {
 } from '@/constants/forms'
 import { ROUTES, serviceDetailPath } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errorMessage'
+import { Reveal } from '@/components/ui/Reveal/Reveal'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ServiceDetailPage.module.css'
 
@@ -91,11 +92,14 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
 
       <div className={pageStyles.page}>
         <div className="container">
-          <Link to={ROUTES.SERVICES} className={styles.back}>
-            ← Каталог услуг
-          </Link>
+          <Reveal delay={40}>
+            <Link to={ROUTES.SERVICES} className={styles.back}>
+              ← Каталог услуг
+            </Link>
+          </Reveal>
 
-          <article className={styles.card}>
+          <Reveal delay={80}>
+            <article className={styles.card}>
             <header className={styles.header}>
               <h1 className="titlePage">{listing.title}</h1>
               {listing.isVerified && <span className={styles.verified}>✓ Проверен</span>}
@@ -201,16 +205,19 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
               </Button>
             </div>
           </article>
+          </Reveal>
 
           {similarListings.length > 0 && (
-            <section className={styles.similar}>
-              <h2 className="titleSection">Похожие услуги</h2>
-              <div className={styles.similarGrid}>
-                {similarListings.map((item) => (
-                  <ListingCard key={item.id} listing={item} />
-                ))}
-              </div>
-            </section>
+            <Reveal delay={120}>
+              <section className={styles.similar}>
+                <h2 className="titleSection">Похожие услуги</h2>
+                <div className={`${styles.similarGrid} motion-stagger`}>
+                  {similarListings.map((item) => (
+                    <ListingCard key={item.id} listing={item} />
+                  ))}
+                </div>
+              </section>
+            </Reveal>
           )}
         </div>
       </div>
