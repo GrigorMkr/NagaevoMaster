@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
-import { CONTACT_EMAIL, GEO } from '@/utils/constants';
+import { CONTACT_EMAIL, GEO, APP_NAME } from '@/utils/constants';
 import { sendContactMessage } from '@/services/contactApi';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { VALIDATION } from '@/constants/validation';
@@ -32,7 +32,7 @@ function ContactPage() {
         }
     };
     return (<>
-      <PageMeta title="Контакты" description="Свяжитесь с администрацией NagaevoMaster."/>
+      <PageMeta title="Контакты" description={`Свяжитесь с администрацией ${APP_NAME}.`}/>
 
       <div className={pageStyles.page}>
         <div className="container">

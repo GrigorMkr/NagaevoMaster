@@ -4,6 +4,7 @@ import { Logo } from '@/components/ui/Logo/Logo';
 import { Button } from '@/components/ui/Button/Button';
 import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput';
 import { COMING_SOON_COPY, grantPreviewAccess } from '@/utils/siteAccess';
+import { APP_NAME } from '@/utils/constants';
 import styles from './ComingSoonPage.module.css';
 interface ComingSoonPageProps {
     onAccessGranted: () => void;
@@ -22,7 +23,7 @@ function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
         setError('Неверный ключ доступа');
     };
     return (<>
-      <PageMeta title="Скоро запуск" description="NagaevoMaster скоро откроется для жителей посёлка Нагаево." canonical="/"/>
+      <PageMeta title="Скоро запуск" description={`${APP_NAME} скоро откроется для жителей посёлка Нагаево.`} canonical="/"/>
 
       <main className={styles.page}>
         <div className={styles.card}>

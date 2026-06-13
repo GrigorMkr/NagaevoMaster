@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { APP_TITLE, SITE_URL } from '@/utils/constants';
+import { APP_NAME, APP_TITLE, SITE_URL } from '@/utils/constants';
 interface PageMetaProps {
     title?: string;
     description?: string;
@@ -9,7 +9,7 @@ interface PageMetaProps {
     ogType?: string;
 }
 function PageMeta({ title, description, keywords, image, canonical, ogType = 'website', }: PageMetaProps) {
-    const fullTitle = title ? `${title} | NagaevoMaster` : APP_TITLE;
+    const fullTitle = title ? `${title} | ${APP_NAME}` : APP_TITLE;
     const canonicalUrl = canonical ? `${SITE_URL}${canonical}` : undefined;
     return (<Helmet>
       <title>{fullTitle}</title>

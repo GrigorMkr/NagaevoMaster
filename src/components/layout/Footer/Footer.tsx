@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/Logo/Logo';
-import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO } from '@/constants';
+import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO, APP_NAME } from '@/constants';
 import styles from './Footer.module.css';
 const Footer = memo(function Footer() {
     const currentYear = new Date().getFullYear();
@@ -22,7 +22,7 @@ const Footer = memo(function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <span>© {currentYear} NagaevoMaster</span>
+          <span>© {currentYear} {APP_NAME}</span>
           <a href={`mailto:${CONTACT_EMAIL}`} className={styles.email}>
             {CONTACT_EMAIL}
           </a>

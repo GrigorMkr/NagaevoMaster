@@ -7,7 +7,7 @@ import { renderWithProviders } from '@/test/test-utils'
 describe('AboutPage', () => {
   it('renders mission and moderation sections', () => {
     renderWithProviders(createElement(AboutPage))
-    expect(screen.getByRole('heading', { name: /NagaevoMaster/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Нагаево Мастер/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Модерация' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Правила платформы' })).toBeInTheDocument()
   })

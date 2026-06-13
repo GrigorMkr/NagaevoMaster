@@ -1,6 +1,6 @@
 {
-  "name": "NagaevoMaster",
-  "short_name": "NagaevoMaster",
+  "name": "Нагаево Мастер",
+  "short_name": "Нагаево Мастер",
   "description": "Агрегатор услуг и форум для поселка Нагаево",
   "start_url": "./",
   "display": "standalone",

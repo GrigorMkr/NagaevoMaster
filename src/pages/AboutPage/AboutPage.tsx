@@ -1,7 +1,7 @@
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ABOUT_IMAGES } from '@/data/aboutImages';
-import { APP_DESCRIPTION, GEO } from '@/utils/constants';
+import { APP_DESCRIPTION, APP_NAME, GEO } from '@/utils/constants';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AboutPage.module.css';
 
@@ -35,12 +35,12 @@ function AboutPage() {
         <div className="container">
           <PageHeader
             badge="О нас"
-            title="О проекте NagaevoMaster"
+            title={`О проекте ${APP_NAME}`}
             subtitle={APP_DESCRIPTION}
           />
 
           <div className={styles.grid}>
-            <article className={styles.card}>
+            <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
                   className={styles.cardImage}
@@ -48,20 +48,20 @@ function AboutPage() {
                   alt="Целевая аудитория"
                   loading="lazy"
                 />
-              </div>
-              <div className={styles.cardBody}>
-                <h2>Целевая аудитория</h2>
-                <div className={styles.cardContent}>
-                  <ul>
-                    {audience.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
+                <div className={styles.cardPanel}>
+                  <h2>Целевая аудитория</h2>
+                  <div className={styles.cardContent}>
+                    <ul>
+                      {audience.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </article>
 
-            <article className={styles.card}>
+            <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
                   className={styles.cardImage}
@@ -69,20 +69,20 @@ function AboutPage() {
                   alt="География"
                   loading="lazy"
                 />
-              </div>
-              <div className={styles.cardBody}>
-                <h2>География</h2>
-                <div className={styles.cardContent}>
-                  <p>
-                    Поселок <strong>{GEO.settlement}</strong> и окрестности в радиусе{' '}
-                    <strong>{GEO.radiusKm} км</strong>. Мы объединяем местные услуги в одном
-                    удобном каталоге.
-                  </p>
+                <div className={styles.cardPanel}>
+                  <h2>География</h2>
+                  <div className={styles.cardContent}>
+                    <p>
+                      Поселок <strong>{GEO.settlement}</strong> и окрестности в радиусе{' '}
+                      <strong>{GEO.radiusKm} км</strong>. Мы объединяем местные услуги в одном
+                      удобном каталоге.
+                    </p>
+                  </div>
                 </div>
               </div>
             </article>
 
-            <article className={styles.card}>
+            <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
                   className={styles.cardImage}
@@ -90,19 +90,19 @@ function AboutPage() {
                   alt="Наша миссия"
                   loading="lazy"
                 />
-              </div>
-              <div className={styles.cardBody}>
-                <h2>Наша миссия</h2>
-                <div className={styles.cardContent}>
-                  <p>
-                    Сделать поиск специалистов и услуг в Нагаево простым, быстрым и надёжным —
-                    для жителей и для тех, кто предлагает свои услуги.
-                  </p>
+                <div className={styles.cardPanel}>
+                  <h2>Наша миссия</h2>
+                  <div className={styles.cardContent}>
+                    <p>
+                      Сделать поиск специалистов и услуг в Нагаево простым, быстрым и надёжным —
+                      для жителей и для тех, кто предлагает свои услуги.
+                    </p>
+                  </div>
                 </div>
               </div>
             </article>
 
-            <article className={styles.card}>
+            <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
                   className={styles.cardImage}
@@ -110,20 +110,20 @@ function AboutPage() {
                   alt="Правила платформы"
                   loading="lazy"
                 />
-              </div>
-              <div className={styles.cardBody}>
-                <h2>Правила платформы</h2>
-                <div className={styles.cardContent}>
-                  <ul>
-                    {platformRules.map((rule) => (
-                      <li key={rule}>{rule}</li>
-                    ))}
-                  </ul>
+                <div className={styles.cardPanel}>
+                  <h2>Правила платформы</h2>
+                  <div className={styles.cardContent}>
+                    <ul>
+                      {platformRules.map((rule) => (
+                        <li key={rule}>{rule}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </article>
 
-            <article className={styles.card}>
+            <article className={styles.card} tabIndex={0}>
               <div className={styles.cardMedia}>
                 <img
                   className={styles.cardImage}
@@ -131,15 +131,15 @@ function AboutPage() {
                   alt="Модерация"
                   loading="lazy"
                 />
-              </div>
-              <div className={styles.cardBody}>
-                <h2>Модерация</h2>
-                <div className={styles.cardContent}>
-                  <ul>
-                    {moderationRules.map((rule) => (
-                      <li key={rule}>{rule}</li>
-                    ))}
-                  </ul>
+                <div className={styles.cardPanel}>
+                  <h2>Модерация</h2>
+                  <div className={styles.cardContent}>
+                    <ul>
+                      {moderationRules.map((rule) => (
+                        <li key={rule}>{rule}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </article>
