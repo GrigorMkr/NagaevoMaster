@@ -37,7 +37,7 @@
 }
 
 .menuToggle {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
@@ -60,7 +60,10 @@
 
 .menuToggle span {
   display: block;
+  width: 100%;
+  min-width: 22px;
   height: 2px;
+  flex-shrink: 0;
   background-color: var(--color-text);
   border-radius: 1px;
   transition: transform var(--transition);
@@ -178,6 +181,28 @@
 @media (min-width: 1025px) {
   .menuToggle {
     display: none;
+  }
+
+  .nav {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .navList {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .navActionItem {
+    margin-left: var(--spacing-md);
+    margin-top: 0;
   }
 }
 

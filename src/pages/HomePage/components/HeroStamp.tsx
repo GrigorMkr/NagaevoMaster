@@ -1,5 +1,4 @@
 import { memo, useCallback, useRef, useState, type PointerEvent } from 'react';
-import { HERO_STAMP_SIZE } from '@/constants';
 import { LogoIcon } from '@/components/ui/Logo/LogoIcon';
 import { useScrollRotation } from '@/hooks/useScrollRotation';
 import styles from '../HomePage.module.css';
@@ -39,7 +38,7 @@ const HeroStamp = memo(function HeroStamp() {
       <div className={styles.heroStampRing} />
       <div className={styles.heroStampRingSecondary} />
       <div ref={innerRef} className={styles.heroStampInner}>
-        <LogoIcon size={HERO_STAMP_SIZE} className={styles.heroStampIcon} />
+        <LogoIcon fluid className={styles.heroStampIcon} />
       </div>
     </div>
   );

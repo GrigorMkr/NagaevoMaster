@@ -4,10 +4,16 @@ import { LOGO_ICON_SIZE_DEFAULT } from '@/constants';
 interface LogoIconProps {
   size?: number;
   className?: string;
+  fluid?: boolean;
   ariaHidden?: boolean;
 }
 
-function LogoIcon({ size = LOGO_ICON_SIZE_DEFAULT, className, ariaHidden = true }: LogoIconProps) {
+function LogoIcon({
+  size = LOGO_ICON_SIZE_DEFAULT,
+  className,
+  fluid = false,
+  ariaHidden = true,
+}: LogoIconProps) {
   const rawId = useId().replace(/:/g, '');
   const topArc = `${rawId}-top`;
   const bottomArc = `${rawId}-bottom`;
@@ -16,12 +22,13 @@ function LogoIcon({ size = LOGO_ICON_SIZE_DEFAULT, className, ariaHidden = true 
 
   return (
     <svg
-      width={size}
-      height={size}
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      width={fluid ? '100%' : size}
+      height={fluid ? '100%' : size}
+      preserveAspectRatio="xMidYMid meet"
       aria-hidden={ariaHidden}
     >
       <defs>
