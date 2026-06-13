@@ -6,6 +6,7 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { CategoryCard } from '@/components/categories/CategoryCard/CategoryCard';
 import { FORUM_CATEGORIES } from '@/data/categories';
+import { getForumCategoryCover } from '@/data/mock/listingImages';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
 import { forumCategoryPath, forumTopicPath, ROUTES } from '@/utils/constants';
 import pageStyles from '@/styles/page.module.css';
@@ -27,7 +28,16 @@ function ForumPage() {
           <PageHeader badge="Сообщество" title="Форум Нагаево" subtitle="8 категорий — строительство, сантехника, спецтехника и общие вопросы"/>
 
           <div className={styles.categoryGrid}>
-            {FORUM_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={forumCategoryPath(cat.slug)} icon={cat.icon} name={cat.name}/>))}
+            {FORUM_CATEGORIES.map((cat) => (
+              <CategoryCard
+                key={cat.slug}
+                to={forumCategoryPath(cat.slug)}
+                icon={cat.icon}
+                name={cat.name}
+                cover={getForumCategoryCover(cat.slug)}
+                variant="tile"
+              />
+            ))}
           </div>
 
           <h2 className={styles.sectionTitle}>Актуальные темы</h2>

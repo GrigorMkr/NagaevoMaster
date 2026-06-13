@@ -158,14 +158,33 @@ const CATEGORY_COVER_KEYS: Record<string, [string, string]> = {
   machinery: ['machinery', 'agri-machinery'],
   utility: ['utility', 'septic-service'],
   staff: ['staff', 'cleaners'],
-  logistics: ['logistics', 'country-move'],
   farming: ['farming', 'mowing'],
-  pro: ['pro', 'lawyers'],
   sales: ['sales', 'firewood-sales'],
   beauty: ['beauty', 'hairdresser'],
 };
 
+const CATEGORY_COVER_DIRECT: Record<string, string> = {
+  logistics: localImage('evacuator-1.jpg'),
+  pro: localImage('tutors-1.jpg'),
+};
+
+const FORUM_COVER_FILES: Record<string, string> = {
+  construction: 'construction-1.jpg',
+  plumbing: 'plumbers-1.jpg',
+  electric: 'electricians-1.jpg',
+  machinery: 'earthmoving-1.jpg',
+  septic: 'septic-service-1.jpg',
+  cleaning: 'waste-1.jpg',
+  beauty: 'beauty-1.jpg',
+  general: 'default-1.jpg',
+};
+
 function getCategoryCover(slug: string): string {
+  const direct = CATEGORY_COVER_DIRECT[slug];
+  if (direct) {
+    return direct;
+  }
+
   const keys = CATEGORY_COVER_KEYS[slug];
   if (!keys) {
     return DEFAULT_IMAGES[0]!;
@@ -174,7 +193,13 @@ function getCategoryCover(slug: string): string {
   return getListingImages(keys[0], keys[1], slug)[0] ?? DEFAULT_IMAGES[0]!;
 }
 
+function getForumCategoryCover(slug: string): string {
+  const file = FORUM_COVER_FILES[slug];
+  return file ? localImage(file) : DEFAULT_IMAGES[0]!;
+}
+
 export {
   getListingImages,
   getCategoryCover,
+  getForumCategoryCover,
 }

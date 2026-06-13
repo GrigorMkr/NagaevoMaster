@@ -6,11 +6,20 @@ const FeaturesSection = memo(function FeaturesSection() {
     return (<div className={styles.contentBlock}>
       <SectionHead badge="Преимущества" title="Почему NagaevoMaster?"/>
       <div className={styles.featureGrid}>
-        {HOME_FEATURES.map((feature) => (<article key={feature.title} className={styles.featureCard}>
-            <span className={styles.featureIcon}>{feature.icon}</span>
+        {HOME_FEATURES.map((feature) => (
+          <article key={feature.title} className={styles.featureCard}>
+            <div className={styles.featureMedia}>
+              <img
+                className={styles.featureImage}
+                src={feature.image}
+                alt=""
+                loading="lazy"
+              />
+            </div>
             <h3>{feature.title}</h3>
             <p>{feature.text}</p>
-          </article>))}
+          </article>
+        ))}
       </div>
     </div>);
 });
