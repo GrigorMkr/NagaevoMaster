@@ -18,6 +18,15 @@ const Header = memo(function Header() {
 
   return (
     <header className={styles.header}>
+      {menuOpen && (
+        <button
+          type="button"
+          className={styles.menuBackdrop}
+          onClick={closeMenu}
+          aria-label="Закрыть меню"
+        />
+      )}
+
       <div className={classNames('container', styles.inner)}>
         <Link to={ROUTES.HOME} className={styles.logoLink} onClick={closeMenu}>
           <Logo />

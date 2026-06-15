@@ -60,16 +60,6 @@ function LogoIcon({
           <stop offset="86%" stopColor="#c0782a" />
           <stop offset="94%" stopColor="#2d9a74" />
           <stop offset="100%" stopColor="#0a3d2e" />
-          {motionEnabled && (
-            <animateTransform
-              attributeName="gradientTransform"
-              type="rotate"
-              from="0 0.5 0.5"
-              to="360 0.5 0.5"
-              dur="4.5s"
-              repeatCount="indefinite"
-            />
-          )}
         </linearGradient>
         <filter id={textGlow} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="blur" />

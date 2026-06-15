@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ABOUT_IMAGES } from '@/data/aboutImages';
 import { APP_DESCRIPTION, APP_NAME, GEO } from '@/utils/constants';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { AboutCard } from './AboutCard';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AboutPage.module.css';
 
@@ -42,109 +43,44 @@ function AboutPage() {
 
           <Reveal delay={80}>
             <div className={`${styles.grid} motion-stagger`}>
-            <article className={styles.card} tabIndex={0}>
-              <div className={styles.cardMedia}>
-                <img
-                  className={styles.cardImage}
-                  src={ABOUT_IMAGES.audience}
-                  alt="Целевая аудитория"
-                  loading="lazy"
-                />
-                <div className={styles.cardPanel}>
-                  <h2>Целевая аудитория</h2>
-                  <div className={styles.cardContent}>
-                    <ul>
-                      {audience.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <AboutCard title="Целевая аудитория" image={ABOUT_IMAGES.audience} alt="Целевая аудитория">
+              <ul>
+                {audience.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </AboutCard>
 
-            <article className={styles.card} tabIndex={0}>
-              <div className={styles.cardMedia}>
-                <img
-                  className={styles.cardImage}
-                  src={ABOUT_IMAGES.geography}
-                  alt="География"
-                  loading="lazy"
-                />
-                <div className={styles.cardPanel}>
-                  <h2>География</h2>
-                  <div className={styles.cardContent}>
-                    <p>
-                      Поселок <strong>{GEO.settlement}</strong> и окрестности в радиусе{' '}
-                      <strong>{GEO.radiusKm} км</strong>. Мы объединяем местные услуги в одном
-                      удобном каталоге.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <AboutCard title="География" image={ABOUT_IMAGES.geography} alt="География">
+              <p>
+                Поселок <strong>{GEO.settlement}</strong> и окрестности в радиусе{' '}
+                <strong>{GEO.radiusKm} км</strong>. Мы объединяем местные услуги в одном
+                удобном каталоге.
+              </p>
+            </AboutCard>
 
-            <article className={styles.card} tabIndex={0}>
-              <div className={styles.cardMedia}>
-                <img
-                  className={styles.cardImage}
-                  src={ABOUT_IMAGES.mission}
-                  alt="Наша миссия"
-                  loading="lazy"
-                />
-                <div className={styles.cardPanel}>
-                  <h2>Наша миссия</h2>
-                  <div className={styles.cardContent}>
-                    <p>
-                      Сделать поиск специалистов и услуг в Нагаево простым, быстрым и надёжным —
-                      для жителей и для тех, кто предлагает свои услуги.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <AboutCard title="Наша миссия" image={ABOUT_IMAGES.mission} alt="Наша миссия">
+              <p>
+                Сделать поиск специалистов и услуг в Нагаево простым, быстрым и надёжным —
+                для жителей и для тех, кто предлагает свои услуги.
+              </p>
+            </AboutCard>
 
-            <article className={styles.card} tabIndex={0}>
-              <div className={styles.cardMedia}>
-                <img
-                  className={styles.cardImage}
-                  src={ABOUT_IMAGES.rules}
-                  alt="Правила платформы"
-                  loading="lazy"
-                />
-                <div className={styles.cardPanel}>
-                  <h2>Правила платформы</h2>
-                  <div className={styles.cardContent}>
-                    <ul>
-                      {platformRules.map((rule) => (
-                        <li key={rule}>{rule}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <AboutCard title="Правила платформы" image={ABOUT_IMAGES.rules} alt="Правила платформы">
+              <ul>
+                {platformRules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </AboutCard>
 
-            <article className={styles.card} tabIndex={0}>
-              <div className={styles.cardMedia}>
-                <img
-                  className={styles.cardImage}
-                  src={ABOUT_IMAGES.moderation}
-                  alt="Модерация"
-                  loading="lazy"
-                />
-                <div className={styles.cardPanel}>
-                  <h2>Модерация</h2>
-                  <div className={styles.cardContent}>
-                    <ul>
-                      {moderationRules.map((rule) => (
-                        <li key={rule}>{rule}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <AboutCard title="Модерация" image={ABOUT_IMAGES.moderation} alt="Модерация">
+              <ul>
+                {moderationRules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ul>
+            </AboutCard>
           </div>
           </Reveal>
         </div>

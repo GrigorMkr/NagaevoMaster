@@ -13,9 +13,11 @@
     0 2px 0 rgba(255, 255, 255, 0.35) inset;
   transform: rotate(-2deg);
   animation: stamp-idle 7s ease-in-out infinite;
+  -webkit-animation: stamp-idle 7s ease-in-out infinite;
   transition:
     box-shadow 0.35s var(--ease-out-expo),
     filter 0.35s var(--ease-out-expo);
+  will-change: transform;
 }
 
 .logo:hover .logomark {
@@ -159,5 +161,10 @@
 @media (max-width: 520px) {
   .logo:not(.footer) .wordmark {
     display: none;
+  }
+
+  .logo:not(.footer) .logomark {
+    animation: stamp-idle 7s ease-in-out infinite;
+    -webkit-animation: stamp-idle 7s ease-in-out infinite;
   }
 }

@@ -14,13 +14,15 @@
   box-shadow: var(--shadow-card);
   overflow: hidden;
   outline: none;
+  cursor: pointer;
   transition:
     border-color 0.35s var(--ease-out-expo),
     box-shadow 0.35s var(--ease-out-expo);
 }
 
 .card:hover,
-.card:focus-within {
+.card:focus-within,
+.cardExpanded {
   border-color: rgba(23, 98, 74, 0.24);
   box-shadow: var(--shadow-card-hover);
 }
@@ -42,7 +44,8 @@
 }
 
 .card:hover .cardImage,
-.card:focus-within .cardImage {
+.card:focus-within .cardImage,
+.cardExpanded .cardImage {
   transform: scale(1.02);
 }
 
@@ -68,7 +71,8 @@
 }
 
 .card:hover .cardPanel,
-.card:focus-within .cardPanel {
+.card:focus-within .cardPanel,
+.cardExpanded .cardPanel {
   inset: 0;
   transform: translateY(0);
   overflow-y: auto;
@@ -81,7 +85,8 @@
 }
 
 .card:hover .cardPanel::-webkit-scrollbar,
-.card:focus-within .cardPanel::-webkit-scrollbar {
+.card:focus-within .cardPanel::-webkit-scrollbar,
+.cardExpanded .cardPanel::-webkit-scrollbar {
   display: none;
 }
 
@@ -105,7 +110,8 @@
 }
 
 .card:hover .cardContent,
-.card:focus-within .cardContent {
+.card:focus-within .cardContent,
+.cardExpanded .cardContent {
   opacity: 1;
   overflow: visible;
 }
@@ -148,31 +154,8 @@
 }
 
 @media (max-width: 768px) {
-  .card {
-    aspect-ratio: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .cardMedia {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    flex-shrink: 0;
-  }
-
-  .cardPanel {
-    position: static;
-    inset: auto;
-    transform: none;
-    max-height: none;
-    overflow: visible;
-    background: transparent;
-    padding: var(--spacing-md) 0 0;
-  }
-
-  .cardContent {
-    opacity: 1;
-    overflow: visible;
+  .cardPanel h2 {
+    font-size: var(--font-size-base);
   }
 }
 
