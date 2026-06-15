@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import classNames from 'classnames';
 import styles from './AboutPage.module.css';
 
 interface AboutCardProps {
@@ -10,28 +11,15 @@ interface AboutCardProps {
 
 function AboutCard({ title, image, alt, children }: AboutCardProps) {
   const cardRef = useRef<HTMLElement>(null);
-  const expandedRef = useRef(false);
-  const expandedClassRef = useRef<string | null>(null);
+  const [expanded, setExpandedState] = useState(false);
 
   const setExpanded = useCallback((next: boolean) => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    expandedRef.current = next;
-    if (expandedClassRef.current) {
-      card.classList.remove(expandedClassRef.current);
-      expandedClassRef.current = null;
-    }
-
-    if (next) {
-      expandedClassRef.current = styles.cardExpanded;
-      card.classList.add(styles.cardExpanded);
-    }
+    setExpandedState(next);
   }, []);
 
   const toggleExpanded = useCallback(() => {
-    setExpanded(!expandedRef.current);
-  }, [setExpanded]);
+    setExpandedState((prev) => !prev);
+  }, []);
 
   useEffect(() => {
     const card = cardRef.current;
@@ -44,7 +32,7 @@ function AboutCard({ title, image, alt, children }: AboutCardProps) {
     };
 
     const onPointerDownOutside = (event: PointerEvent) => {
-      if (!expandedRef.current) return;
+      if (!expanded) return;
       if (card.contains(event.target as Node)) return;
       setExpanded(false);
     };
@@ -56,12 +44,12 @@ function AboutCard({ title, image, alt, children }: AboutCardProps) {
       card.removeEventListener('pointerdown', onCardPointerDown);
       document.removeEventListener('pointerdown', onPointerDownOutside);
     };
-  }, [setExpanded, toggleExpanded]);
+  }, [expanded, setExpanded, toggleExpanded]);
 
   return (
     <article
       ref={cardRef}
-      className={styles.card}
+      className={classNames(styles.card, expanded && styles.cardExpanded)}
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
