@@ -1,7 +1,6 @@
 import { useId } from 'react';
 import { LOGO_ICON_SIZE_DEFAULT } from '@/constants';
 import { usePrefersReducedMotion } from '@/hooks/useScrollRotation';
-import iconStyles from './LogoIcon.module.css';
 
 interface LogoIconProps {
   size?: number;
@@ -60,6 +59,16 @@ function LogoIcon({
           <stop offset="86%" stopColor="#c0782a" />
           <stop offset="94%" stopColor="#2d9a74" />
           <stop offset="100%" stopColor="#0a3d2e" />
+          {motionEnabled && (
+            <animateTransform
+              attributeName="gradientTransform"
+              type="rotate"
+              from="0 0.5 0.5"
+              to="360 0.5 0.5"
+              dur="4.5s"
+              repeatCount="indefinite"
+            />
+          )}
         </linearGradient>
         <filter id={textGlow} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="blur" />
@@ -104,10 +113,18 @@ function LogoIcon({
       <circle cx="78" cy="78" r="1" fill="#f0b429" opacity="0.7" />
       <circle cx="22" cy="22" r="1" fill="#f0b429" opacity="0.7" />
 
-      <g
-        className={motionEnabled ? iconStyles.textRings : undefined}
-        filter={motionEnabled ? `url(#${textGlow})` : undefined}
-      >
+      <g filter={motionEnabled ? `url(#${textGlow})` : undefined}>
+        {motionEnabled && (
+          <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            type="rotate"
+            from="0 50 50"
+            to="360 50 50"
+            dur="24s"
+            repeatCount="indefinite"
+          />
+        )}
         <text
           fontFamily="var(--font-ui), Manrope, system-ui, sans-serif"
           fontSize="7.2"

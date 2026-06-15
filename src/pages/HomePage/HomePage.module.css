@@ -163,6 +163,8 @@
   inset: 4%;
   border: 2px dashed rgba(126, 200, 168, 0.32);
   animation: stamp-orbit 24s linear infinite;
+  -webkit-animation: stamp-orbit 24s linear infinite;
+  will-change: transform;
 }
 
 .heroStampRing::before {
@@ -185,6 +187,8 @@
   border: 1.5px solid rgba(240, 180, 41, 0.22);
   border-style: double;
   animation: stamp-orbit-reverse 32s linear infinite;
+  -webkit-animation: stamp-orbit-reverse 32s linear infinite;
+  will-change: transform;
 }
 
 .heroStampRingTertiary {
@@ -192,6 +196,8 @@
   border: 1px dotted rgba(23, 98, 74, 0.35);
   opacity: 0.85;
   animation: stamp-orbit 40s linear infinite;
+  -webkit-animation: stamp-orbit 40s linear infinite;
+  will-change: transform;
 }
 
 .heroStampOrbit,
@@ -205,11 +211,15 @@
 .heroStampOrbit {
   inset: 6%;
   animation: stamp-orbit 20s linear infinite;
+  -webkit-animation: stamp-orbit 20s linear infinite;
+  will-change: transform;
 }
 
 .heroStampOrbitSecondary {
   inset: 12%;
   animation: stamp-orbit-reverse 28s linear infinite;
+  -webkit-animation: stamp-orbit-reverse 28s linear infinite;
+  will-change: transform;
 }
 
 .heroStampOrbit span,

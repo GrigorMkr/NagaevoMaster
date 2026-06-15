@@ -5,6 +5,7 @@
 }
 
 .logomark {
+  display: inline-flex;
   flex-shrink: 0;
   border-radius: 50%;
   box-shadow:
@@ -18,6 +19,11 @@
     box-shadow 0.35s var(--ease-out-expo),
     filter 0.35s var(--ease-out-expo);
   will-change: transform;
+}
+
+.logomark svg {
+  display: block;
+  border-radius: 50%;
 }
 
 .logo:hover .logomark {

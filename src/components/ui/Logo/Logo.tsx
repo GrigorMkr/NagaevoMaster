@@ -21,11 +21,12 @@ function Logo({ variant = 'default', className }: LogoProps) {
       role="img"
       aria-label={label}
     >
-      <LogoIcon
-        size={isFooter ? LOGO_ICON_SIZE_COMPACT : LOGO_ICON_SIZE_DEFAULT}
-        className={styles.logomark}
-        ariaHidden
-      />
+      <span className={styles.logomark}>
+        <LogoIcon
+          size={isFooter ? LOGO_ICON_SIZE_COMPACT : LOGO_ICON_SIZE_DEFAULT}
+          ariaHidden
+        />
+      </span>
       {!isIconOnly && (
         <span className={styles.wordmark} aria-hidden="true">
           <span className={styles.name}>Нагаево</span>
