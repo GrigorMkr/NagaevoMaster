@@ -33,8 +33,6 @@ jobs:
       - name: Build
         env:
           VITE_USE_MOCK_FALLBACK: 'true'
-          VITE_SITE_CLOSED: 'true'
-          VITE_PREVIEW_ACCESS_KEY: 'nagaevo-preview'
         run: npm run build
 
       - name: Upload artifact
