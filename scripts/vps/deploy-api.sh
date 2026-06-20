@@ -32,7 +32,14 @@ fi
 mkdir -p uploads
 
 echo "==> PM2"
-pm2 startOrRestart "${APP_DIR}/deploy/pm2.ecosystem.cjs" --update-env
+if pm2 describe nagaevomaster-api >/dev/null 2>&1; then
+  pm2 restart nagaevomaster-api --update-env
+else
+  pm2 start dist/index.js \
+    --name nagaevomaster-api \
+    --cwd "${BACKEND_DIR}" \
+    --max-memory-restart 400M
+fi
 pm2 save
 pm2 startup systemd -u root --hp /root 2>/dev/null || true
 

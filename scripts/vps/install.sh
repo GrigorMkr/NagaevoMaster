@@ -14,8 +14,11 @@ fi
 
 echo "==> Обновление пакетов"
 export DEBIAN_FRONTEND=noninteractive
+export UCF_FORCE_CONFOLD=1
 apt-get update -y
-apt-get upgrade -y
+dpkg --configure -a || true
+apt-get -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -f install -y || true
+apt-get -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold upgrade -y || true
 apt-get install -y curl git nginx postgresql postgresql-contrib certbot python3-certbot-nginx ufw
 
 echo "==> Node.js 20"

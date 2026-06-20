@@ -1,0 +1,43 @@
+.favorite {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: rgba(8, 31, 24, 0.72);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition);
+}
+
+.favorite:hover {
+  transform: scale(1.06);
+  background: rgba(8, 31, 24, 0.9);
+}
+
+.favoriteActive {
+  color: #f0b429;
+  border-color: rgba(240, 180, 41, 0.45);
+}
+
+.favorite:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.inline {
+  position: static;
+  background: var(--color-bg-warm);
+  color: var(--color-text);
+}
+
+.inline.favoriteActive {
+  color: #b8860b;
+}

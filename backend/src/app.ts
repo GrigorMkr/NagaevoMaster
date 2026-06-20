@@ -13,6 +13,8 @@ import { contactRouter } from './routes/contact.js';
 import { uploadsRouter } from './routes/uploads.js';
 import { usersRouter } from './routes/users.js';
 import { reportsRouter } from './routes/reports.js';
+import { notificationsRouter } from './routes/notifications.js';
+import { moderationRouter } from './routes/moderation.js';
 function createApp() {
     const app = express();
     app.set('trust proxy', 1);
@@ -31,6 +33,8 @@ function createApp() {
     app.use('/api/listings/:listingId/reviews', reviewsRouter);
     app.use('/api/listings/:listingId/report', reportsRouter);
     app.use('/api/favorites', favoritesRouter);
+    app.use('/api/notifications', notificationsRouter);
+    app.use('/api/moderation', moderationRouter);
     app.use('/api/forum', forumRouter);
     app.use('/api/contact', contactRouter);
     app.use('/api/uploads', uploadsRouter);

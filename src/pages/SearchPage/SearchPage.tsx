@@ -9,6 +9,7 @@ import { selectSearchParams } from '@/features/filters/filtersSelectors';
 import { fetchListingsThunk } from '@/features/listings/listingsThunks';
 import { selectListingsItems, selectListingsLoading } from '@/features/listings/listingsSelectors';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
+import { GEO, savePendingSearchQuery } from '@/constants';
 import { SortBy } from '@/enums/sort';
 import type { DistanceFilter, RatingFilter } from '@/types/search';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
@@ -79,12 +80,16 @@ function SearchPage() {
     }, [filters]);
     const handleSearch = useCallback((event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        if (filters.query.trim()) {
+            savePendingSearchQuery(filters.query);
+        }
         if (accountLocation && filters.query.trim()) {
             dispatch(setSearchParams({ sortBy: SortBy.Distance }));
         }
         const params = buildUrlParams();
         if (accountLocation && filters.query.trim()) {
             params.sortBy = SortBy.Distance;
+            params.distance = String(GEO.radiusKm);
         }
         setUrlParams(params);
     }, [accountLocation, buildUrlParams, dispatch, filters.query, setUrlParams]);
@@ -137,7 +142,11 @@ function SearchPage() {
 
           {!isLoading && filters.query && (
             <Reveal delay={140}>
-              <SearchMapSection listings={items ?? []} userLocation={accountLocation}/>
+              <SearchMapSection
+                listings={items ?? []}
+                userLocation={accountLocation}
+                query={filters.query}
+              />
             </Reveal>
           )}
 

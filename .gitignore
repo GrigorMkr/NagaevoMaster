@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env.production
 deploy.env
+deploy/regru.env
+deploy/notify.env
+deploy/ssl-local/
 hosting.reg.ru.env
 nagaevo-hosting.zip
 src/assets/fonts/loos-temp/

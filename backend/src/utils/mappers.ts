@@ -54,6 +54,7 @@ function toListingResponse(listing: Listing, user?: Pick<User, 'id' | 'name' | '
         },
         phone: listing.phone,
         isVerified: listing.isVerified,
+        status: listing.status,
         createdAt: listing.createdAt.toISOString(),
         updatedAt: listing.updatedAt.toISOString(),
         author: user ? toListingAuthor(user) : undefined,

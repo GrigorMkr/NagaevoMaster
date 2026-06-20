@@ -2,21 +2,31 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Listing } from '@/types/listing';
 import { serviceDetailPath } from '@/constants';
+import { FavoriteButton } from '@/components/listings/FavoriteButton/FavoriteButton';
 import { ListingAuthorRow } from '@/components/listings/ListingAuthorRow/ListingAuthorRow';
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import styles from './ListingCard.module.css';
 
 interface ListingCardProps {
   listing: Listing;
+  preview?: boolean;
+  showFavorite?: boolean;
 }
 
-const ListingCard = memo(function ListingCard({ listing }: ListingCardProps) {
+const ListingCard = memo(function ListingCard({
+  listing,
+  preview = false,
+  showFavorite = true,
+}: ListingCardProps) {
   const coverImage = listing.images[0];
 
-  return (
-    <Link to={serviceDetailPath(listing.id)} data-ui="card" className={styles.card}>
+  const content = (
+    <>
       {coverImage && (
         <div className={styles.media}>
+          {showFavorite && !preview && (
+            <FavoriteButton listingId={listing.id} />
+          )}
           <ListingPhoto
             className={styles.cover}
             src={coverImage}
@@ -45,6 +55,20 @@ const ListingCard = memo(function ListingCard({ listing }: ListingCardProps) {
           <span>{listing.location.address}</span>
         </div>
       </div>
+    </>
+  );
+
+  if (preview) {
+    return (
+      <article data-ui="card" className={styles.card}>
+        {content}
+      </article>
+    );
+  }
+
+  return (
+    <Link to={serviceDetailPath(listing.id)} data-ui="card" className={styles.card}>
+      {content}
     </Link>
   );
 });

@@ -40,8 +40,56 @@ async function sendVerificationEmail(to: string, code: string): Promise<void> {
     text,
     html,
   });
+  console.log(`[email] sent to ${to}`);
+}
+
+async function sendModeratorNewListingEmail(params: {
+  listingTitle: string;
+  authorName: string;
+  listingId: string;
+}): Promise<void> {
+  const to = env.MODERATOR_NOTIFY_EMAIL;
+  if (!to) {
+    return;
+  }
+
+  const subject = `Новое объявление на модерации — ${params.listingTitle}`;
+  const profileUrl = `${env.SITE_URL}/profile`;
+  const text = [
+    'На сайте Нагаево Мастер добавлено новое объявление.',
+    '',
+    `Заголовок: ${params.listingTitle}`,
+    `Автор: ${params.authorName}`,
+    `ID: ${params.listingId}`,
+    '',
+    `Откройте панель модерации: ${profileUrl}`,
+  ].join('\n');
+  const html = `
+    <p>На сайте <strong>Нагаево Мастер</strong> добавлено новое объявление.</p>
+    <ul>
+      <li><strong>Заголовок:</strong> ${params.listingTitle}</li>
+      <li><strong>Автор:</strong> ${params.authorName}</li>
+    </ul>
+    <p><a href="${profileUrl}">Открыть панель модерации</a></p>
+  `;
+
+  const mailer = getTransporter();
+  if (!mailer) {
+    console.log(`[email:moderator] ${to}: new listing "${params.listingTitle}"`);
+    return;
+  }
+
+  await mailer.sendMail({
+    from: env.SMTP_FROM,
+    to,
+    subject,
+    text,
+    html,
+  });
+  console.log(`[email:moderator] new listing notice sent to ${to}`);
 }
 
 export {
   sendVerificationEmail,
+  sendModeratorNewListingEmail,
 }

@@ -2,6 +2,8 @@ import type { User } from './user';
 
 type PriceUnit = 'час' | 'день' | 'м²' | 'услуга' | 'шт';
 
+type ListingStatus = 'pending' | 'published' | 'rejected';
+
 interface ListingLocation {
   lat: number;
   lng: number;
@@ -31,6 +33,7 @@ interface Listing {
   location: ListingLocation;
   phone: string;
   isVerified: boolean;
+  status?: ListingStatus;
   createdAt: string;
   updatedAt: string;
   author?: ListingAuthor;
@@ -53,6 +56,7 @@ interface ListingWithUser extends Listing {
 
 export type {
   PriceUnit,
+  ListingStatus,
   ListingLocation,
   ListingAuthor,
   Listing,

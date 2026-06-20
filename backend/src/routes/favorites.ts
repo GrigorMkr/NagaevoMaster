@@ -2,8 +2,17 @@ import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { toListingResponse } from '../utils/mappers.js';
 import { routeParam } from '../utils/params.js';
 const favoritesRouter = Router();
+const listingUserSelect = {
+    select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+    },
+} as const;
 favoritesRouter.get('/', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const favorites = await prisma.favorite.findMany({
@@ -11,6 +20,23 @@ favoritesRouter.get('/', requireAuth, async (req: AuthRequest, res, next) => {
             select: { listingId: true },
         });
         res.json(favorites.map((item) => item.listingId));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+favoritesRouter.get('/listings', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        const favorites = await prisma.favorite.findMany({
+            where: { userId: req.user!.id },
+            include: {
+                listing: { include: { user: listingUserSelect } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        res.json(favorites
+            .map((item) => toListingResponse(item.listing, item.listing.user))
+            .filter((listing) => listing.status === 'published'));
     }
     catch (error) {
         next(error);

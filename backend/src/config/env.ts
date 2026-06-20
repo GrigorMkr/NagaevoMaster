@@ -28,6 +28,8 @@ const env = {
   SMTP_PASS: process.env.SMTP_PASS,
   SMTP_FROM: process.env.SMTP_FROM,
   SMS_RU_API_ID: process.env.SMS_RU_API_ID,
+  MODERATOR_NOTIFY_EMAIL: process.env.MODERATOR_NOTIFY_EMAIL ?? 'Grom666e@gmail.com',
+  SITE_URL: process.env.SITE_URL ?? 'https://nagaevomaster.ru',
 };
 
 export {

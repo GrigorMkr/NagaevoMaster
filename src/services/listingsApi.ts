@@ -1,4 +1,4 @@
-import type { Listing } from '@/types/listing';
+import type { Listing, ListingStatus, PriceUnit } from '@/types/listing';
 import type { SearchParams } from '@/types/search';
 import { DEGREES_IN_SEMICIRCLE, EARTH_RADIUS_KM } from '@/constants/geo';
 import { NAGAEVO_CENTER } from '@/constants/geo-data';
@@ -6,8 +6,13 @@ import { MOCK_LISTINGS } from '@/data/mockListings';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { SortBy } from '@/enums/sort';
 import { enrichListing, enrichListings } from '@/utils/listingEnrich';
+import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
+import {
+  fetchModerationListings,
+  moderateListingStatus,
+} from './moderationApi';
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const toRadians = (value: number) => (value * Math.PI) / DEGREES_IN_SEMICIRCLE;
     const deltaLat = toRadians(lat2 - lat1);
@@ -138,12 +143,63 @@ async function fetchListingById(id: string): Promise<Listing | null> {
     }
 }
 
+interface CreateListingPayload {
+    category: string;
+    subcategory: string;
+    title: string;
+    description: string;
+    priceFrom: number;
+    unit: PriceUnit;
+    phone: string;
+    location: { lat: number; lng: number; address: string };
+    imageIds?: string[];
+}
+
+async function uploadListingImage(file: File): Promise<string> {
+    const form = new FormData();
+    form.append('file', file);
+    const response = await api.post<{ id: string; url: string }>('/uploads', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return resolveUploadUrl(response.data.url);
+}
+
+async function createListing(payload: CreateListingPayload): Promise<Listing> {
+    const response = await api.post<Listing>('/listings', payload);
+    return enrichListing(response.data);
+}
+
+async function fetchPendingListings(): Promise<Listing[]> {
+    try {
+        return await fetchModerationListings('pending');
+    }
+    catch {
+        const response = await api.get<Listing[]>('/listings/moderation/pending');
+        return enrichListings(asArray<Listing>(response.data));
+    }
+}
+
+async function moderateListing(id: string, status: Extract<ListingStatus, 'published' | 'rejected'>): Promise<Listing> {
+    try {
+        return await moderateListingStatus(id, status);
+    }
+    catch {
+        const response = await api.patch<Listing>(`/listings/${id}/status`, { status });
+        return enrichListing(response.data);
+    }
+}
+
 export {
   fetchListings,
   fetchListingById,
   fetchMyListings,
+  uploadListingImage,
+  createListing,
+  fetchPendingListings,
+  moderateListing,
 }
 
 export type {
   ListingsResponse,
+  CreateListingPayload,
 }

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { USER_LOCATION_STORAGE_KEY } from '@/constants';
+import { GEOLOCATION_MAX_AGE_MS, GEOLOCATION_TIMEOUT_MS, USER_LOCATION_STORAGE_KEY, } from '@/constants';
 import { clearAccountLocation, setAccountLocation, setLocating, } from '@/features/user/userSlice';
 import type { AccountLocation } from '@/types/location';
 function saveLocation(location: AccountLocation) {
@@ -28,9 +28,13 @@ function useAccountLocation() {
     const dispatch = useAppDispatch();
     const accountLocation = useAppSelector((state) => state.user.accountLocation);
     const isLocating = useAppSelector((state) => state.user.isLocating);
-    const detectLocation = useCallback(() => {
+
+    const detectLocationAsync = useCallback((options?: { silent?: boolean }) => new Promise<AccountLocation | null>((resolve) => {
         if (!navigator.geolocation) {
-            toast.error('Геолокация не поддерживается в этом браузере');
+            if (!options?.silent) {
+                toast.error('Геолокация не поддерживается в этом браузере');
+            }
+            resolve(null);
             return;
         }
         dispatch(setLocating(true));
@@ -43,12 +47,26 @@ function useAccountLocation() {
             };
             saveLocation(location);
             dispatch(setAccountLocation(location));
-            toast.success('Местоположение определено');
+            if (!options?.silent) {
+                toast.success('Местоположение определено');
+            }
+            resolve(location);
         }, () => {
             dispatch(setLocating(false));
-            toast.error('Не удалось определить местоположение');
-        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
-    }, [dispatch]);
+            if (!options?.silent) {
+                toast.error('Не удалось определить местоположение');
+            }
+            resolve(null);
+        }, {
+            enableHighAccuracy: true,
+            timeout: GEOLOCATION_TIMEOUT_MS,
+            maximumAge: GEOLOCATION_MAX_AGE_MS,
+        });
+    }), [dispatch]);
+
+    const detectLocation = useCallback(() => {
+        void detectLocationAsync();
+    }, [detectLocationAsync]);
     const resetLocation = useCallback(() => {
         removeStoredLocation();
         dispatch(clearAccountLocation());
@@ -58,6 +76,7 @@ function useAccountLocation() {
         accountLocation,
         isLocating,
         detectLocation,
+        detectLocationAsync,
         resetLocation,
     };
 }

@@ -102,11 +102,135 @@
   letter-spacing: -0.02em;
 }
 
-.subcategoryTag {
-  padding: 0.4rem 0.9rem;
+.subcategoryTag,
+.subcategoryActive {
+  padding: 0.5rem 1rem;
   font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
   background: var(--color-bg-warm);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.subcategoryActive {
+  background: var(--color-button-active-bg);
+  border-color: var(--color-button-active-border);
+  color: var(--color-button-active-text);
+}
+
+.subcategoryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.formStack {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: grid;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.textarea,
+.select {
+  padding: 0.9rem 1.125rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: rgba(8, 31, 24, 0.55);
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-mint);
+  box-shadow: 0 0 0 4px rgba(126, 200, 168, 0.18);
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.photoThumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.photoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
   border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.previewBlock {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.editLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.publishInfo {
+  display: grid;
+  gap: var(--spacing-md);
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.publishInfo ul {
+  margin: 0;
+  padding-left: 1.25rem;
 }
 
 .upload {

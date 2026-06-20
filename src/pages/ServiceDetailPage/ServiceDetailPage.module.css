@@ -21,6 +21,14 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+}
+
 .verified {
   padding: 0.35rem 0.75rem;
   font-size: var(--font-size-sm);

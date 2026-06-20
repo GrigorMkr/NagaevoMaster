@@ -22,10 +22,19 @@ async function sendVerificationSms(phone: string, code: string): Promise<void> {
     throw new Error('Не удалось отправить SMS');
   }
 
-  const body = await response.json() as { status?: string; status_code?: number };
-  if (body.status !== 'OK' && body.status_code !== 100) {
-    throw new Error('Сервис SMS вернул ошибку');
+  const body = await response.json() as {
+    status?: string;
+    status_code?: number;
+    status_text?: string;
+  };
+
+  if (body.status === 'OK' && body.status_code === 100) {
+    return;
   }
+
+  const detail = body.status_text ?? `код ${body.status_code ?? 'unknown'}`;
+  console.error('[sms.ru]', body);
+  throw new Error(`SMS не отправлено: ${detail}`);
 }
 
 export {

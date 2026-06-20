@@ -23,7 +23,11 @@
     "images:listings:local": "node scripts/generate-listing-placeholders.mjs",
     "images:listings:prune": "node scripts/prune-listing-duplicates.mjs",
     "images:listings:verify": "node scripts/verify-listing-images.mjs",
-    "images:listings:landscapes": "node scripts/copy-listing-images.mjs"
+    "images:listings:landscapes": "node scripts/copy-listing-images.mjs",
+    "vps:ssh-setup": "node scripts/vps/setup-ssh-key.mjs",
+    "vps:install": "node scripts/vps/remote-install.mjs",
+    "vps:notify": "node scripts/vps/apply-notify-env.mjs",
+    "vps:notify:test": "node scripts/vps/test-notify.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

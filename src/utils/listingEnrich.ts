@@ -2,11 +2,13 @@ import { getListingAuthor } from '@/data/mock/listingAuthors';
 import { getListingImages } from '@/data/mock/listingImages';
 import type { Listing } from '@/types/listing';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
+import { resolveUploadUrl } from '@/utils/mediaUrl';
 
 function enrichListing(listing: Listing): Listing {
-  const hasImages = listing.images.some((image) => typeof image === 'string' && image.trim().length > 0);
+  const resolvedImages = listing.images.map((image) => resolveUploadUrl(image));
+  const hasImages = resolvedImages.some((image) => typeof image === 'string' && image.trim().length > 0);
   const images = hasImages
-    ? listing.images
+    ? resolvedImages
     : getListingImages(listing.category, listing.subcategory, listing.id);
 
   const author = listing.author

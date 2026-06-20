@@ -6,9 +6,11 @@ import type { User } from '@/types/user';
 import { Button } from '@/components/ui/Button/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
+import { MAX_AVATAR_BYTES, resizeImageForAvatar } from '@/utils/resizeImage';
 import { updateProfile } from '@/services/usersApi';
 import { uploadImage } from '@/services/uploadsApi';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
+import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { getErrorMessage } from '@/utils/errorMessage';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ProfileSettingsForm.module.css';
@@ -17,17 +19,31 @@ interface ProfileSettingsFormProps {
   user: User;
 }
 
+function resolveAvatarDisplay(url: string): string {
+  return resolveUploadUrl(url);
+}
+
 function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   const dispatch = useAppDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone ?? '');
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? buildAvatarUrl(user.name, user.email));
+  const [avatarUrl, setAvatarUrl] = useState(
+    user.avatarUrl ? resolveAvatarDisplay(user.avatarUrl) : buildAvatarUrl(user.name, user.email),
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleAvatarPick = () => {
     fileInputRef.current?.click();
+  };
+
+  const persistAvatar = async (nextAvatarUrl: string) => {
+    const updatedUser = await updateProfile({ avatarUrl: nextAvatarUrl });
+    dispatch(setUser(updatedUser));
+    setAvatarUrl(updatedUser.avatarUrl
+      ? resolveAvatarDisplay(updatedUser.avatarUrl)
+      : buildAvatarUrl(updatedUser.name, updatedUser.email));
   };
 
   const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -39,19 +55,23 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
     setIsUploading(true);
 
     try {
+      const resized = await resizeImageForAvatar(file);
+      let storedUrl: string;
+
       if (!USE_MOCK_FALLBACK) {
-        const uploaded = await uploadImage(file);
-        setAvatarUrl(uploaded.url);
+        const uploaded = await uploadImage(resized);
+        storedUrl = uploaded.url;
       } else {
         const reader = new FileReader();
-        const dataUrl = await new Promise<string>((resolve, reject) => {
+        storedUrl = await new Promise<string>((resolve, reject) => {
           reader.onload = () => resolve(String(reader.result));
           reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(resized);
         });
-        setAvatarUrl(dataUrl);
       }
-      toast.success('Аватар обновлён');
+
+      await persistAvatar(storedUrl);
+      toast.success('Аватар сохранён');
     } catch (error) {
       toast.error(getErrorMessage(error, 'Не удалось загрузить аватар'));
     } finally {
@@ -68,7 +88,6 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
       const updatedUser = await updateProfile({
         name: name.trim(),
         phone: phone.trim(),
-        avatarUrl,
       });
       dispatch(setUser(updatedUser));
       toast.success('Профиль сохранён');
@@ -78,6 +97,8 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
       setIsSaving(false);
     }
   };
+
+  const maxKb = Math.round(MAX_AVATAR_BYTES / 1024);
 
   return (
     <section className={styles.card} aria-labelledby="profile-settings-title">
@@ -93,14 +114,14 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               className="sr-only"
               onChange={handleAvatarChange}
             />
             <Button type="button" variant="outline" size="sm" onClick={handleAvatarPick} loading={isUploading}>
               Сменить аватар
             </Button>
-            <p className={styles.hint}>JPG или PNG, до 5 МБ</p>
+            <p className={styles.hint}>JPG или PNG, до {maxKb} КБ после сжатия</p>
           </div>
         </div>
 

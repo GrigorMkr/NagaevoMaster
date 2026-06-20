@@ -95,6 +95,12 @@ npm run deploy:hosting
 
 ISPmanager → WWW-домены → ваш домен → Let's Encrypt.
 
+Подробнее для **DomainSSL (GlobalSign)**: [`deploy/HOSTING-SSL.md`](deploy/HOSTING-SSL.md)
+
+```powershell
+node scripts/prepare-hosting-ssl.mjs   # собрать .crt/.key для панели
+```
+
 ### 4. Backend (VPS REG.RU)
 
 На виртуальном хостинге Node.js не запускается. API разворачивается на **VPS REG.RU**:
@@ -105,6 +111,8 @@ curl -fsSL https://raw.githubusercontent.com/GrigorMkr/NagaevoMaster/main/script
 ```
 
 Полная инструкция: [`deploy/VPS-REG.RU.md`](deploy/VPS-REG.RU.md)
+
+**Email/SMS при регистрации:** [`deploy/NOTIFY.md`](deploy/NOTIFY.md)
 
 После запуска API пересоберите фронт: `npm run build:hosting && npm run deploy:hosting`
 

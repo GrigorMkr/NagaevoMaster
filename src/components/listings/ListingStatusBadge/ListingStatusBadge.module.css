@@ -1,0 +1,29 @@
+.listingWrap {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
+.statusBadge {
+  width: fit-content;
+  padding: 0.2rem 0.65rem;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-full);
+}
+
+.pending {
+  background: rgba(240, 180, 41, 0.2);
+  color: #b8860b;
+}
+
+.published {
+  background: rgba(126, 200, 168, 0.25);
+  color: var(--color-mint-dark, #2d6a4f);
+}
+
+.rejected {
+  background: rgba(220, 80, 80, 0.15);
+  color: #c0392b;
+}

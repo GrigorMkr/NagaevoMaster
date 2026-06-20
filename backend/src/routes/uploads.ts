@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024, files: 10 },
+    limits: { fileSize: 2 * 1024 * 1024, files: 1 },
     fileFilter: (_req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) {
             cb(new HttpError(400, 'Можно загружать только изображения'));

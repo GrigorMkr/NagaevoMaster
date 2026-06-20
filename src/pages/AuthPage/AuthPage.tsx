@@ -24,6 +24,7 @@ import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput'
 import { Spinner } from '@/components/ui/Spinner/Spinner'
 import { ECHO_FORM_ACTION } from '@/constants/forms'
 import { VALIDATION } from '@/constants/validation'
+import { requestLocationPromptAfterAuth } from '@/constants/user-location'
 import pageStyles from '@/styles/page.module.css'
 import styles from './AuthPage.module.css'
 
@@ -125,6 +126,7 @@ function AuthPage() {
       const response = await loginRequest(data.user, data.password)
       saveAuthToken(response.token)
       dispatch(setUser(response.user))
+      requestLocationPromptAfterAuth()
       toast.success(`Добро пожаловать, ${response.user.name}!`)
     } catch (error) {
       toast.error(getErrorMessage(error, 'Ошибка входа'))
@@ -164,6 +166,7 @@ function AuthPage() {
       )
       saveAuthToken(response.token)
       dispatch(setUser(response.user))
+      requestLocationPromptAfterAuth()
       resetRegisterFlow()
       toast.success('Регистрация подтверждена')
     } catch (error) {

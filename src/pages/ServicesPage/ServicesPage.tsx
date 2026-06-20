@@ -17,6 +17,7 @@ import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { servicesCategoryPath, searchPath, ROUTES } from '@/utils/constants';
+import { savePendingSearchQuery } from '@/constants/user-location';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ServicesPage.module.css';
 const searchSchema = z.object({
@@ -37,7 +38,11 @@ function ServicesPage() {
         dispatch(fetchListingsThunk({}));
     }, [dispatch]);
     const onSubmit = (data: SearchFormData) => {
-        navigate(searchPath(data.search ?? ''));
+        const query = data.search ?? '';
+        if (query.trim()) {
+            savePendingSearchQuery(query);
+        }
+        navigate(searchPath(query));
     };
     return (<>
       <PageMeta title="Услуги" description="Каталог услуг и специалистов в поселке Нагаево и окрестностях." canonical="/services"/>

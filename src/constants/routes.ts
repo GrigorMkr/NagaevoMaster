@@ -33,6 +33,8 @@ function forumTopicPath(id: string): string {
 function searchPath(query?: string, filters?: {
     category?: string;
     subcategory?: string;
+    sortBy?: string;
+    distance?: number;
 }): string {
     const params = new URLSearchParams();
     if (query)
@@ -41,6 +43,10 @@ function searchPath(query?: string, filters?: {
         params.set('category', filters.category);
     if (filters?.subcategory)
         params.set('subcategory', filters.subcategory);
+    if (filters?.sortBy)
+        params.set('sortBy', filters.sortBy);
+    if (filters?.distance != null)
+        params.set('distance', String(filters.distance));
     const qs = params.toString();
     return qs ? `${ROUTES.SEARCH}?${qs}` : ROUTES.SEARCH;
 }

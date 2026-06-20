@@ -1,26 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useAppSelector } from '@/app/hooks';
+import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
+import { ForumReplyForm } from '@/components/forum/ForumReplyForm/ForumReplyForm';
 import { fetchForumTopic, type ForumTopicDetail } from '@/services/forumApi';
 import { ROUTES, forumTopicPath } from '@/utils/constants';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumTopicPage.module.css';
 function ForumTopicPage() {
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const { id } = useParams<{
         id: string;
     }>();
     const [topic, setTopic] = useState<ForumTopicDetail | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    useEffect(() => {
-        if (!id)
-            return;
+
+    const loadTopic = useCallback(() => {
+        if (!id) return;
+        setIsLoading(true);
         fetchForumTopic(id)
             .then(setTopic)
             .catch(() => setTopic(null))
             .finally(() => setIsLoading(false));
     }, [id]);
+
+    useEffect(() => {
+        loadTopic();
+    }, [loadTopic]);
     if (isLoading) {
         return (<div className={pageStyles.page}>
         <div className="container">
@@ -64,9 +73,17 @@ function ForumTopicPage() {
                       <p>{post.content}</p>
                     </li>))}
                 </ul>)}
-              <p className="textMuted">
-                <Link to={ROUTES.AUTH}>Войдите</Link>, чтобы ответить в теме
-              </p>
+              {isAuthenticated ? (
+                <ForumReplyForm
+                  topicId={topic.id}
+                  disabled={topic.isClosed}
+                  onReplyAdded={loadTopic}
+                />
+              ) : (
+                <p className="textMuted">
+                  <Link to={ROUTES.AUTH}>Войдите</Link>, чтобы ответить в теме
+                </p>
+              )}
             </div>
           </article>
         </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button/Button';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { HERO_SUBTITLE, searchPath } from '@/constants';
+import { savePendingSearchQuery } from '@/constants/user-location';
 import { HeroStamp } from './HeroStamp';
 import styles from '../HomePage.module.css';
 
@@ -12,6 +13,7 @@ const HeroSection = memo(function HeroSection() {
 
   const handleSearch = useCallback((e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    savePendingSearchQuery(searchQuery);
     navigate(searchPath(searchQuery));
   }, [navigate, searchQuery]);
 

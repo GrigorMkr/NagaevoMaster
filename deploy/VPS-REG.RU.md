@@ -17,15 +17,43 @@ api.nagaevomaster.ru (VPS)      →  Node.js + PostgreSQL + Nginx
 
 ## 2. DNS
 
-В ISPmanager / DNS домена `nagaevomaster.ru`:
+### Вариант A — вручную (быстрее)
+
+ISPmanager DNS: https://dnsadmin.hosting.reg.ru/manager/ispmgr
 
 | Тип | Имя | Значение |
 |-----|-----|----------|
-| A | `api` | IP вашего VPS |
+| A | `api` | `161.104.18.17` |
+
+### Вариант B — REG.API (скрипт)
+
+1. [reg.ru → Настройки API](https://www.reg.ru/user/account/#/settings/api): **альтернативный пароль** + разрешите IP `136.169.156.224` (ваш текущий)
+2. `cp deploy/regru.env.example deploy/regru.env` — заполните `REGRU_API_*` и `REGRU_CLOUD_TOKEN`
+3. `node scripts/regru/add-api-dns.mjs`
 
 Проверка (через 5–30 мин): `ping api.nagaevomaster.ru`
 
-## 3. Первичная настройка VPS (один раз)
+## 3. SSH с вашего ПК (без пароля)
+
+Один раз (по паролю root):
+
+```powershell
+# Ключ (если нет OpenSSH — через Git):
+& "C:\Program Files\Git\usr\bin\ssh-keygen.exe" -t ed25519 -f $env:USERPROFILE\.ssh\nagaevomaster_vps -N '""'
+
+$env:VPS_PASSWORD='пароль-root'
+node scripts/vps/setup-ssh-key.mjs
+```
+
+Дальше:
+
+```powershell
+ssh nagaevomaster-vps
+# или Git SSH:
+& "C:\Program Files\Git\usr\bin\ssh.exe" nagaevomaster-vps
+```
+
+## 4. Первичная настройка VPS (один раз)
 
 Подключитесь по SSH (PowerShell / PuTTY):
 
@@ -48,7 +76,7 @@ bash /var/www/nagaevomaster/scripts/vps/install.sh
 
 Скрипт установит: Node.js 20, PostgreSQL, Nginx, PM2, Certbot.
 
-## 4. Переменные окружения API
+## 5. Переменные окружения API
 
 ```bash
 cp /var/www/nagaevomaster/deploy/vps.env.example /var/www/nagaevomaster/backend/.env
@@ -63,7 +91,7 @@ nano /var/www/nagaevomaster/backend/.env
 
 Опционально для кодов регистрации: `SMTP_*`, `SMS_RU_API_ID`.
 
-## 5. Деплой API
+## 6. Деплой API
 
 ```bash
 bash /var/www/nagaevomaster/scripts/vps/deploy-api.sh
@@ -76,7 +104,7 @@ curl https://api.nagaevomaster.ru/api/health
 # {"status":"ok","service":"nagaevomaster-api"}
 ```
 
-## 6. SSL (Let's Encrypt)
+## 7. SSL (Let's Encrypt)
 
 Если `install.sh` не выпустил сертификат автоматически:
 
@@ -84,7 +112,7 @@ curl https://api.nagaevomaster.ru/api/health
 certbot --nginx -d api.nagaevomaster.ru
 ```
 
-## 7. Обновить фронтенд (на вашем ПК)
+## 8. Обновить фронтенд (на вашем ПК)
 
 В `.env.production`:
 
@@ -98,7 +126,7 @@ npm run build:hosting
 npm run deploy:hosting
 ```
 
-## 8. Обновление API после изменений в коде
+## 9. Обновление API после изменений в коде
 
 На VPS:
 

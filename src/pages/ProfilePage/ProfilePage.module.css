@@ -72,6 +72,11 @@
   gap: var(--spacing-lg);
 }
 
+.listingItem {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
 @media (min-width: 768px) {
   .listingsGrid {
     grid-template-columns: repeat(2, 1fr);

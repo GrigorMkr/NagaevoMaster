@@ -12,6 +12,11 @@ import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { Button } from '@/components/ui/Button/Button'
 import { ButtonLink } from '@/components/ui/Button/ButtonLink'
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
+import { ListingStatusBadge } from '@/components/listings/ListingStatusBadge/ListingStatusBadge'
+import { ModerationDashboard } from '@/components/moderation/ModerationDashboard/ModerationDashboard'
+import { FavoritesPanel } from '@/components/profile/FavoritesPanel/FavoritesPanel'
+import { MyReviewsPanel } from '@/components/profile/MyReviewsPanel/MyReviewsPanel'
+import { NotificationsPanel } from '@/components/profile/NotificationsPanel/NotificationsPanel'
 import { ProfileSettingsForm } from '@/components/profile/ProfileSettingsForm/ProfileSettingsForm'
 import { Spinner } from '@/components/ui/Spinner/Spinner'
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar'
@@ -19,16 +24,11 @@ import { useAccountLocation } from '@/hooks/useAccountLocation'
 import { useMyListings } from '@/hooks/useMyListings'
 import { clearAuthToken } from '@/services/authApi'
 import { buildAvatarUrl } from '@/utils/avatarUrl'
+import { resolveUploadUrl } from '@/utils/mediaUrl'
 import { ROUTES } from '@/utils/constants'
 import { Reveal } from '@/components/ui/Reveal/Reveal'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ProfilePage.module.css'
-
-const otherSections = [
-  { title: 'Мои отзывы', desc: 'Комментарии к услугам мастеров' },
-  { title: 'Избранное', desc: 'Сохранённые услуги' },
-  { title: 'Уведомления', desc: 'Ответы на форуме и модерация' },
-] as const
 
 function ProfilePage() {
   const dispatch = useAppDispatch()
@@ -58,7 +58,10 @@ function ProfilePage() {
     return <Navigate to={ROUTES.AUTH} replace />
   }
 
-  const avatarSrc = currentUser.avatarUrl ?? buildAvatarUrl(currentUser.name, currentUser.email)
+  const avatarSrc = currentUser.avatarUrl
+    ? resolveUploadUrl(currentUser.avatarUrl)
+    : buildAvatarUrl(currentUser.name, currentUser.email)
+  const canModerate = currentUser.role === 'admin' || currentUser.role === 'moderator'
 
   return (
     <>
@@ -80,6 +83,8 @@ function ProfilePage() {
           </Reveal>
 
           <Reveal delay={100}>
+            {canModerate && <ModerationDashboard />}
+
             <section className={styles.locationCard} aria-label="Местоположение аккаунта">
             <h2 className={styles.locationTitle}>Текущее местоположение</h2>
             {accountLocation ? (
@@ -128,7 +133,13 @@ function ProfilePage() {
               ) : myListings.length > 0 ? (
                 <div className={`${styles.listingsGrid} motion-stagger`}>
                   {myListings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
+                    <div key={listing.id} className={styles.listingItem}>
+                      <ListingStatusBadge status={listing.status} />
+                      <ListingCard
+                        listing={listing}
+                        preview={listing.status !== 'published'}
+                      />
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -141,14 +152,9 @@ function ProfilePage() {
               )}
             </section>
 
-            <div className={`${styles.grid} motion-stagger`}>
-              {otherSections.map((section) => (
-                <article key={section.title} className={styles.card}>
-                  <h3>{section.title}</h3>
-                  <p>{section.desc}</p>
-                </article>
-              ))}
-            </div>
+            <NotificationsPanel />
+            <FavoritesPanel />
+            <MyReviewsPanel />
           </Reveal>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { HttpError } from '../middleware/errorHandler.js';
 import { getDistanceKm } from '../utils/geo.js';
 import { toListingResponse } from '../utils/mappers.js';
 import { routeParam } from '../utils/params.js';
+import { sendModeratorNewListingEmail } from '../services/notify/email.js';
 const listingsRouter = Router();
 const listingUserSelect = {
     select: {
@@ -65,6 +66,47 @@ function sortListings<T extends Listing>(items: T[], sortBy: string | undefined,
     }
     return sorted;
 }
+function assertModerator(role: string) {
+    if (!['moderator', 'admin'].includes(role)) {
+        throw new HttpError(403, 'Доступ только для модераторов');
+    }
+}
+listingsRouter.get('/moderation/pending', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const listings = await prisma.listing.findMany({
+            where: { status: 'pending' },
+            include: { user: listingUserSelect },
+            orderBy: { createdAt: 'asc' },
+        });
+        res.json(listings.map((item) => toListingResponse(item, item.user)));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+listingsRouter.patch('/:id/status', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const listingId = routeParam(req.params.id);
+        const { status } = z.object({
+            status: z.enum(['published', 'rejected']),
+        }).parse(req.body);
+        const listing = await prisma.listing.findUnique({ where: { id: listingId } });
+        if (!listing) {
+            throw new HttpError(404, 'Объявление не найдено');
+        }
+        const updated = await prisma.listing.update({
+            where: { id: listingId },
+            data: { status },
+            include: { user: listingUserSelect },
+        });
+        res.json(toListingResponse(updated, updated.user));
+    }
+    catch (error) {
+        next(error);
+    }
+});
 listingsRouter.get('/', async (req, res, next) => {
     try {
         const query = req.query;
@@ -150,6 +192,13 @@ listingsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
                 status: 'pending',
                 isVerified: false,
             },
+        });
+        void sendModeratorNewListingEmail({
+            listingTitle: listing.title,
+            authorName: req.user!.name,
+            listingId: listing.id,
+        }).catch((error) => {
+            console.error('[email:moderator] failed', error);
         });
         res.status(201).json(toListingResponse(listing, req.user!));
     }

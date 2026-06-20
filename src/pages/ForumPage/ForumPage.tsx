@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useAppSelector } from '@/app/hooks';
+import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { CategoryCard } from '@/components/categories/CategoryCard/CategoryCard';
+import { ForumNewTopicForm } from '@/components/forum/ForumNewTopicForm/ForumNewTopicForm';
 import { FORUM_CATEGORIES } from '@/data/categories';
 import { getForumCategoryCover } from '@/data/mock/listingImages';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
@@ -13,6 +16,7 @@ import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumPage.module.css';
 function ForumPage() {
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const [topics, setTopics] = useState<ForumTopicListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
@@ -62,9 +66,13 @@ function ForumPage() {
           {isLoading && <p className="textMuted">Загрузка тем…</p>}
           {!isLoading && topics.length === 0 && (<p className={pageStyles.emptyHint}>Тем пока нет</p>)}
 
-          <p className={pageStyles.emptyHint}>
-            <Link to={ROUTES.AUTH}>Войдите</Link> чтобы создать новую тему
-          </p>
+          {isAuthenticated ? (
+            <ForumNewTopicForm onCreated={(topic) => setTopics((prev) => [topic, ...prev])} />
+          ) : (
+            <p className={pageStyles.emptyHint}>
+              <Link to={ROUTES.AUTH}>Войдите</Link>, чтобы создать новую тему
+            </p>
+          )}
           </Reveal>
         </div>
       </div>

@@ -16,11 +16,13 @@ const ProvidersMap = lazy(() =>
 interface SearchMapSectionProps {
   listings: Listing[]
   userLocation: AccountLocation | null
+  query?: string
 }
 
 const SearchMapSection = memo(function SearchMapSection({
   listings,
   userLocation,
+  query,
 }: SearchMapSectionProps) {
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
@@ -33,8 +35,10 @@ const SearchMapSection = memo(function SearchMapSection({
       <h2 className={styles.mapTitle}>Ближайшие услуги на карте</h2>
       <p className={styles.mapHint}>
         {userLocation
-          ? 'Показаны результаты поиска относительно вашего местоположения'
-          : 'Укажите местоположение в профиле для сортировки по расстоянию'}
+          ? query
+            ? `На карте — результаты по запросу «${query}» рядом с вами`
+            : 'Показаны услуги рядом с вашим местоположением'
+          : 'Укажите местоположение в профиле или нажмите «Да, определить» после входа'}
       </p>
 
       {isAuthenticated ? (

@@ -5,6 +5,7 @@ import type { AccountLocation } from '@/types/location';
 import { GEO } from '@/constants';
 import { ClusterMarkers } from './ClusterMarkers';
 import { FitListingsBounds } from './FitListingsBounds';
+import { FlyToUserLocation } from './FlyToUserLocation';
 import { LocateButton } from './LocateButton';
 import { MapFilters } from './MapFilters';
 import { MapViewport } from './MapViewport';
@@ -36,8 +37,9 @@ function ProvidersMap({ listings, showFilters = true, fitToListings = false, use
       {showFilters && (<MapFilters categoryFilter={categoryFilter} onFilterChange={setCategoryFilter}/>)}
       <MapContainer center={[mapCenter?.lat ?? userLocation?.lat ?? GEO.center.lat, mapCenter?.lng ?? userLocation?.lng ?? GEO.center.lng]} zoom={GEO.defaultZoom} minZoom={GEO.minZoom} maxZoom={GEO.maxZoom} className={styles.map} scrollWheelZoom={false} maxBounds={GEO.mapBounds} maxBoundsViscosity={0.85}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
-        {fitToListings ? (<FitListingsBounds listings={filtered}/>) : (<MapViewport />)}
+        {fitToListings ? (<FitListingsBounds listings={filtered} userLocation={userLocation}/>) : (<MapViewport />)}
         <LocateButton />
+        <FlyToUserLocation location={userLocation} />
         <SettlementMarker />
         {userLocation && <UserLocationMarker location={userLocation}/>}
         <ClusterMarkers listings={filtered}/>

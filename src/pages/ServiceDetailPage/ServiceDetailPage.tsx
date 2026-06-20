@@ -5,6 +5,7 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { Button } from '@/components/ui/Button/Button'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { AuthRequiredPanel } from '@/components/auth/AuthRequiredPanel/AuthRequiredPanel'
+import { FavoriteButton } from '@/components/listings/FavoriteButton/FavoriteButton'
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
 import { ListingAuthorRow } from '@/components/listings/ListingAuthorRow/ListingAuthorRow'
 import { ListingGallery } from '@/components/listings/ListingGallery/ListingGallery'
@@ -42,7 +43,7 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const currentUser = useAppSelector(selectCurrentUser)
   const [showPhone, setShowPhone] = useState(false)
-  const [showReviews, setShowReviews] = useState(false)
+  const [showReviews, setShowReviews] = useState(isAuthenticated)
   const [captchaAnswer, setCaptchaAnswer] = useState('')
   const {
     reviews: listingReviews,
@@ -102,7 +103,10 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
             <article className={styles.card}>
             <header className={styles.header}>
               <h1 className="titlePage">{listing.title}</h1>
-              {listing.isVerified && <span className={styles.verified}>✓ Проверен</span>}
+              <div className={styles.headerActions}>
+                {isAuthenticated && <FavoriteButton listingId={listing.id} variant="inline" />}
+                {listing.isVerified && <span className={styles.verified}>✓ Проверен</span>}
+              </div>
             </header>
 
             {listing.author && (

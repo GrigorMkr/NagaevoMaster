@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useAppSelector } from '@/app/hooks';
+import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
+import { ForumNewTopicForm } from '@/components/forum/ForumNewTopicForm/ForumNewTopicForm';
 import { FORUM_CATEGORIES } from '@/data/categories';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
 import { ROUTES, forumCategoryPath, forumTopicPath } from '@/utils/constants';
@@ -12,6 +15,7 @@ import styles from './ForumCategoryPage.module.css';
 function ForumCategoryTopicList({ category }: {
     category: string;
 }) {
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const [topics, setTopics] = useState<ForumTopicListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
@@ -50,6 +54,17 @@ function ForumCategoryTopicList({ category }: {
 
       {isLoading && <p className="textMuted">Загрузка…</p>}
       {!isLoading && topics.length === 0 && (<p className={pageStyles.emptyHint}>Тем в этой категории пока нет</p>)}
+
+      {isAuthenticated ? (
+        <ForumNewTopicForm
+          defaultCategory={category}
+          onCreated={(topic) => setTopics((prev) => [topic, ...prev])}
+        />
+      ) : (
+        <p className={pageStyles.emptyHint}>
+          <Link to={ROUTES.AUTH}>Войдите</Link>, чтобы создать тему в этой категории
+        </p>
+      )}
     </>);
 }
 function ForumCategoryPage() {
