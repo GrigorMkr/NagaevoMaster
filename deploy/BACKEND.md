@@ -1,4 +1,10 @@
-# Деплой API на Render (PostgreSQL + Node.js)
+# Деплой API
+
+**Рекомендуется:** VPS REG.RU — [`deploy/VPS-REG.RU.md`](VPS-REG.RU.md) (быстро, без cold start).
+
+**Запасной вариант:** Render (бесплатный tier, холодный старт 30–60 с).
+
+## Render
 
 1. Откройте https://dashboard.render.com/blueprints
 2. **New Blueprint Instance** → репозиторий `GrigorMkr/NagaevoMaster`

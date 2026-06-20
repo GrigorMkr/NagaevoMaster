@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 header('X-Content-Type-Options: nosniff');
 
-$upstream = 'https://nagaevomaster-api.onrender.com/api';
+$upstream = getenv('NAGAEVOMASTER_API_UPSTREAM') ?: 'https://api.nagaevomaster.ru/api';
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/api';
 $path = parse_url($requestUri, PHP_URL_PATH) ?? '/api';
 $query = parse_url($requestUri, PHP_URL_QUERY);

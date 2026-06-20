@@ -95,11 +95,18 @@ npm run deploy:hosting
 
 ISPmanager → WWW-домены → ваш домен → Let's Encrypt.
 
-### 4. Backend (VPS)
+### 4. Backend (VPS REG.RU)
 
-На виртуальном хостинге Node.js не запускается. Для реального API — VPS + `deploy/nginx.conf.example` и `deploy/pm2.ecosystem.cjs`.
+На виртуальном хостинге Node.js не запускается. API разворачивается на **VPS REG.RU**:
 
-Пока API нет, в `.env.production` включён `VITE_USE_MOCK_FALLBACK=true` — сайт работает с демо-данными.
+```bash
+# На VPS (Ubuntu 22.04), после заказа и A-записи api → IP:
+curl -fsSL https://raw.githubusercontent.com/GrigorMkr/NagaevoMaster/main/scripts/vps/install.sh | sudo bash
+```
+
+Полная инструкция: [`deploy/VPS-REG.RU.md`](deploy/VPS-REG.RU.md)
+
+После запуска API пересоберите фронт: `npm run build:hosting && npm run deploy:hosting`
 
 ## GitHub Pages
 
