@@ -6,6 +6,8 @@
 4. Дождитесь статуса **Live** (5–10 мин)
 5. Проверка: https://nagaevomaster-api.onrender.com/api/health
 
+> Если сборка падает с ошибками `@types/*`: в Blueprint нажмите **Manual sync** после обновления `render.yaml` (build ставит devDependencies через `NPM_CONFIG_PRODUCTION=false`).
+
 ## Локальная разработка с PostgreSQL
 
 ```bash
