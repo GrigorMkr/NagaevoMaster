@@ -25,7 +25,20 @@ interface SendCodeResponse {
     target: string;
 }
 
+interface RecoverySendResponse {
+    message: string;
+    target?: string;
+}
+
 const MOCK_VERIFICATION_CODE = '123456';
+
+function normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+}
+
+function shouldUseAuthMock(): boolean {
+    return USE_MOCK_FALLBACK;
+}
 
 function getAuthToken(): string | null {
     try {
@@ -38,6 +51,14 @@ function getAuthToken(): string | null {
 
 function saveAuthToken(token: string): void {
     localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    if (!token.startsWith('mock:')) {
+        try {
+            localStorage.removeItem('nagaevomaster-mock-user');
+        }
+        catch {
+            // ignore
+        }
+    }
 }
 
 function clearAuthToken(): void {
@@ -45,7 +66,7 @@ function clearAuthToken(): void {
 }
 
 function mockLogin(email: string, password: string): AuthResponse {
-    const account = findMockAccount(email, password);
+    const account = findMockAccount(normalizeEmail(email), password);
     if (!account) {
         throw new Error('Неверный email или пароль');
     }
@@ -58,7 +79,7 @@ function mockLogin(email: string, password: string): AuthResponse {
 }
 
 function mockRegister(data: RegisterPayload): AuthResponse {
-    const email = data.user.trim().toLowerCase();
+    const email = normalizeEmail(data.user);
     if (isMockEmailRegistered(email) || getMockUserFromToken(createMockToken(email))) {
         throw new Error('Пользователь с таким email уже существует');
     }
@@ -81,14 +102,19 @@ function mockRegister(data: RegisterPayload): AuthResponse {
 }
 
 async function loginRequest(email: string, password: string): Promise<AuthResponse> {
+    const normalizedEmail = normalizeEmail(email);
     try {
-        const response = await api.post<AuthResponse>('/auth/login', { user: email, password });
+        const response = await api.post<AuthResponse>('/auth/login', {
+            user: normalizedEmail,
+            password,
+        });
         return response.data;
     }
     catch (error) {
-        if (!USE_MOCK_FALLBACK)
+        if (!shouldUseAuthMock()) {
             throw error;
-        return mockLogin(email, password);
+        }
+        return mockLogin(normalizedEmail, password);
     }
 }
 
@@ -96,18 +122,23 @@ async function sendRegistrationCode(
     channel: VerificationChannel,
     data: RegisterPayload,
 ): Promise<SendCodeResponse> {
+    const payload = {
+        ...data,
+        user: normalizeEmail(data.user),
+    };
     try {
         const response = await api.post<SendCodeResponse>('/auth/register/send-code', {
             channel,
-            ...data,
+            ...payload,
         });
         return response.data;
     }
     catch (error) {
-        if (!USE_MOCK_FALLBACK)
+        if (!shouldUseAuthMock()) {
             throw error;
-        const target = channel === 'email' ? data.user.trim().toLowerCase() : data.phone;
-        sessionStorage.setItem(`mock-register:${channel}:${target}`, JSON.stringify(data));
+        }
+        const target = channel === 'email' ? payload.user : data.phone;
+        sessionStorage.setItem(`mock-register:${channel}:${target}`, JSON.stringify(payload));
         return {
             message: channel === 'email' ? 'Код отправлен на email (демо: 123456)' : 'Код отправлен в SMS (демо: 123456)',
             channel,
@@ -121,44 +152,97 @@ async function verifyRegistrationCode(
     target: string,
     code: string,
 ): Promise<AuthResponse> {
+    const normalizedTarget = channel === 'email' ? normalizeEmail(target) : target;
     try {
         const response = await api.post<AuthResponse>('/auth/register/verify', {
             channel,
-            target,
+            target: normalizedTarget,
             code,
         });
         return response.data;
     }
     catch (error) {
-        if (!USE_MOCK_FALLBACK)
+        if (!shouldUseAuthMock()) {
             throw error;
+        }
         if (code !== MOCK_VERIFICATION_CODE) {
             throw new Error('Неверный код подтверждения');
         }
-        const stored = sessionStorage.getItem(`mock-register:${channel}:${target}`);
+        const stored = sessionStorage.getItem(`mock-register:${channel}:${normalizedTarget}`);
         if (!stored) {
             throw new Error('Сначала запросите код подтверждения');
         }
         const data = JSON.parse(stored) as RegisterPayload;
-        sessionStorage.removeItem(`mock-register:${channel}:${target}`);
+        sessionStorage.removeItem(`mock-register:${channel}:${normalizedTarget}`);
         return mockRegister(data);
     }
 }
 
 async function registerRequest(data: RegisterPayload): Promise<AuthResponse> {
-    return verifyRegistrationCode('email', data.user.trim().toLowerCase(), MOCK_VERIFICATION_CODE);
+    return verifyRegistrationCode('email', normalizeEmail(data.user), MOCK_VERIFICATION_CODE);
+}
+
+async function sendRecoveryCode(email: string): Promise<RecoverySendResponse> {
+    const normalizedEmail = normalizeEmail(email);
+    try {
+        const response = await api.post<RecoverySendResponse>('/auth/recovery/send-code', {
+            email: normalizedEmail,
+        });
+        return response.data;
+    }
+    catch (error) {
+        if (!shouldUseAuthMock()) {
+            throw error;
+        }
+        return {
+            message: 'Если email зарегистрирован, код отправлен (демо: 123456)',
+            target: normalizedEmail,
+        };
+    }
+}
+
+async function resetPasswordRequest(
+    email: string,
+    code: string,
+    password: string,
+): Promise<AuthResponse> {
+    const normalizedEmail = normalizeEmail(email);
+    try {
+        const response = await api.post<AuthResponse & { message: string }>('/auth/recovery/reset', {
+            email: normalizedEmail,
+            code,
+            password,
+        });
+        return {
+            token: response.data.token,
+            user: response.data.user,
+        };
+    }
+    catch (error) {
+        if (!shouldUseAuthMock()) {
+            throw error;
+        }
+        if (code !== MOCK_VERIFICATION_CODE) {
+            throw new Error('Неверный код');
+        }
+        throw new Error('Восстановление пароля доступно только через API');
+    }
 }
 
 async function recoveryRequest(email: string): Promise<void> {
-    await api.post('/auth/recovery', { email });
+    await sendRecoveryCode(email);
 }
 
 async function fetchCurrentUser(): Promise<User> {
     const token = getAuthToken();
-    if (token) {
+    if (!token) {
+        throw new Error('Требуется авторизация');
+    }
+    if (token.startsWith('mock:')) {
         const mockUser = getMockUserFromToken(token);
-        if (mockUser)
+        if (mockUser) {
             return mockUser;
+        }
     }
     const response = await api.get<User>('/auth/me');
     if (!isRecord(response.data) || typeof response.data.id !== 'string') {
@@ -175,8 +259,11 @@ export {
   sendRegistrationCode,
   verifyRegistrationCode,
   registerRequest,
+  sendRecoveryCode,
+  resetPasswordRequest,
   recoveryRequest,
   fetchCurrentUser,
+  normalizeEmail,
   MOCK_VERIFICATION_CODE,
 }
 
@@ -184,5 +271,6 @@ export type {
   AuthResponse,
   RegisterPayload,
   SendCodeResponse,
+  RecoverySendResponse,
   VerificationChannel,
 }

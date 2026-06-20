@@ -9,8 +9,9 @@ import { setUser } from '@/features/user/userSlice'
 import { selectAuthLoading, selectIsAuthenticated } from '@/features/user/userSelectors'
 import {
   loginRequest,
-  recoveryRequest,
+  resetPasswordRequest,
   saveAuthToken,
+  sendRecoveryCode,
   sendRegistrationCode,
   verifyRegistrationCode,
   type VerificationChannel,
@@ -39,6 +40,11 @@ enum RegisterStep {
   Code = 'code',
 }
 
+enum RecoveryStep {
+  Form = 'form',
+  Code = 'code',
+}
+
 const RESEND_COOLDOWN_SEC = 60
 
 const loginSchema = z.object({
@@ -57,6 +63,13 @@ const recoverySchema = z.object({
   email: z.string().email('Введите корректный email'),
 })
 
+const recoveryResetSchema = z.object({
+  code: z.string().length(6, 'Код состоит из 6 цифр'),
+  password: z
+    .string()
+    .min(VALIDATION.MIN_PASSWORD_LENGTH, `Минимум ${VALIDATION.MIN_PASSWORD_LENGTH} символов`),
+})
+
 const codeSchema = z.object({
   code: z.string().length(6, 'Код состоит из 6 цифр'),
 })
@@ -64,6 +77,7 @@ const codeSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>
 type RegisterForm = z.infer<typeof registerSchema>
 type RecoveryForm = z.infer<typeof recoverySchema>
+type RecoveryResetForm = z.infer<typeof recoveryResetSchema>
 type CodeForm = z.infer<typeof codeSchema>
 
 function AuthPage() {
@@ -72,16 +86,21 @@ function AuthPage() {
   const isAuthLoading = useAppSelector(selectAuthLoading)
   const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.Login)
   const [registerStep, setRegisterStep] = useState<RegisterStep>(RegisterStep.Form)
+  const [recoveryStep, setRecoveryStep] = useState<RecoveryStep>(RecoveryStep.Form)
+  const [recoveryEmail, setRecoveryEmail] = useState('')
   const [verificationChannel, setVerificationChannel] = useState<VerificationChannel>('email')
   const [verificationTarget, setVerificationTarget] = useState('')
   const [pendingRegisterData, setPendingRegisterData] = useState<RegisterForm | null>(null)
   const [resendSeconds, setResendSeconds] = useState(0)
   const [isSendingCode, setIsSendingCode] = useState(false)
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
+  const [isSendingRecovery, setIsSendingRecovery] = useState(false)
+  const [isResettingPassword, setIsResettingPassword] = useState(false)
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
   const recoveryForm = useForm<RecoveryForm>({ resolver: zodResolver(recoverySchema) })
+  const recoveryResetForm = useForm<RecoveryResetForm>({ resolver: zodResolver(recoveryResetSchema) })
   const codeForm = useForm<CodeForm>({ resolver: zodResolver(codeSchema) })
 
   useEffect(() => {
@@ -119,7 +138,12 @@ function AuthPage() {
     setActiveTab(AuthTab.Register)
     resetRegisterFlow()
   }
-  const handleRecoveryTabClick = () => setActiveTab(AuthTab.Recovery)
+  const handleRecoveryTabClick = () => {
+    setActiveTab(AuthTab.Recovery)
+    setRecoveryStep(RecoveryStep.Form)
+    setRecoveryEmail('')
+    recoveryResetForm.reset()
+  }
 
   const handleLogin = async (data: LoginForm) => {
     try {
@@ -181,12 +205,56 @@ function AuthPage() {
     await handleSendCode(pendingRegisterData)
   }
 
-  const handleRecovery = async (data: RecoveryForm) => {
+  const handleRecoverySendCode = async (data: RecoveryForm) => {
+    setIsSendingRecovery(true)
     try {
-      await recoveryRequest(data.email)
-      toast.success(`Если email зарегистрирован, инструкция отправлена на ${data.email}`)
+      const response = await sendRecoveryCode(data.email)
+      setRecoveryEmail(data.email.trim().toLowerCase())
+      setRecoveryStep(RecoveryStep.Code)
+      setResendSeconds(RESEND_COOLDOWN_SEC)
+      recoveryResetForm.reset()
+      toast.success(response.message)
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Ошибка восстановления'))
+      toast.error(getErrorMessage(error, 'Не удалось отправить код'))
+    } finally {
+      setIsSendingRecovery(false)
+    }
+  }
+
+  const handleRecoveryReset = async (data: RecoveryResetForm) => {
+    if (!recoveryEmail) {
+      setRecoveryStep(RecoveryStep.Form)
+      return
+    }
+    setIsResettingPassword(true)
+    try {
+      const response = await resetPasswordRequest(recoveryEmail, data.code, data.password)
+      saveAuthToken(response.token)
+      dispatch(setUser(response.user))
+      requestLocationPromptAfterAuth()
+      setRecoveryStep(RecoveryStep.Form)
+      setRecoveryEmail('')
+      recoveryForm.reset()
+      recoveryResetForm.reset()
+      toast.success('Пароль обновлён, вы вошли в аккаунт')
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось сменить пароль'))
+    } finally {
+      setIsResettingPassword(false)
+    }
+  }
+
+  const handleResendRecoveryCode = async () => {
+    if (!recoveryEmail || resendSeconds > 0) return
+    setIsSendingRecovery(true)
+    try {
+      const response = await sendRecoveryCode(recoveryEmail)
+      setResendSeconds(RESEND_COOLDOWN_SEC)
+      toast.success(response.message)
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось отправить код'))
+    } finally {
+      setIsSendingRecovery(false)
     }
   }
 
@@ -428,14 +496,15 @@ function AuthPage() {
             </section>
           )}
 
-          {activeTab === AuthTab.Recovery && (
-            <section className={`${styles.card} ${styles.tabPanel}`} key="recovery">
+          {activeTab === AuthTab.Recovery && recoveryStep === RecoveryStep.Form && (
+            <section className={`${styles.card} ${styles.tabPanel}`} key="recovery-form">
               <h2 className="titleSection">Восстановление пароля</h2>
+              <p className={styles.hint}>Код придёт на email, если аккаунт зарегистрирован</p>
               <form
                 className={styles.form}
                 action={ECHO_FORM_ACTION}
                 method="post"
-                onSubmit={recoveryForm.handleSubmit(handleRecovery)}
+                onSubmit={recoveryForm.handleSubmit(handleRecoverySendCode)}
                 noValidate
               >
                 <label htmlFor="recovery-email">Email</label>
@@ -453,9 +522,73 @@ function AuthPage() {
                   </span>
                 )}
 
-                <Button type="submit" fullWidth>
-                  Отправить ссылку
+                <Button type="submit" fullWidth loading={isSendingRecovery}>
+                  Получить код
                 </Button>
+              </form>
+            </section>
+          )}
+
+          {activeTab === AuthTab.Recovery && recoveryStep === RecoveryStep.Code && (
+            <section className={`${styles.card} ${styles.tabPanel}`} key="recovery-code">
+              <h2 className="titleSection">Новый пароль</h2>
+              <p className={styles.hint}>Код отправлен на {recoveryEmail}</p>
+              <form
+                className={styles.form}
+                onSubmit={recoveryResetForm.handleSubmit(handleRecoveryReset)}
+                noValidate
+              >
+                <label htmlFor="recovery-code">Код из письма</label>
+                <input
+                  id="recovery-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="000000"
+                  className={`${pageStyles.input} ${styles.codeInput}`}
+                  {...recoveryResetForm.register('code')}
+                />
+                {recoveryResetForm.formState.errors.code && (
+                  <span className={pageStyles.formError}>
+                    {recoveryResetForm.formState.errors.code.message}
+                  </span>
+                )}
+
+                <label htmlFor="recovery-password">Новый пароль</label>
+                <PasswordInput
+                  id="recovery-password"
+                  required
+                  autoComplete="new-password"
+                  {...recoveryResetForm.register('password')}
+                />
+                {recoveryResetForm.formState.errors.password && (
+                  <span className={pageStyles.formError}>
+                    {recoveryResetForm.formState.errors.password.message}
+                  </span>
+                )}
+
+                <Button type="submit" fullWidth loading={isResettingPassword}>
+                  Сохранить пароль и войти
+                </Button>
+
+                <div className={styles.secondaryActions}>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    disabled={resendSeconds > 0 || isSendingRecovery}
+                    onClick={() => void handleResendRecoveryCode()}
+                  >
+                    {resendSeconds > 0 ? `Отправить снова через ${resendSeconds} с` : 'Отправить код снова'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    onClick={() => setRecoveryStep(RecoveryStep.Form)}
+                  >
+                    Изменить email
+                  </button>
+                </div>
               </form>
             </section>
           )}

@@ -9,6 +9,10 @@ import {
   sendRegistrationCode,
   verifyRegistrationCode,
 } from '../services/verification/registration.js';
+import {
+  resetPasswordWithCode,
+  sendPasswordRecoveryCode,
+} from '../services/verification/passwordRecovery.js';
 import { toUserResponse } from '../utils/mappers.js';
 
 const authRouter = Router();
@@ -37,6 +41,16 @@ const recoverySchema = z.object({
   email: z.string().email(),
 });
 
+const recoveryResetSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+  password: z.string().min(6),
+});
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 function assertUserVerified(user: { emailVerified: boolean; phoneVerified: boolean }) {
   if (!user.emailVerified && !user.phoneVerified) {
     throw new HttpError(403, 'Подтвердите email или телефон для входа');
@@ -46,7 +60,8 @@ function assertUserVerified(user: { emailVerified: boolean; phoneVerified: boole
 authRouter.post('/login', async (req, res, next) => {
   try {
     const data = loginSchema.parse(req.body);
-    const user = await prisma.user.findUnique({ where: { email: data.user } });
+    const email = normalizeEmail(data.user);
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await bcrypt.compare(data.password, user.passwordHash))) {
       throw new HttpError(401, 'Неверный email или пароль');
     }
@@ -98,15 +113,43 @@ authRouter.post('/register', async (req, res, next) => {
   }
 });
 
+authRouter.post('/recovery/send-code', async (req, res, next) => {
+  try {
+    const data = recoverySchema.parse(req.body);
+    await sendPasswordRecoveryCode(normalizeEmail(data.email));
+    res.json({
+      message: 'Если email зарегистрирован, код отправлен на почту',
+      target: normalizeEmail(data.email),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.post('/recovery/reset', async (req, res, next) => {
+  try {
+    const data = recoveryResetSchema.parse(req.body);
+    const user = await resetPasswordWithCode(
+      normalizeEmail(data.email),
+      data.code,
+      data.password,
+    );
+    res.json({
+      message: 'Пароль обновлён',
+      token: signToken(user.id),
+      user: toUserResponse(user),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 authRouter.post('/recovery', async (req, res, next) => {
   try {
     const data = recoverySchema.parse(req.body);
-    const user = await prisma.user.findUnique({ where: { email: data.email } });
-    if (!user) {
-      throw new HttpError(404, 'Пользователь с таким email не найден');
-    }
+    await sendPasswordRecoveryCode(normalizeEmail(data.email));
     res.json({
-      message: 'Если email зарегистрирован, инструкция по восстановлению будет отправлена',
+      message: 'Если email зарегистрирован, код отправлен на почту',
     });
   } catch (error) {
     next(error);

@@ -26,6 +26,7 @@
     "images:listings:landscapes": "node scripts/copy-listing-images.mjs",
     "vps:ssh-setup": "node scripts/vps/setup-ssh-key.mjs",
     "vps:install": "node scripts/vps/remote-install.mjs",
+    "vps:deploy": "node scripts/vps/remote-deploy-api.mjs",
     "vps:notify": "node scripts/vps/apply-notify-env.mjs",
     "vps:notify:test": "node scripts/vps/test-notify.mjs"
   },

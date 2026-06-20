@@ -89,7 +89,29 @@ async function sendModeratorNewListingEmail(params: {
   console.log(`[email:moderator] new listing notice sent to ${to}`);
 }
 
+async function sendPasswordRecoveryEmail(to: string, code: string): Promise<void> {
+  const subject = 'Восстановление пароля — Нагаево Мастер';
+  const text = `Код для смены пароля: ${code}\n\nКод действует 10 минут. Если вы не запрашивали смену пароля, проигнорируйте письмо.`;
+  const html = `<p>Код для смены пароля:</p><p style="font-size:24px;font-weight:700;letter-spacing:4px">${code}</p><p>Код действует 10 минут.</p>`;
+
+  const mailer = getTransporter();
+  if (!mailer) {
+    console.log(`[email:recovery] ${to}: ${code}`);
+    return;
+  }
+
+  await mailer.sendMail({
+    from: env.SMTP_FROM,
+    to,
+    subject,
+    text,
+    html,
+  });
+  console.log(`[email:recovery] sent to ${to}`);
+}
+
 export {
   sendVerificationEmail,
   sendModeratorNewListingEmail,
+  sendPasswordRecoveryEmail,
 }

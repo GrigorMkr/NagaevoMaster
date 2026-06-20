@@ -1,33 +1,36 @@
 import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { GEOLOCATION_MAX_AGE_MS, GEOLOCATION_TIMEOUT_MS, USER_LOCATION_STORAGE_KEY, } from '@/constants';
-import { clearAccountLocation, setAccountLocation, setLocating, } from '@/features/user/userSlice';
+import { GEOLOCATION_MAX_AGE_MS, GEOLOCATION_TIMEOUT_MS } from '@/constants';
+import { selectIsAuthenticated } from '@/features/user/userSelectors';
+import { clearAccountLocation, setAccountLocation, setLocating } from '@/features/user/userSlice';
+import { clearUserLocation, saveUserLocation } from '@/services/usersApi';
 import type { AccountLocation } from '@/types/location';
-function saveLocation(location: AccountLocation) {
-    localStorage.setItem(USER_LOCATION_STORAGE_KEY, JSON.stringify(location));
-}
-function removeStoredLocation() {
-    localStorage.removeItem(USER_LOCATION_STORAGE_KEY);
-}
-function loadStoredAccountLocation(): AccountLocation | null {
-    try {
-        const raw = localStorage.getItem(USER_LOCATION_STORAGE_KEY);
-        if (!raw)
-            return null;
-        const parsed = JSON.parse(raw) as AccountLocation;
-        if (typeof parsed.lat !== 'number' || typeof parsed.lng !== 'number')
-            return null;
-        return parsed;
-    }
-    catch {
-        return null;
-    }
-}
+import {
+    loadStoredAccountLocation,
+    removeStoredAccountLocation,
+    saveStoredAccountLocation,
+} from '@/utils/accountLocationStorage';
+import { getErrorMessage } from '@/utils/errorMessage';
+
 function useAccountLocation() {
     const dispatch = useAppDispatch();
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const accountLocation = useAppSelector((state) => state.user.accountLocation);
     const isLocating = useAppSelector((state) => state.user.isLocating);
+
+    const persistLocation = useCallback(async (location: AccountLocation) => {
+        saveStoredAccountLocation(location);
+        dispatch(setAccountLocation(location));
+        if (!isAuthenticated) {
+            return;
+        }
+        try {
+            await saveUserLocation(location);
+        } catch (error) {
+            console.warn('Не удалось сохранить местоположение на сервере', error);
+        }
+    }, [dispatch, isAuthenticated]);
 
     const detectLocationAsync = useCallback((options?: { silent?: boolean }) => new Promise<AccountLocation | null>((resolve) => {
         if (!navigator.geolocation) {
@@ -45,8 +48,9 @@ function useAccountLocation() {
                 label: 'Текущее местоположение',
                 updatedAt: new Date().toISOString(),
             };
-            saveLocation(location);
-            dispatch(setAccountLocation(location));
+            void persistLocation(location).finally(() => {
+                dispatch(setLocating(false));
+            });
             if (!options?.silent) {
                 toast.success('Местоположение определено');
             }
@@ -62,26 +66,37 @@ function useAccountLocation() {
             timeout: GEOLOCATION_TIMEOUT_MS,
             maximumAge: GEOLOCATION_MAX_AGE_MS,
         });
-    }), [dispatch]);
+    }), [dispatch, persistLocation]);
 
     const detectLocation = useCallback(() => {
         void detectLocationAsync();
     }, [detectLocationAsync]);
-    const resetLocation = useCallback(() => {
-        removeStoredLocation();
+
+    const resetLocation = useCallback(async () => {
+        removeStoredAccountLocation();
         dispatch(clearAccountLocation());
+        if (isAuthenticated) {
+            try {
+                await clearUserLocation();
+            } catch (error) {
+                toast.error(getErrorMessage(error, 'Не удалось сбросить местоположение на сервере'));
+                return;
+            }
+        }
         toast.success('Местоположение сброшено');
-    }, [dispatch]);
+    }, [dispatch, isAuthenticated]);
+
     return {
         accountLocation,
         isLocating,
         detectLocation,
         detectLocationAsync,
         resetLocation,
+        persistLocation,
     };
 }
 
 export {
-  loadStoredAccountLocation,
-  useAccountLocation,
-}
+    loadStoredAccountLocation,
+    useAccountLocation,
+};

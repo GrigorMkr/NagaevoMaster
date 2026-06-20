@@ -26,7 +26,8 @@ process.env.VITE_BASE = process.env.VITE_BASE ?? '/'
 process.env.VITE_API_URL = process.env.VITE_API_URL ?? '/api'
 
 if (process.env.VITE_USE_MOCK_FALLBACK === undefined) {
-  process.env.VITE_USE_MOCK_FALLBACK = 'true'
+  const apiUrl = process.env.VITE_API_URL ?? ''
+  process.env.VITE_USE_MOCK_FALLBACK = apiUrl.startsWith('http') ? 'false' : 'true'
 }
 
 console.log(`Сборка для хостинга: base=${process.env.VITE_BASE}, api=${process.env.VITE_API_URL}`)

@@ -38,6 +38,45 @@ usersRouter.patch('/me', requireAuth, async (req: AuthRequest, res, next) => {
         next(error);
     }
 });
+usersRouter.patch('/me/location', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        const data = z.object({
+            lat: z.number().min(-90).max(90),
+            lng: z.number().min(-180).max(180),
+            label: z.string().min(1).max(120).optional(),
+        }).parse(req.body);
+        const user = await prisma.user.update({
+            where: { id: req.user!.id },
+            data: {
+                lastLat: data.lat,
+                lastLng: data.lng,
+                lastLocationLabel: data.label ?? 'Текущее местоположение',
+                lastLocationAt: new Date(),
+            },
+        });
+        res.json(toUserResponse(user));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+usersRouter.delete('/me/location', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        const user = await prisma.user.update({
+            where: { id: req.user!.id },
+            data: {
+                lastLat: null,
+                lastLng: null,
+                lastLocationLabel: null,
+                lastLocationAt: null,
+            },
+        });
+        res.json(toUserResponse(user));
+    }
+    catch (error) {
+        next(error);
+    }
+});
 usersRouter.get('/me/listings', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const listings = await prisma.listing.findMany({

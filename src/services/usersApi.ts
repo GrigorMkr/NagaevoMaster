@@ -57,9 +57,23 @@ async function fetchMyReviews(): Promise<UserReviewItem[]> {
   }
 }
 
+async function saveUserLocation(location: import('@/types/location').AccountLocation): Promise<void> {
+  await api.patch('/users/me/location', {
+    lat: location.lat,
+    lng: location.lng,
+    label: location.label,
+  });
+}
+
+async function clearUserLocation(): Promise<void> {
+  await api.delete('/users/me/location');
+}
+
 export {
   updateProfile,
   fetchMyReviews,
+  saveUserLocation,
+  clearUserLocation,
 }
 
 export type {

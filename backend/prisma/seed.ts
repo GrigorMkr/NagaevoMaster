@@ -5,6 +5,12 @@ import { SEED_FORUM_TOPICS, SEED_LISTINGS, SEED_REVIEWS } from './seed-data.js'
 const prisma = new PrismaClient()
 
 async function main() {
+  const existingUsers = await prisma.user.count()
+  if (existingUsers > 0) {
+    console.log(`В базе уже ${existingUsers} пользователей — seed пропущен (данные сохранены).`)
+    return
+  }
+
   await prisma.report.deleteMany()
   await prisma.review.deleteMany()
   await prisma.favorite.deleteMany()

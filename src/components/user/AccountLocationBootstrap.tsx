@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/app/hooks';
 import { setAccountLocation } from '@/features/user/userSlice';
-import { loadStoredAccountLocation } from '@/hooks/useAccountLocation';
+import { loadStoredAccountLocation } from '@/utils/accountLocationStorage';
 function AccountLocationBootstrap() {
     const dispatch = useAppDispatch();
     useEffect(() => {

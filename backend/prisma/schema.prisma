@@ -17,6 +17,10 @@ model User {
   role          String        @default("user")
   emailVerified Boolean       @default(false)
   phoneVerified Boolean       @default(false)
+  lastLat           Float?
+  lastLng           Float?
+  lastLocationLabel String?
+  lastLocationAt    DateTime?
   createdAt     DateTime      @default(now())
   listings      Listing[]
   reviews       Review[]

@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/app/hooks';
-import { setUser, setUserError, setUserLoading } from '@/features/user/userSlice';
+import { setUser, setUserError, setUserLoading, setAccountLocation } from '@/features/user/userSlice';
 import { clearAuthToken, fetchCurrentUser, getAuthToken } from '@/services/authApi';
 import { fetchFavorites } from '@/services/favoritesApi';
 import { setFavorites } from '@/features/favorites/favoritesSlice';
+import { loadStoredAccountLocation, saveStoredAccountLocation } from '@/utils/accountLocationStorage';
+import { saveUserLocation } from '@/services/usersApi';
 function AuthBootstrap() {
     const dispatch = useAppDispatch();
     useEffect(() => {
@@ -12,8 +14,22 @@ function AuthBootstrap() {
             return;
         dispatch(setUserLoading(true));
         fetchCurrentUser()
-            .then((user) => {
+            .then(async (user) => {
             dispatch(setUser(user));
+            const local = loadStoredAccountLocation();
+            if (local) {
+                dispatch(setAccountLocation(local));
+                if (!token.startsWith('mock:')) {
+                    try {
+                        await saveUserLocation(local);
+                    } catch {
+                        // API may be unavailable
+                    }
+                }
+            } else if (user.savedLocation) {
+                saveStoredAccountLocation(user.savedLocation);
+                dispatch(setAccountLocation(user.savedLocation));
+            }
             if (token.startsWith('mock:'))
                 return null;
             return fetchFavorites();

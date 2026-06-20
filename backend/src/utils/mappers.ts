@@ -21,6 +21,14 @@ function toListingAuthor(user: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl'>
 }
 
 function toUserResponse(user: User) {
+    const savedLocation = user.lastLat != null && user.lastLng != null
+        ? {
+            lat: user.lastLat,
+            lng: user.lastLng,
+            label: user.lastLocationLabel ?? 'Текущее местоположение',
+            updatedAt: (user.lastLocationAt ?? user.createdAt).toISOString(),
+        }
+        : undefined;
     return {
         id: user.id,
         email: user.email,
@@ -30,6 +38,7 @@ function toUserResponse(user: User) {
         role: user.role,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
+        savedLocation,
         createdAt: user.createdAt.toISOString(),
     };
 }
