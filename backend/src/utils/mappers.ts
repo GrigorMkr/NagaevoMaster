@@ -28,6 +28,8 @@ function toUserResponse(user: User) {
         phone: user.phone ?? undefined,
         avatarUrl: user.avatarUrl ?? undefined,
         role: user.role,
+        emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified,
         createdAt: user.createdAt.toISOString(),
     };
 }

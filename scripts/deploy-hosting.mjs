@@ -76,6 +76,12 @@ try {
   const remoteDir = await resolveRemoteDir(client, FTP_REMOTE_DIR)
   console.log(`Загрузка dist/ → ${remoteDir}…`)
   await client.uploadFromDir(distDir)
+  try {
+    await client.removeDir('about')
+    console.log('Удалена устаревшая папка about/ (конфликт с маршрутом /about)')
+  } catch {
+    // папки уже нет
+  }
   console.log('Готово. Откройте https://nagaevomaster.ru')
 } catch (error) {
   console.error('Ошибка FTP:', error instanceof Error ? error.message : error)

@@ -7,9 +7,9 @@ import { renderWithProviders } from '@/test/test-utils'
 describe('Footer', () => {
   it('renders email link', () => {
     renderWithProviders(createElement(Footer))
-    expect(screen.getByRole('link', { name: /info@nagaievomaster.ru/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /info@nagaevomaster.ru/i })).toHaveAttribute(
       'href',
-      'mailto:info@nagaievomaster.ru',
+      'mailto:info@nagaevomaster.ru',
     )
   })
 })

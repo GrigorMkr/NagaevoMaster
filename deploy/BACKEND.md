@@ -22,6 +22,20 @@ cd backend && cp .env.example .env && npm install && npm run db:setup && npm run
 | `CORS_ORIGIN` | `https://nagaevomaster.ru,https://www.nagaevomaster.ru` |
 | `DATABASE_URL` | из PostgreSQL Render |
 | `JWT_SECRET` | генерируется автоматически |
+| `SMTP_*` | SMTP для email-кодов (опционально) |
+| `SMS_RU_API_ID` | API-ключ SMS.ru для SMS-кодов |
+
+## Подтверждение регистрации
+
+Новые пользователи подтверждают регистрацию **кодом из email или SMS**:
+
+1. `POST /api/auth/register/send-code` — отправка 6-значного кода (действует 10 мин)
+2. `POST /api/auth/register/verify` — проверка кода и создание аккаунта
+
+Без SMTP/SMS.ru в dev код выводится в **логи Render**. Для продакшена задайте в Render Dashboard:
+
+- **Email:** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+- **SMS:** `SMS_RU_API_ID` (https://sms.ru)
 
 ## Фронтенд после деплоя API
 

@@ -11,6 +11,7 @@ async function main() {
   await prisma.forumPost.deleteMany()
   await prisma.forumTopic.deleteMany()
   await prisma.contactMessage.deleteMany()
+  await prisma.verificationChallenge.deleteMany()
   await prisma.listing.deleteMany()
   await prisma.user.deleteMany()
 
@@ -24,6 +25,8 @@ async function main() {
       name: 'Администратор',
       phone: '+7 (347) 000-00-00',
       role: 'admin',
+      emailVerified: true,
+      phoneVerified: true,
     },
   })
 
@@ -34,6 +37,8 @@ async function main() {
       name: 'Демо Пользователь',
       phone: '+7 (900) 000-00-00',
       role: 'user',
+      emailVerified: true,
+      phoneVerified: true,
     },
   })
 
@@ -47,6 +52,8 @@ async function main() {
         name: `Мастер ${item.legacyId}`,
         phone: item.phone,
         role: 'master',
+        emailVerified: true,
+        phoneVerified: true,
       },
     })
 

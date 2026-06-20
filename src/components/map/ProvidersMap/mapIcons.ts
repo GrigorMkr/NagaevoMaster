@@ -3,9 +3,9 @@ import L from 'leaflet';
 const MARKER_SIZE = 46;
 
 const defaultMarkerIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconUrl: `${import.meta.env.BASE_URL}leaflet/marker-icon.png`,
+  iconRetinaUrl: `${import.meta.env.BASE_URL}leaflet/marker-icon-2x.png`,
+  shadowUrl: `${import.meta.env.BASE_URL}leaflet/marker-shadow.png`,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],

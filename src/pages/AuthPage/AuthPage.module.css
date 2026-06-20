@@ -72,6 +72,82 @@
   margin-top: var(--spacing-lg);
 }
 
+.hint {
+  margin: var(--spacing-md) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.channelGroup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.channel,
+.channelActive {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    box-shadow var(--transition);
+}
+
+.channel:hover {
+  border-color: var(--color-mint);
+}
+
+.channelActive {
+  border-color: var(--color-button-active-border);
+  background: rgba(23, 98, 74, 0.08);
+  box-shadow: 0 4px 16px rgba(23, 98, 74, 0.12);
+}
+
+.channel input,
+.channelActive input {
+  accent-color: var(--color-mint);
+}
+
+.codeInput {
+  letter-spacing: 0.35em;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.secondaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  justify-content: center;
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-mint);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.textButton:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 .error {
   font-size: var(--font-size-sm);
   color: #c62828;

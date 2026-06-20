@@ -6,6 +6,8 @@ interface User {
     phone?: string;
     avatarUrl?: string;
     role: UserRole;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
     createdAt: string;
 }
 

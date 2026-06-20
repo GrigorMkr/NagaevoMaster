@@ -8,20 +8,35 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  passwordHash String
-  name         String
-  phone        String?
-  avatarUrl    String?
-  role         String        @default("user")
-  createdAt    DateTime      @default(now())
-  listings     Listing[]
-  reviews      Review[]
-  favorites    Favorite[]
-  forumTopics  ForumTopic[]
-  forumPosts   ForumPost[]
-  reports      Report[]
+  id            String        @id @default(uuid())
+  email         String        @unique
+  passwordHash  String
+  name          String
+  phone         String?       @unique
+  avatarUrl     String?
+  role          String        @default("user")
+  emailVerified Boolean       @default(false)
+  phoneVerified Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  listings      Listing[]
+  reviews       Review[]
+  favorites     Favorite[]
+  forumTopics   ForumTopic[]
+  forumPosts    ForumPost[]
+  reports       Report[]
+}
+
+model VerificationChallenge {
+  id        String   @id @default(uuid())
+  channel   String
+  target    String
+  codeHash  String
+  payload   String
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([target, channel])
 }
 
 model Listing {

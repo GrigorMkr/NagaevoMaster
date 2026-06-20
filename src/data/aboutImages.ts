@@ -1,4 +1,4 @@
-const ABOUT_IMAGE_BASE = `${import.meta.env.BASE_URL || '/'}`.replace(/\/$/, '') + '/about';
+const ABOUT_IMAGE_BASE = `${import.meta.env.BASE_URL || '/'}`.replace(/\/$/, '') + '/about-images';
 
 function aboutImage(name: string): string {
   return `${ABOUT_IMAGE_BASE}/${name}`.replace(/\/{2,}/g, '/');

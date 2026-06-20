@@ -1,8 +1,8 @@
 const APP_NAME = 'Нагаево Мастер';
 const APP_TITLE = 'Нагаево Мастер — Все услуги поселка Нагаево';
 const APP_DESCRIPTION = 'Централизованная платформа для поиска специалистов, техники и услуг в поселке Нагаево и окрестностях (радиус до 50 км).';
-const SITE_URL = 'https://nagaievomaster.ru';
-const CONTACT_EMAIL = 'info@nagaievomaster.ru';
+const SITE_URL = 'https://nagaevomaster.ru';
+const CONTACT_EMAIL = 'info@nagaevomaster.ru';
 
 export {
   APP_NAME,
