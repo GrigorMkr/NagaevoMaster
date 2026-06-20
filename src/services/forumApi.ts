@@ -1,5 +1,6 @@
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { MOCK_FORUM_TOPICS } from '@/data/mockListings';
+import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 interface ForumTopicListItem {
     id: string;
@@ -58,7 +59,11 @@ async function fetchForumTopics(category?: string): Promise<ForumTopicListItem[]
         const response = await api.get<ForumTopicListItem[]>('/forum/topics', {
             params: category ? { category } : undefined,
         });
-        return response.data;
+        const topics = asArray<ForumTopicListItem>(response.data);
+        if (topics.length === 0 && USE_MOCK_FALLBACK) {
+            return mockForumTopics(category);
+        }
+        return topics;
     }
     catch (error) {
         if (!USE_MOCK_FALLBACK)

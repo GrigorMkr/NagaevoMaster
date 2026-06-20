@@ -15,6 +15,7 @@ import { usersRouter } from './routes/users.js';
 import { reportsRouter } from './routes/reports.js';
 function createApp() {
     const app = express();
+    app.set('trust proxy', 1);
     app.use(cors({
         origin: env.CORS_ORIGIN.split(',').map((value) => value.trim()),
         credentials: true,

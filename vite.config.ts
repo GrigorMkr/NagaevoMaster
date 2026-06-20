@@ -3,8 +3,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-/** GitHub Pages project site: https://grigormkr.github.io/NagaevoMaster/ */
+/** GitHub Pages: /NagaevoMaster/ · свой домен (REG.RU): VITE_BASE=/ */
 const pagesBase = '/NagaevoMaster/'
+const buildBase = process.env.VITE_BASE ?? pagesBase
 
 function patchWebManifestPlugin(base: string) {
   return {
@@ -32,8 +33,8 @@ function patchWebManifestPlugin(base: string) {
 }
 
 export default defineConfig(({ command }) => ({
-  base: command === 'build' ? pagesBase : '/',
-  plugins: [react(), ...(command === 'build' ? [patchWebManifestPlugin(pagesBase)] : [])],
+  base: command === 'build' ? buildBase : '/',
+  plugins: [react(), ...(command === 'build' ? [patchWebManifestPlugin(buildBase)] : [])],
   css: {
     modules: {
       localsConvention: 'camelCase',

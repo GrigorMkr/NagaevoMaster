@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+.env.production
+deploy.env
+hosting.reg.ru.env
+nagaevo-hosting.zip
+src/assets/fonts/loos-temp/
+src/assets/fonts/manrope-temp/
 
 # Editor directories and files
 .vscode/*

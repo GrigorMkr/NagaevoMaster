@@ -28,7 +28,8 @@ npm run dev
 ## Сборка
 
 ```bash
-npm run build
+npm run build          # GitHub Pages (/NagaevoMaster/)
+npm run build:hosting  # свой домен (REG.RU), base /
 npm run preview
 ```
 
@@ -69,16 +70,39 @@ VITE_API_URL=/api
 
 Для GitHub Pages без сервера: `VITE_USE_MOCK_FALLBACK=true`
 
-## Закрытый режим (сайт в разработке)
+## Деплой на REG.RU (свой домен)
 
-На GitHub Pages включён режим «Скоро запуск» для посетителей. Команда может тестировать полный сайт.
+### 1. Сборка
 
-| Кто | Как открыть |
-|-----|-------------|
-| Посетители | https://grigormkr.github.io/NagaevoMaster/ — страница «Сайт в разработке» |
-| Команда (онлайн) | `https://grigormkr.github.io/NagaevoMaster/?preview=nagaevo-preview` |
-| Команда (локально) | `npm run dev` — полный сайт без ограничений |
+```bash
+cp .env.production.example .env.production   # при необходимости отредактируйте
+npm run build:hosting
+npm run package:hosting   # создаст nagaevo-hosting.zip
+```
 
-Сменить ключ: `VITE_PREVIEW_ACCESS_KEY` в `.github/workflows/deploy.yml`.
+### 2. Загрузка на хостинг
 
-Открыть сайт для всех: уберите `VITE_SITE_CLOSED: 'true'` из deploy workflow.
+**Вариант A — архив:** ISPmanager → Менеджер файлов → папка сайта (`www/домен.ru/data`) → распакуйте содержимое `nagaevo-hosting.zip`.
+
+**Вариант B — FTP:**
+
+```bash
+cp deploy.env.example deploy.env   # FTP из ISPmanager → FTP-пользователи
+npm run deploy:hosting
+```
+
+### 3. SSL
+
+ISPmanager → WWW-домены → ваш домен → Let's Encrypt.
+
+### 4. Backend (VPS)
+
+На виртуальном хостинге Node.js не запускается. Для реального API — VPS + `deploy/nginx.conf.example` и `deploy/pm2.ecosystem.cjs`.
+
+Пока API нет, в `.env.production` включён `VITE_USE_MOCK_FALLBACK=true` — сайт работает с демо-данными.
+
+## GitHub Pages
+
+Демо: https://grigormkr.github.io/NagaevoMaster/
+
+Деплой автоматический при push в `main` (workflow `deploy.yml`).

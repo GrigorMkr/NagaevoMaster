@@ -2,6 +2,7 @@ import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { createMockToken, findMockAccount, getMockUserFromToken, isMockEmailRegistered, saveMockUserSession, } from '@/data/mock/authUsers';
 import type { User } from '@/types/user';
+import { isRecord } from '@/utils/apiGuards';
 import { api } from './api';
 interface AuthResponse {
     token: string;
@@ -96,6 +97,9 @@ async function fetchCurrentUser(): Promise<User> {
             return mockUser;
     }
     const response = await api.get<User>('/auth/me');
+    if (!isRecord(response.data) || typeof response.data.id !== 'string') {
+        throw new Error('Invalid user response');
+    }
     return response.data;
 }
 

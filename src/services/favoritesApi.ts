@@ -1,7 +1,13 @@
+import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 async function fetchFavorites(): Promise<string[]> {
-    const response = await api.get<string[]>('/favorites');
-    return response.data;
+    try {
+        const response = await api.get<string[]>('/favorites');
+        return asArray<string>(response.data);
+    }
+    catch {
+        return [];
+    }
 }
 async function addFavorite(listingId: string): Promise<void> {
     await api.post(`/favorites/${listingId}`);

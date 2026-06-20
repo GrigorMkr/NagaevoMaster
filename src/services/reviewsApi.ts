@@ -1,12 +1,13 @@
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { getReviewsForListing } from '@/data/mock/reviews';
 import type { Review } from '@/types/listing';
+import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 type ReviewListItem = Review;
 async function fetchListingReviews(listingId: string): Promise<ReviewListItem[]> {
     try {
         const response = await api.get<ReviewListItem[]>(`/listings/${listingId}/reviews`);
-        return response.data;
+        return asArray<ReviewListItem>(response.data);
     }
     catch (error) {
         if (!USE_MOCK_FALLBACK)

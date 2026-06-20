@@ -6,6 +6,7 @@ import { MOCK_LISTINGS } from '@/data/mockListings';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import { SortBy } from '@/enums/sort';
 import { enrichListing, enrichListings } from '@/utils/listingEnrich';
+import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const toRadians = (value: number) => (value * Math.PI) / DEGREES_IN_SEMICIRCLE;
@@ -112,7 +113,7 @@ async function fetchListings(params: Partial<SearchParams> = {}): Promise<Listin
 async function fetchMyListings(userId: string): Promise<Listing[]> {
     try {
         const response = await api.get<Listing[]>('/users/me/listings');
-        return enrichListings(response.data);
+        return enrichListings(asArray<Listing>(response.data));
     }
     catch (error) {
         if (!USE_MOCK_FALLBACK)

@@ -32,6 +32,7 @@ jobs:
 
       - name: Build
         env:
+          VITE_BASE: /NagaevoMaster/
           VITE_USE_MOCK_FALLBACK: 'true'
         run: npm run build
 
