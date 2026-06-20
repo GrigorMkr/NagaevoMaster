@@ -11,6 +11,8 @@
     "build:hosting": "node scripts/build-hosting.mjs",
     "package:hosting": "node scripts/package-hosting.mjs",
     "deploy:hosting": "node scripts/deploy-hosting.mjs",
+    "deploy:render": "node scripts/open-render-deploy.mjs",
+    "deploy:full": "node scripts/wait-api-and-deploy.mjs",
     "lint": "eslint . && stylelint \"src/**/*.css\"",
     "test": "vitest run",
     "test:watch": "vitest",

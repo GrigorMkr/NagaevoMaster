@@ -42,10 +42,10 @@ function resolveOrigin(query: Record<string, unknown>) {
     }
     return NAGAEVO_CENTER;
 }
-function sortListings(items: Listing[], sortBy: string | undefined, origin: {
+function sortListings<T extends Listing>(items: T[], sortBy: string | undefined, origin: {
     lat: number;
     lng: number;
-}) {
+}): T[] {
     const sorted = [...items];
     if (sortBy === 'distance') {
         sorted.sort((a, b) => getDistanceKm(origin.lat, origin.lng, a.lat, a.lng) -
