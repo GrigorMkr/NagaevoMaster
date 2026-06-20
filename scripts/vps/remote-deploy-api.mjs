@@ -1,17 +1,22 @@
 /**
- * Деплой API на VPS: git pull + deploy-api.sh
+ * Деплой API на VPS из локального репозитория (без git push).
  *
  *   npm run vps:deploy
  */
-import { readFileSync, existsSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { execSync } from 'node:child_process';
+import { readFileSync, existsSync, unlinkSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Client } from 'ssh2';
 
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const privateKeyPath = join(homedir(), '.ssh', process.env.VPS_SSH_KEY_NAME ?? 'nagaevomaster_vps');
 const host = process.env.VPS_HOST ?? '161.104.18.17';
 const user = process.env.VPS_USER ?? 'root';
 const appDir = process.env.VPS_APP_DIR ?? '/var/www/nagaevomaster';
+const archivePath = join(tmpdir(), 'nagaevomaster-deploy.tar.gz');
+const remoteArchive = '/tmp/nagaevomaster-deploy.tar.gz';
 
 if (!existsSync(privateKeyPath)) {
   console.error(`Нет ${privateKeyPath}. Запустите: npm run vps:ssh-setup`);
@@ -44,16 +49,45 @@ function run(conn, command) {
   });
 }
 
+function upload(conn, localPath, remotePath) {
+  return new Promise((resolve, reject) => {
+    conn.sftp((err, sftp) => {
+      if (err) return reject(err);
+      sftp.fastPut(localPath, remotePath, (putErr) => {
+        if (putErr) reject(putErr);
+        else resolve();
+      });
+    });
+  });
+}
+
+console.log('Создаём архив для деплоя...');
+execSync(
+  `git archive --format=tar.gz -o "${archivePath}" HEAD backend scripts package.json package-lock.json`,
+  { cwd: root, stdio: 'inherit' },
+);
+
 const conn = await connect();
-console.log(`SSH ${host} — деплой API...\n`);
+console.log(`SSH ${host} — загрузка и деплой API...\n`);
 
-const command = [
-  `cd ${appDir}`,
-  'git fetch origin main',
-  'git reset --hard origin/main',
-  'bash scripts/vps/deploy-api.sh',
-].join(' && ');
-
-const code = await run(conn, command);
-conn.end();
-process.exit(code === 0 ? 0 : 1);
+try {
+  await upload(conn, archivePath, remoteArchive);
+  const code = await run(
+    conn,
+    [
+      `mkdir -p ${appDir}`,
+      `tar -xzf ${remoteArchive} -C ${appDir}`,
+      `rm -f ${remoteArchive}`,
+      `find ${appDir}/scripts -name '*.sh' -exec sed -i 's/\\r$//' {} +`,
+      `cd ${appDir} && bash scripts/vps/deploy-api.sh`,
+    ].join(' && '),
+  );
+  conn.end();
+  unlinkSync(archivePath);
+  process.exit(code === 0 ? 0 : 1);
+} catch (error) {
+  conn.end();
+  if (existsSync(archivePath)) unlinkSync(archivePath);
+  console.error(error);
+  process.exit(1);
+}

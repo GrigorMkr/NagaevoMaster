@@ -4,14 +4,10 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/var/www/nagaevomaster}"
 BACKEND_DIR="${APP_DIR}/backend"
 
-if [[ ! -d "${APP_DIR}/.git" ]]; then
-  echo "Репозиторий не найден в ${APP_DIR}"
+if [[ ! -d "${BACKEND_DIR}" ]]; then
+  echo "Backend не найден в ${BACKEND_DIR}"
   exit 1
 fi
-
-cd "${APP_DIR}"
-echo "==> git pull"
-git pull origin main
 
 cd "${BACKEND_DIR}"
 
