@@ -1,65 +1,67 @@
-import { memo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { POPULAR_SERVICES } from '@/data/mockListings';
-import { getListingImages } from '@/data/mock/listingImages';
-import { searchPath } from '@/constants';
+import { memo, useEffect, useState } from 'react';
+import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
+import { SortBy } from '@/enums/sort';
+import { fetchListings } from '@/services/listingsApi';
+import type { Listing } from '@/types/listing';
 import { SectionHead } from './SectionHead';
+import tileGrid from '@/styles/tileGrid.module.css';
 import styles from '../HomePage.module.css';
 
+const POPULAR_LIMIT = 8;
+
 const PopularServicesSection = memo(function PopularServicesSection() {
-    return (<div className={styles.contentBlock}>
-      <SectionHead badge="Популярно" title="16 популярных услуг"/>
-      <div className={styles.popularGrid}>
-        {POPULAR_SERVICES.map((item) => {
-            const cover = getListingImages(item.category, item.subcategory, item.id)[0] ?? '';
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
 
-            return (
-              <PopularServiceCard
-                key={item.id}
-                to={searchPath(item.title)}
-                cover={cover}
-                title={item.title}
-                count={item.count}
-                icon={item.icon}
-              />
-            );
-        })}
-      </div>
-    </div>);
-});
-
-interface PopularServiceCardProps {
-  to: string;
-  cover: string;
-  title: string;
-  count: number;
-  icon: string;
-}
-
-function PopularServiceCard({ to, cover, title, count, icon }: PopularServiceCardProps) {
-  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetchListings({ sortBy: SortBy.Newest })
+      .then((response) => {
+        if (!cancelled) {
+          setListings(response.items.slice(0, POPULAR_LIMIT));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setListings([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
-    <Link to={to} className={styles.popularCard}>
-      <div className={styles.popularMedia}>
-        {cover && !imageFailed ? (
-          <img
-            className={styles.popularImage}
-            src={cover}
-            alt=""
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <span className={styles.popularIcon}>{icon}</span>
-        )}
-      </div>
-      <span className={styles.popularTitle}>{title}</span>
-      <span className={styles.popularCount}>{count} мастеров</span>
-    </Link>
+    <div className={styles.contentBlock}>
+      <SectionHead badge="Каталог" title="Новые услуги" />
+      {loading ? (
+        <p className="textMuted">Загрузка…</p>
+      ) : listings.length === 0 ? (
+        <p className="textMuted">Скоро здесь появятся новые объявления</p>
+      ) : (
+        <div className={tileGrid.grid}>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              variant="default"
+              showFavorite={false}
+              onModerated={(listingId) => {
+                setListings((current) => current.filter((item) => item.id !== listingId));
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
-}
+});
 
 export {
   PopularServicesSection,
-}
+};

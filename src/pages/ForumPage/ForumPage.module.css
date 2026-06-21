@@ -45,6 +45,17 @@
     border-color var(--transition);
 }
 
+.topicRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.topicBody {
+  flex: 1;
+  min-width: 0;
+}
+
 .topic:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);

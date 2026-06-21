@@ -5,8 +5,13 @@
   overflow: hidden;
   border-radius: 50%;
   background: linear-gradient(145deg, rgba(23, 98, 74, 0.18), rgba(240, 180, 41, 0.2));
-  border: 2px solid rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(126, 200, 168, 0.45);
   box-shadow: var(--shadow-sm);
+}
+
+.xs {
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 .sm {
@@ -32,15 +37,24 @@
 
 .fallback {
   font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.xs .fallback {
+  font-size: 0.55rem;
 }
 
 .lg .fallback {
   font-size: 1.1rem;
 }
 
+.sm .fallback {
+  font-size: 0.7rem;
+}
+
 .md .fallback {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }

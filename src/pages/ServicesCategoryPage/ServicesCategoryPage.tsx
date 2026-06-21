@@ -1,15 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
+import { ListingSortControls } from '@/components/listings/ListingSortControls/ListingSortControls';
 import { SKELETON_COUNT_DEFAULT } from '@/constants';
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setListings, setListingsLoading, setListingsError, } from '@/features/listings/listingsSlice';
 import { fetchListings } from '@/services/listingsApi';
 import { getCategoryBySlug, getBeautySubcategory } from '@/data/categories';
+import { SortBy, SERVICE_SORT_OPTIONS } from '@/enums/sort';
 import { servicesBeautyPath, servicesCategoryPath, searchPath, ROUTES, } from '@/utils/constants';
+import tileGrid from '@/styles/tileGrid.module.css';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ServicesCategoryPage.module.css';
 function ServicesCategoryPage() {
@@ -24,6 +27,7 @@ function ServicesCategoryPage() {
     const beautySub = category === 'beauty' && subcategory ? getBeautySubcategory(subcategory) : undefined;
     const pageTitle = beautySub?.name ?? cat?.name ?? 'Категория';
     const isBeautySubRoute = category === 'beauty' && subcategory;
+    const [sortBy, setSortBy] = useState<SortBy>(SortBy.Popular);
     useEffect(() => {
         if (!category)
             return;
@@ -31,11 +35,12 @@ function ServicesCategoryPage() {
         fetchListings({
             category,
             subcategory: isBeautySubRoute ? subcategory : undefined,
+            sortBy,
         })
             .then((data) => dispatch(setListings(data.items)))
             .catch((err: Error) => dispatch(setListingsError(err.message)))
             .finally(() => dispatch(setListingsLoading(false)));
-    }, [category, subcategory, dispatch, isBeautySubRoute]);
+    }, [category, subcategory, dispatch, isBeautySubRoute, sortBy]);
     if (!cat) {
         return (<div className={pageStyles.page}>
         <div className="container">
@@ -51,7 +56,7 @@ function ServicesCategoryPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader badge="Каталог" title={pageTitle} subtitle={cat.description}/>
+          <PageHeader badge="Каталог" title={pageTitle} />
 
           {cat.slug === 'beauty' && !subcategory && (<div className={styles.subcategoryGrid}>
               {cat.subcategories.map((sub) => (<Link key={sub.slug} to={servicesBeautyPath(sub.slug)} className={styles.subcategoryLink}>
@@ -65,7 +70,7 @@ function ServicesCategoryPage() {
                 </Link>))}
             </div>)}
 
-          {isLoading && (<div className={styles.grid}>
+          {isLoading && (<div className={tileGrid.grid}>
               {Array.from({ length: SKELETON_COUNT_DEFAULT }, (_, i) => (<Skeleton key={i} variant="card"/>))}
             </div>)}
 
@@ -74,9 +79,16 @@ function ServicesCategoryPage() {
               <p className={pageStyles.emptyHint}>Скоро появятся мастера из Нагаево</p>
             </div>)}
 
-          {!isLoading && items.length > 0 && (<div className={styles.grid}>
+          {!isLoading && items.length > 0 && (<>
+              <ListingSortControls
+                activeSort={sortBy}
+                options={SERVICE_SORT_OPTIONS}
+                onSort={setSortBy}
+              />
+              <div className={tileGrid.grid}>
               {items.map((listing) => (<ListingCard key={listing.id} listing={listing}/>))}
-            </div>)}
+            </div>
+            </>)}
         </div>
       </div>
     </>);

@@ -7,6 +7,8 @@ import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ForumNewTopicForm } from '@/components/forum/ForumNewTopicForm/ForumNewTopicForm';
+import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
+import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { FORUM_CATEGORIES } from '@/data/categories';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
 import { ROUTES, forumCategoryPath, forumTopicPath } from '@/utils/constants';
@@ -41,13 +43,22 @@ function ForumCategoryTopicList({ category }: {
       <ul className={styles.list}>
         {topics.map((topic) => (<li key={topic.id}>
             <Link to={forumTopicPath(topic.id)} className={styles.topic}>
-              <span className={styles.topicTitle}>
-                {topic.isPinned && '📌 '}{topic.title}
-              </span>
-              <span className={styles.meta}>
-                {topic.authorName} · {topic.postsCount} ответов ·{' '}
-                {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
-              </span>
+              <div className={styles.topicRow}>
+                <UserAvatar
+                  name={topic.authorName}
+                  src={resolveAuthorAvatar(topic.authorName, topic.authorName, topic.authorAvatarUrl)}
+                  size="xs"
+                />
+                <div className={styles.topicBody}>
+                  <span className={styles.topicTitle}>
+                    {topic.isPinned && '📌 '}{topic.title}
+                  </span>
+                  <span className={styles.meta}>
+                    {topic.authorName} · {topic.postsCount} ответов ·{' '}
+                    {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
+                  </span>
+                </div>
+              </div>
             </Link>
           </li>))}
       </ul>
@@ -85,7 +96,7 @@ function ForumCategoryPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader badge="Форум" title={forumCat.name} subtitle="Обсуждения жителей Нагаево"/>
+          <PageHeader badge="Форум" title={forumCat.name} />
 
           <Link to={ROUTES.FORUM} className={styles.back}>← Все категории</Link>
 

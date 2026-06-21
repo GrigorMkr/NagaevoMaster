@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
+import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
 import { fetchFavoriteListings } from '@/services/favoritesApi';
 import type { Listing } from '@/types/listing';
+import tileGrid from '@/styles/tileGrid.module.css';
 import styles from './FavoritesPanel.module.css';
 
 function FavoritesPanel() {
@@ -16,25 +18,20 @@ function FavoritesPanel() {
   }, []);
 
   return (
-    <section className={styles.panel} aria-labelledby="favorites-title">
-      <h2 id="favorites-title" className={styles.title}>Избранное</h2>
-      <p className={styles.desc}>Сохранённые услуги, чтобы не потерять</p>
-
-      {loading ? (
-        <p className={styles.empty}>Загрузка…</p>
-      ) : items.length === 0 ? (
-        <p className={styles.empty}>Пока ничего не добавлено. Нажмите ☆ на карточке услуги</p>
+    <ProfileExpandableSection title="Избранное" count={items.length} loading={loading}>
+      {items.length === 0 ? (
+        <p className={styles.empty}>Пока пусто — нажмите ☆ на карточке услуги</p>
       ) : (
-        <div className={styles.grid}>
+        <div className={tileGrid.grid}>
           {items.map((listing) => (
             <ListingCard key={listing.id} listing={listing} />
           ))}
         </div>
       )}
-    </section>
+    </ProfileExpandableSection>
   );
 }
 
 export {
   FavoritesPanel,
-}
+};

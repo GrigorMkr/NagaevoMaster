@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { routeParam } from '../utils/params.js';
+import { assertCleanContent } from '../services/moderation/contentFilter.js';
 const forumRouter = Router();
 const createTopicSchema = z.object({
     title: z.string().min(5).max(200),
@@ -22,6 +23,7 @@ function toTopicListItem(topic: {
     updatedAt: Date;
     author: {
         name: string;
+        avatarUrl: string | null;
     };
     posts: {
         createdAt: Date;
@@ -33,6 +35,7 @@ function toTopicListItem(topic: {
         title: topic.title,
         category: topic.category,
         authorName: topic.author.name,
+        authorAvatarUrl: topic.author.avatarUrl ?? undefined,
         postsCount: topic.posts.length,
         lastPostAt: lastPostAt.toISOString(),
         isPinned: topic.isPinned,
@@ -45,7 +48,7 @@ forumRouter.get('/topics', async (req, res, next) => {
         const topics = await prisma.forumTopic.findMany({
             where: category ? { category } : undefined,
             include: {
-                author: { select: { name: true } },
+                author: { select: { name: true, avatarUrl: true } },
                 posts: {
                     select: { createdAt: true },
                     orderBy: { createdAt: 'desc' },
@@ -87,6 +90,7 @@ forumRouter.get('/topics/:id', async (req, res, next) => {
             category: topic.category,
             content: topic.content,
             authorName: topic.author.name,
+            authorAvatarUrl: topic.author.avatarUrl ?? undefined,
             postsCount: topic.posts.length,
             lastPostAt: (topic.posts.at(-1)?.createdAt ?? topic.updatedAt).toISOString(),
             isPinned: topic.isPinned,
@@ -97,6 +101,7 @@ forumRouter.get('/topics/:id', async (req, res, next) => {
                 id: post.id,
                 content: post.content,
                 authorName: post.author.name,
+                authorAvatarUrl: post.author.avatarUrl ?? undefined,
                 likes: post.likes,
                 createdAt: post.createdAt.toISOString(),
             })),
@@ -109,6 +114,7 @@ forumRouter.get('/topics/:id', async (req, res, next) => {
 forumRouter.post('/topics', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const data = createTopicSchema.parse(req.body);
+        assertCleanContent(data.title, data.content);
         const topic = await prisma.forumTopic.create({
             data: {
                 title: data.title,
@@ -117,7 +123,7 @@ forumRouter.post('/topics', requireAuth, async (req: AuthRequest, res, next) => 
                 authorId: req.user!.id,
             },
             include: {
-                author: { select: { name: true } },
+                author: { select: { name: true, avatarUrl: true } },
                 posts: true,
             },
         });
@@ -130,6 +136,7 @@ forumRouter.post('/topics', requireAuth, async (req: AuthRequest, res, next) => 
 forumRouter.post('/topics/:id/replies', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const data = createReplySchema.parse(req.body);
+        assertCleanContent(data.content);
         const topic = await prisma.forumTopic.findUnique({ where: { id: routeParam(req.params.id) } });
         if (!topic) {
             throw new HttpError(404, 'Тема не найдена');
@@ -144,7 +151,7 @@ forumRouter.post('/topics/:id/replies', requireAuth, async (req: AuthRequest, re
                 content: data.content,
             },
             include: {
-                author: { select: { name: true } },
+                author: { select: { name: true, avatarUrl: true } },
             },
         });
         await prisma.forumTopic.update({
@@ -155,6 +162,7 @@ forumRouter.post('/topics/:id/replies', requireAuth, async (req: AuthRequest, re
             id: post.id,
             content: post.content,
             authorName: post.author.name,
+            authorAvatarUrl: post.author.avatarUrl ?? undefined,
             likes: post.likes,
             createdAt: post.createdAt.toISOString(),
         });

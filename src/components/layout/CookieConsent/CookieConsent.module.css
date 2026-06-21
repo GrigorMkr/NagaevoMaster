@@ -1,4 +1,10 @@
 .banner {
+  --cookie-bg: #fffdf8;
+  --cookie-text: #1a2e26;
+  --cookie-text-muted: #4a5c54;
+  --cookie-link: #17624a;
+  --cookie-border: rgb(23 98 74 / 22%);
+
   position: fixed;
   z-index: 1100;
   display: flex;
@@ -9,14 +15,13 @@
   left: var(--spacing-md);
   max-width: 720px;
   margin: 0 auto;
-  padding: 0.75rem 1rem;
-  background: rgb(255 252 246 / 98%);
-  border: 1px solid var(--color-border-strong);
+  padding: 0.9rem 1.1rem;
+  background: var(--cookie-bg);
+  border: 1px solid var(--cookie-border);
   border-radius: var(--radius-lg);
   box-shadow:
-    0 12px 32px rgb(8 31 24 / 18%),
-    inset 0 1px 0 rgb(255 255 255 / 90%);
-  backdrop-filter: blur(16px);
+    0 16px 40px rgb(8 31 24 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 95%);
   animation: cookie-slide-in 0.35s var(--ease-out-expo) both;
 }
 
@@ -39,9 +44,9 @@
 
 .text {
   margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-text);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--cookie-text);
 }
 
 .detailsToggle {
@@ -50,26 +55,32 @@
   background: none;
   font: inherit;
   font-size: inherit;
-  font-weight: 600;
-  color: var(--color-button-label-muted);
-  text-decoration: none;
+  font-weight: 700;
+  color: var(--cookie-link);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
   cursor: pointer;
   white-space: nowrap;
 }
 
+.detailsToggle:hover {
+  color: #0a3d2e;
+}
+
 .detailsToggle:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--cookie-link);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .details {
-  max-height: 6rem;
-  margin: 0.5rem 0 0;
-  padding-right: 0.25rem;
+  max-height: 8rem;
+  margin: 0.65rem 0 0;
+  padding-right: 0.35rem;
   overflow-y: auto;
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--cookie-text-muted);
 }
 
 .acceptButton {
@@ -81,21 +92,17 @@
     right: var(--spacing-xl);
     bottom: var(--spacing-xl);
     left: auto;
-    width: min(400px, calc(100vw - 2 * var(--spacing-xl)));
-    max-width: 400px;
+    width: min(420px, calc(100vw - 2 * var(--spacing-xl)));
+    max-width: 420px;
     margin: 0;
     flex-direction: column;
     align-items: stretch;
-    padding: 1rem 1.1rem;
-  }
-
-  .text {
-    font-size: 0.8125rem;
+    padding: 1.1rem 1.2rem;
   }
 
   .acceptButton {
     width: 100%;
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
   }
 }
 
@@ -104,7 +111,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
-    padding: 0.75rem;
+    padding: 0.85rem;
   }
 
   .acceptButton {

@@ -2,9 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
 import { LocationPromptDialog } from '@/components/location/LocationPromptDialog/LocationPromptDialog';
+import { LOCATION_REMINDER_MS } from '@/constants';
 import {
-  clearLocationPromptFlag,
   consumePendingSearchQuery,
+  getLocationConsent,
+  hasLocationConsentAccepted,
+  hasLocationConsentDeclined,
+  setLocationConsentAccepted,
+  setLocationConsentDeclined,
   shouldShowLocationPrompt,
 } from '@/constants/user-location';
 import { GEO, searchPath } from '@/constants';
@@ -21,23 +26,51 @@ function LocationPromptBootstrap() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (isAuthLoading || !isAuthenticated || accountLocation) {
+    if (isAuthLoading || !isAuthenticated) {
       setOpen(false);
       return;
     }
-    if (shouldShowLocationPrompt()) {
-      setOpen(true);
+
+    if (hasLocationConsentAccepted()) {
+      if (!accountLocation) {
+        void detectLocationAsync({ silent: true });
+      }
+      setOpen(false);
+      return;
     }
+
+    if (shouldShowLocationPrompt() && getLocationConsent() === null) {
+      setOpen(true);
+      return;
+    }
+
+    setOpen(false);
+  }, [isAuthLoading, isAuthenticated, accountLocation, detectLocationAsync]);
+
+  useEffect(() => {
+    if (isAuthLoading || !isAuthenticated || accountLocation || !hasLocationConsentDeclined()) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      if (!accountLocation) {
+        setOpen(true);
+      }
+    }, LOCATION_REMINDER_MS);
+
+    return () => {
+      window.clearInterval(interval);
+    };
   }, [isAuthLoading, isAuthenticated, accountLocation]);
 
   const handleDecline = useCallback(() => {
-    clearLocationPromptFlag();
+    setLocationConsentDeclined();
     setOpen(false);
   }, []);
 
   const handleAccept = useCallback(async () => {
-    const location = await detectLocationAsync();
-    clearLocationPromptFlag();
+    setLocationConsentAccepted();
+    const location = await detectLocationAsync({ silent: true });
     setOpen(false);
     if (!location) {
       return;
@@ -62,4 +95,4 @@ function LocationPromptBootstrap() {
 
 export {
   LocationPromptBootstrap,
-}
+};

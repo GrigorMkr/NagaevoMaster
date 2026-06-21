@@ -5,7 +5,7 @@ import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO, APP_NAME } from '@/constants';
 import styles from './Footer.module.css';
 const Footer = memo(function Footer() {
     const currentYear = new Date().getFullYear();
-    return (<footer className={styles.footer}>
+    return (<footer className={`${styles.footer} site-footer`}>
       <div className="container">
         <div className={styles.inner}>
           <Logo variant="footer"/>

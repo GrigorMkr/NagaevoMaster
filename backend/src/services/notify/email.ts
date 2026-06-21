@@ -89,6 +89,47 @@ async function sendModeratorNewListingEmail(params: {
   console.log(`[email:moderator] new listing notice sent to ${to}`);
 }
 
+async function sendContactMessageEmail(params: {
+  name: string;
+  email: string;
+  message: string;
+}): Promise<void> {
+  const to = env.CONTACT_NOTIFY_EMAIL;
+  if (!to) {
+    return;
+  }
+
+  const subject = `Сообщение с сайта — ${params.name}`;
+  const text = [
+    `Имя: ${params.name}`,
+    `Email: ${params.email}`,
+    '',
+    params.message,
+  ].join('\n');
+  const html = `
+    <p><strong>Имя:</strong> ${params.name}</p>
+    <p><strong>Email:</strong> <a href="mailto:${params.email}">${params.email}</a></p>
+    <hr />
+    <p>${params.message.replace(/\n/g, '<br />')}</p>
+  `;
+
+  const mailer = getTransporter();
+  if (!mailer) {
+    console.log(`[email:contact] ${to}: from ${params.email}`);
+    return;
+  }
+
+  await mailer.sendMail({
+    from: env.SMTP_FROM,
+    to,
+    replyTo: params.email,
+    subject,
+    text,
+    html,
+  });
+  console.log(`[email:contact] message from ${params.email} sent to ${to}`);
+}
+
 async function sendPasswordRecoveryEmail(to: string, code: string): Promise<void> {
   const subject = 'Восстановление пароля — Нагаево Мастер';
   const text = `Код для смены пароля: ${code}\n\nКод действует 10 минут. Если вы не запрашивали смену пароля, проигнорируйте письмо.`;
@@ -113,5 +154,6 @@ async function sendPasswordRecoveryEmail(to: string, code: string): Promise<void
 export {
   sendVerificationEmail,
   sendModeratorNewListingEmail,
+  sendContactMessageEmail,
   sendPasswordRecoveryEmail,
 }

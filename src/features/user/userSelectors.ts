@@ -12,8 +12,19 @@ function selectAuthLoading(state: RootState) {
   return state.user.isLoading
 }
 
+function selectCanModerate(state: RootState) {
+  const role = state.user.currentUser?.role
+  return role === 'admin' || role === 'moderator'
+}
+
+function selectIsAdmin(state: RootState) {
+  return state.user.currentUser?.role === 'admin'
+}
+
 export {
   selectCurrentUser,
   selectIsAuthenticated,
   selectAuthLoading,
+  selectCanModerate,
+  selectIsAdmin,
 }

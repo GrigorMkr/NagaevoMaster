@@ -1,10 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { fetchMyListings } from '@/services/listingsApi'
 import type { Listing } from '@/types/listing'
 
 function useMyListings(userId: string | undefined) {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(Boolean(userId))
+
+  const reload = useCallback(async () => {
+    if (!userId) {
+      setListings([])
+      return
+    }
+    setLoading(true)
+    try {
+      setListings(await fetchMyListings(userId))
+    } catch {
+      setListings([])
+    } finally {
+      setLoading(false)
+    }
+  }, [userId])
 
   useEffect(() => {
     if (!userId) {
@@ -29,7 +44,7 @@ function useMyListings(userId: string | undefined) {
     }
   }, [userId])
 
-  return { listings, loading }
+  return { listings, loading, reload }
 }
 
 export {

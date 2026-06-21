@@ -1,48 +1,127 @@
-import { Navigate } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { logout } from '@/features/user/userSlice'
+import { useAppSelector } from '@/app/hooks'
 import {
   selectAuthLoading,
+  selectCanModerate,
   selectCurrentUser,
   selectIsAuthenticated,
 } from '@/features/user/userSelectors'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
-import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { Button } from '@/components/ui/Button/Button'
 import { ButtonLink } from '@/components/ui/Button/ButtonLink'
-import { ListingCard } from '@/components/listings/ListingCard/ListingCard'
-import { ListingStatusBadge } from '@/components/listings/ListingStatusBadge/ListingStatusBadge'
+import { CompactListingRow } from '@/components/listings/CompactListingRow/CompactListingRow'
+import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection'
 import { ModerationDashboard } from '@/components/moderation/ModerationDashboard/ModerationDashboard'
 import { FavoritesPanel } from '@/components/profile/FavoritesPanel/FavoritesPanel'
+import { SocialPanel } from '@/components/profile/SocialPanel/SocialPanel'
 import { MyReviewsPanel } from '@/components/profile/MyReviewsPanel/MyReviewsPanel'
 import { NotificationsPanel } from '@/components/profile/NotificationsPanel/NotificationsPanel'
 import { ProfileSettingsForm } from '@/components/profile/ProfileSettingsForm/ProfileSettingsForm'
 import { Spinner } from '@/components/ui/Spinner/Spinner'
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar'
-import { useAccountLocation } from '@/hooks/useAccountLocation'
 import { useMyListings } from '@/hooks/useMyListings'
-import { clearAuthToken } from '@/services/authApi'
+import { fetchUnreadMessageCount } from '@/services/messagesApi'
+import { resubmitListing } from '@/services/listingsApi'
 import { buildAvatarUrl } from '@/utils/avatarUrl'
 import { resolveUploadUrl } from '@/utils/mediaUrl'
-import { ROUTES } from '@/utils/constants'
+import { ROUTES, editListingPath } from '@/utils/constants'
+import { getErrorMessage } from '@/utils/errorMessage'
+import { showMessageLightning } from '@/utils/messageLightningToast'
+import { useAuthLogout } from '@/hooks/useAuthLogout'
+import { PushSetupGate } from '@/components/push/PushSetupGate/PushSetupGate'
 import { Reveal } from '@/components/ui/Reveal/Reveal'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ProfilePage.module.css'
 
 function ProfilePage() {
-  const dispatch = useAppDispatch()
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isAuthLoading = useAppSelector(selectAuthLoading)
   const currentUser = useAppSelector(selectCurrentUser)
-  const { accountLocation, isLocating, detectLocation, resetLocation } = useAccountLocation()
-  const { listings: myListings, loading: listingsLoading } = useMyListings(currentUser?.id)
+  const canModerate = useAppSelector(selectCanModerate)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const chatId = searchParams.get('chat')
+  const withUserId = searchParams.get('with')
+  const section = searchParams.get('section')
+  const { listings: myListings, loading: listingsLoading, reload: reloadMyListings } = useMyListings(currentUser?.id)
+  const [resubmittingId, setResubmittingId] = useState<string | null>(null)
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  const [flashUnread, setFlashUnread] = useState(false)
+  const prevUnreadRef = useRef(0)
+  const handleLogout = useAuthLogout()
 
-  const handleLogout = () => {
-    clearAuthToken()
-    dispatch(logout())
-    toast.success('Вы вышли из аккаунта')
-  }
+  const handleUnreadChange = useCallback((count: number) => {
+    if (count > prevUnreadRef.current && prevUnreadRef.current > 0) {
+      setFlashUnread(true)
+      showMessageLightning('Новое сообщение', 'Откройте переписку')
+      window.setTimeout(() => setFlashUnread(false), 1200)
+    }
+    prevUnreadRef.current = count
+    setUnreadMessages(count)
+  }, [])
+
+  const updateChatParam = useCallback((nextChatId: string | null) => {
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+      params.delete('with')
+      params.set('section', 'messages')
+      if (nextChatId) {
+        params.set('chat', nextChatId)
+      } else {
+        params.delete('chat')
+      }
+      return params
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const openMessageWithUser = useCallback((userId: string) => {
+    setSearchParams((current) => {
+      const params = new URLSearchParams(current)
+      params.set('section', 'messages')
+      params.delete('chat')
+      params.set('with', userId)
+      return params
+    }, { replace: true })
+  }, [setSearchParams])
+
+  useEffect(() => {
+    if (!section && !chatId && !withUserId) {
+      setSearchParams((current) => {
+        const params = new URLSearchParams(current)
+        params.set('section', 'messages')
+        return params
+      }, { replace: true })
+    }
+  }, [chatId, section, setSearchParams, withUserId])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadMessages(0);
+      return;
+    }
+    const loadUnread = () => {
+      void fetchUnreadMessageCount()
+        .then(handleUnreadChange)
+        .catch(() => handleUnreadChange(0));
+    };
+    loadUnread();
+    const timer = window.setInterval(loadUnread, 3000);
+    return () => window.clearInterval(timer);
+  }, [isAuthenticated, handleUnreadChange]);
+
+  const handleResubmit = useCallback(async (listingId: string) => {
+    setResubmittingId(listingId)
+    try {
+      await resubmitListing(listingId)
+      toast.success('Объявление снова отправлено на модерацию')
+      await reloadMyListings()
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось отправить объявление на модерацию'))
+    } finally {
+      setResubmittingId(null)
+    }
+  }, [reloadMyListings])
 
   if (isAuthLoading) {
     return (
@@ -61,96 +140,96 @@ function ProfilePage() {
   const avatarSrc = currentUser.avatarUrl
     ? resolveUploadUrl(currentUser.avatarUrl)
     : buildAvatarUrl(currentUser.name, currentUser.email)
-  const canModerate = currentUser.role === 'admin' || currentUser.role === 'moderator'
 
   return (
     <>
-      <PageMeta title="Личный кабинет" canonical="/profile" />
+      <PageMeta title="Профиль" canonical="/profile" />
 
       <div className={pageStyles.page}>
         <div className="container">
-          <div className={styles.profileIntro}>
+          <header className={styles.profileIntro}>
             <UserAvatar name={currentUser.name} src={avatarSrc} size="lg" />
-            <PageHeader
-              badge="Профиль"
-              title="Личный кабинет"
-              subtitle={`Здравствуйте, ${currentUser.name}`}
-            />
-          </div>
+            <div className={styles.profileHeadline}>
+              <p className={styles.profileBadge}>Профиль</p>
+              <h1 className={styles.profileName}>{currentUser.name}</h1>
+              <p className={styles.profileGreeting}>Сообщения и объявления в одном месте</p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={styles.profileLogout}
+                onClick={handleLogout}
+              >
+                Выйти из аккаунта
+              </Button>
+            </div>
+            {unreadMessages > 0 && (
+              <span className={`${styles.unreadPill} ${flashUnread ? styles.unreadPillFlash : ''}`}>
+                ⚡ {unreadMessages} новых
+              </span>
+            )}
+          </header>
 
-          <Reveal delay={60}>
-            <ProfileSettingsForm user={currentUser} />
+          <Reveal delay={40}>
+            <section className={styles.messagesHero} aria-label="Переписка">
+              <div className={styles.messagesHeroHeader}>
+                <h2 className={styles.messagesHeroTitle}>💬 Переписка</h2>
+              </div>
+              <PushSetupGate />
+              <SocialPanel
+                chatId={chatId}
+                withUserId={withUserId}
+                onChatChange={updateChatParam}
+                onUnreadChange={handleUnreadChange}
+                onMessageUser={openMessageWithUser}
+              />
+            </section>
           </Reveal>
 
           <Reveal delay={100}>
+            <ProfileExpandableSection title="Настройки профиля">
+              <ProfileSettingsForm user={currentUser} />
+            </ProfileExpandableSection>
+
             {canModerate && <ModerationDashboard />}
 
-            <section className={styles.locationCard} aria-label="Местоположение аккаунта">
-            <h2 className={styles.locationTitle}>Текущее местоположение</h2>
-            {accountLocation ? (
-              <p className={styles.locationText}>
-                {accountLocation.label}: {accountLocation.lat.toFixed(5)},{' '}
-                {accountLocation.lng.toFixed(5)}
-              </p>
-            ) : (
-              <p className={styles.locationText}>
-                Местоположение не задано. Оно нужно для поиска ближайших услуг на карте.
-              </p>
-            )}
-            <div className={styles.locationActions}>
-              <Button type="button" onClick={detectLocation} loading={isLocating}>
-                Определить местоположение
-              </Button>
-              {accountLocation && (
-                <Button type="button" variant="outline" onClick={resetLocation}>
-                  Сбросить
-                </Button>
-              )}
-            </div>
-          </section>
-          </Reveal>
-
-          <Reveal delay={120}>
-            <div className={styles.actions}>
-              <ButtonLink to={ROUTES.ADD_LISTING}>Добавить объявление</ButtonLink>
-              <Button type="button" variant="outline" onClick={handleLogout}>
-                Выйти
-              </Button>
-            </div>
-
-            <section className={styles.listingsSection} aria-labelledby="my-listings-title">
-              <div className={styles.sectionHead}>
-                <h2 id="my-listings-title" className={styles.sectionTitle}>
-                  Мои объявления
-                </h2>
-                <p className={styles.sectionDesc}>
-                  Управляйте своими услугами в каталоге посёлка
-                </p>
-              </div>
-
-              {listingsLoading ? (
-                <p className={styles.sectionStatus}>Загрузка объявлений…</p>
-              ) : myListings.length > 0 ? (
-                <div className={`${styles.listingsGrid} motion-stagger`}>
+            <ProfileExpandableSection
+              title="Мои объявления"
+              count={myListings.length}
+              loading={listingsLoading}
+            >
+              {myListings.length === 0 ? (
+                <p className={styles.emptyListings}>У вас пока нет объявлений</p>
+              ) : (
+                <div className={styles.listingsList}>
                   {myListings.map((listing) => (
                     <div key={listing.id} className={styles.listingItem}>
-                      <ListingStatusBadge status={listing.status} />
-                      <ListingCard
+                      <CompactListingRow
                         listing={listing}
-                        preview={listing.status !== 'published'}
+                        to={editListingPath(listing.id)}
+                        showAuthor={false}
+                        showArrow={false}
                       />
+                      <div className={styles.listingActions}>
+                        {listing.status === 'rejected' && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            loading={resubmittingId === listing.id}
+                            onClick={() => void handleResubmit(listing.id)}
+                          >
+                            Снова на модерацию
+                          </Button>
+                        )}
+                        <ButtonLink to={editListingPath(listing.id)} size="sm" variant="outline">
+                          Редактировать
+                        </ButtonLink>
+                      </div>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className={styles.emptyListings}>
-                  <p>У вас пока нет объявлений.</p>
-                  <ButtonLink to={ROUTES.ADD_LISTING} size="sm">
-                    Создать первое объявление
-                  </ButtonLink>
-                </div>
               )}
-            </section>
+            </ProfileExpandableSection>
 
             <NotificationsPanel />
             <FavoritesPanel />

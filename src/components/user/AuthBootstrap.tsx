@@ -1,13 +1,23 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/app/hooks';
-import { setUser, setUserError, setUserLoading, setAccountLocation } from '@/features/user/userSlice';
+import { logout, setUserError, setUserLoading, setUser, setAccountLocation } from '@/features/user/userSlice';
 import { clearAuthToken, fetchCurrentUser, getAuthToken } from '@/services/authApi';
+import { ensurePushNotifications } from '@/services/pushApi';
+import { isPushEnabledPreference } from '@/utils/pushPreferences';
+import { setUnauthorizedHandler } from '@/services/api';
 import { fetchFavorites } from '@/services/favoritesApi';
 import { setFavorites } from '@/features/favorites/favoritesSlice';
 import { loadStoredAccountLocation, saveStoredAccountLocation } from '@/utils/accountLocationStorage';
 import { saveUserLocation } from '@/services/usersApi';
 function AuthBootstrap() {
     const dispatch = useAppDispatch();
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            clearAuthToken();
+            dispatch(logout());
+            dispatch(setUserError('Сессия истекла. Войдите снова.'));
+        });
+    }, [dispatch]);
     useEffect(() => {
         const token = getAuthToken();
         if (!token)
@@ -16,6 +26,7 @@ function AuthBootstrap() {
         fetchCurrentUser()
             .then(async (user) => {
             dispatch(setUser(user));
+            void ensurePushNotifications({ requestPermission: isPushEnabledPreference() });
             const local = loadStoredAccountLocation();
             if (local) {
                 dispatch(setAccountLocation(local));

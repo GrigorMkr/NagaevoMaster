@@ -1,12 +1,17 @@
 /** Абсолютный URL для /uploads с API-сервера */
+import { ensureHttpsUrl } from '@/utils/secureUrl';
+
 function resolveUploadUrl(path: string): string {
-  if (!path || path.startsWith('http') || path.startsWith('data:')) {
+  if (!path || path.startsWith('data:')) {
     return path;
+  }
+  if (path.startsWith('http')) {
+    return ensureHttpsUrl(path);
   }
   const apiBase = import.meta.env.VITE_API_URL ?? '/api';
   if (apiBase.startsWith('http')) {
     const origin = apiBase.replace(/\/api\/?$/, '');
-    return `${origin}${path.startsWith('/') ? path : `/${path}`}`;
+    return ensureHttpsUrl(`${origin}${path.startsWith('/') ? path : `/${path}`}`);
   }
   return path;
 }

@@ -5,7 +5,7 @@ import styles from './AuthRequiredPanel.module.css'
 
 interface AuthRequiredPanelProps {
   title: string
-  description: string
+  description?: string
 }
 
 const AuthRequiredPanel = memo(function AuthRequiredPanel({
@@ -15,7 +15,7 @@ const AuthRequiredPanel = memo(function AuthRequiredPanel({
   return (
     <div className={styles.panel}>
       <p className={styles.title}>{title}</p>
-      <p className={styles.description}>{description}</p>
+      {description && <p className={styles.description}>{description}</p>}
       <ButtonLink to={ROUTES.AUTH} size="lg">
         Войти или зарегистрироваться
       </ButtonLink>

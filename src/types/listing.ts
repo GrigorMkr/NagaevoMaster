@@ -29,6 +29,7 @@ interface Listing {
   unit: PriceUnit;
   rating: number;
   reviewsCount: number;
+  viewsCount?: number;
   images: string[];
   location: ListingLocation;
   phone: string;

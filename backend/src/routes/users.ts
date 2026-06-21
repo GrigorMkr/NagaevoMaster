@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
+import { HttpError } from '../middleware/errorHandler.js';
+import { routeParam } from '../utils/params.js';
 import { toListingResponse, toReviewResponse, toUserResponse } from '../utils/mappers.js';
 const usersRouter = Router();
 const listingUserSelect = {
@@ -15,7 +17,7 @@ const listingUserSelect = {
 const updateProfileSchema = z.object({
     name: z.string().min(2).optional(),
     phone: z.string().min(10).optional(),
-    avatarUrl: z.string().min(1).max(500_000).optional(),
+    avatarUrl: z.string().url().max(2048).optional(),
 });
 usersRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
     try {
@@ -105,6 +107,59 @@ usersRouter.get('/me/reviews', requireAuth, async (req: AuthRequest, res, next) 
             listingTitle: review.listing.title,
             listingId: review.listing.id,
         })));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+usersRouter.get('/:userId/profile', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        const userId = routeParam(req.params.userId);
+        const viewerId = req.user!.id;
+
+        const block = await prisma.userBlock.findFirst({
+            where: {
+                OR: [
+                    { blockerId: viewerId, blockedId: userId },
+                    { blockerId: userId, blockedId: viewerId },
+                ],
+            },
+        });
+        if (block) {
+            throw new HttpError(403, 'Профиль недоступен');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                avatarUrl: true,
+                isBanned: true,
+            },
+        });
+        if (!user || user.isBanned) {
+            throw new HttpError(404, 'Пользователь не найден');
+        }
+
+        const listings = await prisma.listing.findMany({
+            where: { userId, status: 'published' },
+            include: { user: listingUserSelect },
+            orderBy: { updatedAt: 'desc' },
+            take: 12,
+        });
+
+        res.json({
+            user: {
+                id: user.id,
+                name: user.name,
+                login: user.email.split('@')[0] ?? user.email,
+                avatarUrl: user.avatarUrl ?? undefined,
+            },
+            listings: listings.map((listing) => toListingResponse(listing, listing.user)),
+        });
     }
     catch (error) {
         next(error);

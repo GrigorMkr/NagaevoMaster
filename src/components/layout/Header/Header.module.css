@@ -122,6 +122,28 @@
   border-radius: var(--radius-full);
 }
 
+.profileGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.logoutButton {
+  flex-shrink: 0;
+}
+
+.headerNative .inner {
+  min-height: 56px;
+}
+
+.nativeActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+}
+
 .profileLink:hover {
   color: var(--color-primary);
 }
@@ -131,6 +153,25 @@
   height: 8px;
   background: #c62828;
   border-radius: 50%;
+}
+
+.messagesLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.messageBadge {
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: var(--radius-full);
+  background: var(--color-mint);
+  color: #0a1f18;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
 }
 
 @media (max-width: 1024px) {

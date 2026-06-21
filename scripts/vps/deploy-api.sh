@@ -20,7 +20,7 @@ echo "==> npm install + build"
 export NPM_CONFIG_PRODUCTION=false
 npm install
 npm run build
-npx prisma db push
+npx prisma db push --accept-data-loss
 if [[ "${RUN_SEED:-false}" == "true" ]]; then
   npm run db:seed
 fi

@@ -37,6 +37,10 @@ if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
     $forwardHeaders[] = 'Authorization: ' . $_SERVER['HTTP_AUTHORIZATION'];
 }
 
+if (!empty($_SERVER['HTTP_COOKIE'])) {
+    $forwardHeaders[] = 'Cookie: ' . $_SERVER['HTTP_COOKIE'];
+}
+
 $body = in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)
     ? file_get_contents('php://input')
     : null;

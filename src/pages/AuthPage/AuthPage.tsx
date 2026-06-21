@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,18 +11,27 @@ import {
   loginRequest,
   resetPasswordRequest,
   saveAuthToken,
+  fetchOAuthStatus,
+  fetchCaptchaConfig,
   sendRecoveryCode,
   sendRegistrationCode,
   verifyRegistrationCode,
+  type OAuthStatus,
   type VerificationChannel,
 } from '@/services/authApi'
+import { ensurePushNotifications } from '@/services/pushApi'
+import { resolveOAuthApiBase } from '@/utils/oauthApiBase'
+import { openOAuthUrl } from '@/utils/nativeNavigation'
+import { completeOAuthLogin } from '@/services/completeOAuthLogin'
+import { RecaptchaWidget } from '@/components/auth/RecaptchaWidget/RecaptchaWidget'
+import { GoogleLogo, VkLogo } from '@/components/auth/OAuthLogoButton/OAuthLogos'
 import { ROUTES } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errorMessage'
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta'
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader'
 import { Button } from '@/components/ui/Button/Button'
 import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput'
-import { Spinner } from '@/components/ui/Spinner/Spinner'
+import { AppLoadingScreen } from '@/components/ui/AppLoadingScreen/AppLoadingScreen'
 import { ECHO_FORM_ACTION } from '@/constants/forms'
 import { VALIDATION } from '@/constants/validation'
 import { requestLocationPromptAfterAuth } from '@/constants/user-location'
@@ -46,6 +55,7 @@ enum RecoveryStep {
 }
 
 const RESEND_COOLDOWN_SEC = 60
+const VK_KNOWN_APP_ID = '54646092'
 
 const loginSchema = z.object({
   user: z.string().email('Введите корректный email'),
@@ -80,22 +90,44 @@ type RecoveryForm = z.infer<typeof recoverySchema>
 type RecoveryResetForm = z.infer<typeof recoveryResetSchema>
 type CodeForm = z.infer<typeof codeSchema>
 
+function resolveAuthTab(tab: string | null): AuthTab {
+  if (tab === 'register') return AuthTab.Register
+  if (tab === 'recovery') return AuthTab.Recovery
+  return AuthTab.Login
+}
+
 function AuthPage() {
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isAuthLoading = useAppSelector(selectAuthLoading)
-  const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.Login)
+  const returnPath = useMemo(() => {
+    const from = searchParams.get('from')
+    if (from && from.startsWith('/') && !from.startsWith('//')) {
+      return from
+    }
+    return ROUTES.PROFILE
+  }, [searchParams])
+  const [activeTab, setActiveTab] = useState<AuthTab>(() => resolveAuthTab(searchParams.get('tab')))
   const [registerStep, setRegisterStep] = useState<RegisterStep>(RegisterStep.Form)
   const [recoveryStep, setRecoveryStep] = useState<RecoveryStep>(RecoveryStep.Form)
   const [recoveryEmail, setRecoveryEmail] = useState('')
-  const [verificationChannel, setVerificationChannel] = useState<VerificationChannel>('email')
+  const verificationChannel: VerificationChannel = 'email'
   const [verificationTarget, setVerificationTarget] = useState('')
   const [pendingRegisterData, setPendingRegisterData] = useState<RegisterForm | null>(null)
+  const [oauthStatus, setOauthStatus] = useState<OAuthStatus | null>(null)
   const [resendSeconds, setResendSeconds] = useState(0)
   const [isSendingCode, setIsSendingCode] = useState(false)
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
   const [isSendingRecovery, setIsSendingRecovery] = useState(false)
   const [isResettingPassword, setIsResettingPassword] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [rememberDevice, setRememberDevice] = useState(true)
+  const [captchaRequired, setCaptchaRequired] = useState(false)
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
@@ -111,18 +143,114 @@ function AuthPage() {
     return () => window.clearInterval(timer)
   }, [resendSeconds])
 
+  useEffect(() => {
+    void fetchCaptchaConfig()
+      .then((config) => {
+        setCaptchaRequired(config.required);
+        setCaptchaSiteKey(config.siteKey);
+      })
+      .catch(() => {
+        setCaptchaRequired(false);
+        setCaptchaSiteKey(null);
+      });
+  }, []);
+
+  useEffect(() => {
+    void fetchOAuthStatus()
+      .then((status) => setOauthStatus({
+        ...status,
+        vkAppId: status.vkAppId ?? VK_KNOWN_APP_ID,
+      }))
+      .catch(() => setOauthStatus({
+        google: false,
+        vk: false,
+        vkAppId: VK_KNOWN_APP_ID,
+        siteUrl: 'https://nagaevomaster.ru',
+        googleCallback: 'https://nagaevomaster.ru/api/auth/google/callback',
+        vkCallback: 'https://nagaevomaster.ru/api/auth/vk/callback',
+      }))
+  }, [])
+
+  useEffect(() => {
+    const oauthError = searchParams.get('oauth_error')
+    const oauthCode = searchParams.get('code')
+    const oauth = searchParams.get('oauth')
+    if (oauthError) {
+      toast.error(decodeURIComponent(oauthError))
+      setSearchParams({}, { replace: true })
+      return
+    }
+    if (oauth !== '1' || !oauthCode) return
+    void completeOAuthLogin(`?${searchParams.toString()}`).then((result) => {
+      if (result.status === 'success') {
+        navigate(result.returnPath, { replace: true })
+      } else if (result.status === 'error') {
+        toast.error(result.message)
+      }
+    }).finally(() => {
+      setSearchParams({}, { replace: true })
+    })
+  }, [dispatch, navigate, returnPath, searchParams, setSearchParams])
+
+  useEffect(() => {
+    setActiveTab(resolveAuthTab(searchParams.get('tab')))
+  }, [searchParams])
+
+  const apiBase = resolveOAuthApiBase()
+  const googleAuthUrl = `${apiBase}/auth/google`
+  const vkAuthUrl = `${apiBase}/auth/vk`
+  const resolvedVkAppId = oauthStatus?.vkAppId ?? VK_KNOWN_APP_ID
+  const oauthEnabled = Boolean(oauthStatus?.google || oauthStatus?.vk || resolvedVkAppId)
+
+  const oauthButtons = oauthStatus && oauthEnabled ? (
+    <div className={styles.oauthRow}>
+      {oauthStatus.google && (
+        <button
+          type="button"
+          className={styles.oauthLogoBtn}
+          aria-label="Войти через Google"
+          onClick={() => void openOAuthUrl(googleAuthUrl)}
+        >
+          <GoogleLogo />
+        </button>
+      )}
+      {(oauthStatus.vk || resolvedVkAppId) && (
+        <button
+          type="button"
+          className={styles.oauthLogoBtn}
+          aria-label="Войти через ВКонтакте"
+          onClick={() => void openOAuthUrl(vkAuthUrl)}
+        >
+          <VkLogo />
+        </button>
+      )}
+    </div>
+  ) : null
+
+  const oauthBlock = oauthButtons ? (
+    <>
+      {oauthButtons}
+      <p className={styles.oauthHint}>или войдите по email и паролю</p>
+    </>
+  ) : null
+
+  const oauthRegisterBlock = oauthButtons ? (
+    <>
+      {oauthButtons}
+      <p className={styles.oauthHint}>или зарегистрируйтесь по email</p>
+    </>
+  ) : null
+
+  const goAfterAuth = () => {
+    navigate(returnPath, { replace: true })
+  }
+
   if (isAuthLoading) {
-    return (
-      <div className={pageStyles.page}>
-        <div className="container">
-          <Spinner />
-        </div>
-      </div>
-    )
+    return <AppLoadingScreen label="Проверяем сессию…" />
   }
 
   if (isAuthenticated) {
-    return <Navigate to={ROUTES.PROFILE} replace />
+    return <Navigate to={returnPath} replace />
   }
 
   const resetRegisterFlow = () => {
@@ -146,14 +274,29 @@ function AuthPage() {
   }
 
   const handleLogin = async (data: LoginForm) => {
+    if (captchaRequired && !captchaToken) {
+      toast.error('Подтвердите, что вы не робот')
+      return
+    }
+    setIsLoggingIn(true)
     try {
-      const response = await loginRequest(data.user, data.password)
+      const response = await loginRequest(
+        data.user,
+        data.password,
+        rememberDevice,
+        captchaToken ?? undefined,
+      )
       saveAuthToken(response.token)
       dispatch(setUser(response.user))
-      requestLocationPromptAfterAuth()
+      void ensurePushNotifications({ requestPermission: true })
       toast.success(`Добро пожаловать, ${response.user.name}!`)
+      goAfterAuth()
     } catch (error) {
+      setCaptchaToken(null)
+      setCaptchaResetKey((value) => value + 1)
       toast.error(getErrorMessage(error, 'Ошибка входа'))
+    } finally {
+      setIsLoggingIn(false)
     }
   }
 
@@ -190,9 +333,11 @@ function AuthPage() {
       )
       saveAuthToken(response.token)
       dispatch(setUser(response.user))
+      void ensurePushNotifications({ requestPermission: true })
       requestLocationPromptAfterAuth()
       resetRegisterFlow()
       toast.success('Регистрация подтверждена')
+      goAfterAuth()
     } catch (error) {
       toast.error(getErrorMessage(error, 'Неверный код'))
     } finally {
@@ -231,12 +376,13 @@ function AuthPage() {
       const response = await resetPasswordRequest(recoveryEmail, data.code, data.password)
       saveAuthToken(response.token)
       dispatch(setUser(response.user))
-      requestLocationPromptAfterAuth()
+      void ensurePushNotifications({ requestPermission: true })
       setRecoveryStep(RecoveryStep.Form)
       setRecoveryEmail('')
       recoveryForm.reset()
       recoveryResetForm.reset()
       toast.success('Пароль обновлён, вы вошли в аккаунт')
+      goAfterAuth()
     } catch (error) {
       toast.error(getErrorMessage(error, 'Не удалось сменить пароль'))
     } finally {
@@ -258,17 +404,21 @@ function AuthPage() {
     }
   }
 
-  const verificationHint = verificationChannel === 'email'
-    ? `Код отправлен на ${verificationTarget}`
-    : `Код отправлен на ${verificationTarget}`
+  const verificationHint = `Код отправлен на ${verificationTarget}`
 
   return (
     <>
       <PageMeta title="Вход и регистрация" canonical="/auth" />
 
-      <div className={pageStyles.page}>
-        <div className="container">
-          <PageHeader badge="Аккаунт" title="Вход и регистрация" />
+      <div className={`${pageStyles.page} ${styles.page}`}>
+        <div className={`container ${styles.container}`}>
+          <div className={`${styles.shell} ${activeTab === AuthTab.Register ? styles.shellRegister : ''}`}>
+            <PageHeader badge="Аккаунт" title="Вход и регистрация" />
+            {activeTab !== AuthTab.Register && (
+              <p className={styles.lead}>
+                Зарегистрируйтесь, чтобы пользоваться услугами, поиском и форумом деревни Нагаево
+              </p>
+            )}
 
           <div className={styles.tabs} role="tablist" aria-label="Формы авторизации">
             <button
@@ -302,7 +452,8 @@ function AuthPage() {
 
           {activeTab === AuthTab.Login && (
             <section className={`${styles.card} ${styles.tabPanel}`} key="login">
-              <h2 className="titleSection">Вход</h2>
+              <h2 className={styles.cardTitle}>Вход в аккаунт</h2>
+              {oauthBlock}
               <form
                 className={styles.form}
                 action={ECHO_FORM_ACTION}
@@ -310,35 +461,57 @@ function AuthPage() {
                 onSubmit={loginForm.handleSubmit(handleLogin)}
                 noValidate
               >
-                <label htmlFor="login-email">Email</label>
-                <input
-                  id="login-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className={pageStyles.input}
-                  {...loginForm.register('user')}
-                />
-                {loginForm.formState.errors.user && (
-                  <span className={pageStyles.formError}>
-                    {loginForm.formState.errors.user.message}
-                  </span>
+                <div className={styles.field}>
+                  <label htmlFor="login-email">Email</label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    className={pageStyles.input}
+                    {...loginForm.register('user')}
+                  />
+                  {loginForm.formState.errors.user && (
+                    <span className={pageStyles.formError}>
+                      {loginForm.formState.errors.user.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className={styles.field}>
+                  <label htmlFor="login-password">Пароль</label>
+                  <PasswordInput
+                    id="login-password"
+                    required
+                    autoComplete="current-password"
+                    {...loginForm.register('password')}
+                  />
+                  {loginForm.formState.errors.password && (
+                    <span className={pageStyles.formError}>
+                      {loginForm.formState.errors.password.message}
+                    </span>
+                  )}
+                </div>
+
+                <label className={styles.rememberRow}>
+                  <input
+                    type="checkbox"
+                    checked={rememberDevice}
+                    onChange={(event) => setRememberDevice(event.target.checked)}
+                  />
+                  <span>Запомнить это устройство</span>
+                </label>
+
+                {captchaRequired && captchaSiteKey && (
+                  <RecaptchaWidget
+                    key={captchaResetKey}
+                    siteKey={captchaSiteKey}
+                    onChange={setCaptchaToken}
+                  />
                 )}
 
-                <label htmlFor="login-password">Пароль</label>
-                <PasswordInput
-                  id="login-password"
-                  required
-                  autoComplete="current-password"
-                  {...loginForm.register('password')}
-                />
-                {loginForm.formState.errors.password && (
-                  <span className={pageStyles.formError}>
-                    {loginForm.formState.errors.password.message}
-                  </span>
-                )}
-
-                <Button type="submit" fullWidth>
+                <Button type="submit" fullWidth loading={isLoggingIn}>
                   Войти
                 </Button>
               </form>
@@ -346,137 +519,136 @@ function AuthPage() {
           )}
 
           {activeTab === AuthTab.Register && registerStep === RegisterStep.Form && (
-            <section className={`${styles.card} ${styles.tabPanel}`} key="register-form">
-              <h2 className="titleSection">Регистрация</h2>
-              <p className={styles.hint}>
-                Подтвердите аккаунт кодом из email или SMS — без этого вход будет недоступен.
-              </p>
-
-              <div className={styles.channelGroup} role="radiogroup" aria-label="Способ подтверждения">
-                <label className={verificationChannel === 'email' ? styles.channelActive : styles.channel}>
-                  <input
-                    type="radio"
-                    name="verification-channel"
-                    value="email"
-                    checked={verificationChannel === 'email'}
-                    onChange={() => setVerificationChannel('email')}
-                  />
-                  <span>Подтвердить email</span>
-                </label>
-                <label className={verificationChannel === 'sms' ? styles.channelActive : styles.channel}>
-                  <input
-                    type="radio"
-                    name="verification-channel"
-                    value="sms"
-                    checked={verificationChannel === 'sms'}
-                    onChange={() => setVerificationChannel('sms')}
-                  />
-                  <span>Подтвердить телефон (SMS)</span>
-                </label>
+            <section className={`${styles.card} ${styles.tabPanel} ${styles.registerCard}`} key="register-form">
+              <div className={styles.registerHero}>
+                <p className={styles.registerStep}>Шаг 1 из 2</p>
+                <h2 className={styles.registerTitle}>Новый аккаунт</h2>
               </div>
 
+              <p className={styles.emailNote}>
+                Подтверждение по email
+                <span className={styles.smsMuted}> · SMS пока в разработке</span>
+              </p>
+
+              {oauthRegisterBlock}
+
               <form
-                className={styles.form}
+                className={`${styles.form} ${styles.registerForm}`}
                 action={ECHO_FORM_ACTION}
                 method="post"
                 onSubmit={registerForm.handleSubmit(handleSendCode)}
                 noValidate
               >
-                <label htmlFor="register-name">Имя</label>
-                <input
-                  id="register-name"
-                  type="text"
-                  required
-                  autoComplete="name"
-                  className={pageStyles.input}
-                  {...registerForm.register('name')}
-                />
-                {registerForm.formState.errors.name && (
-                  <span className={pageStyles.formError}>
-                    {registerForm.formState.errors.name.message}
-                  </span>
-                )}
+                <div className={styles.field}>
+                  <label htmlFor="register-name">Имя</label>
+                  <input
+                    id="register-name"
+                    type="text"
+                    required
+                    autoComplete="name"
+                    placeholder="Как к вам обращаться"
+                    className={pageStyles.input}
+                    {...registerForm.register('name')}
+                  />
+                  {registerForm.formState.errors.name && (
+                    <span className={pageStyles.formError}>
+                      {registerForm.formState.errors.name.message}
+                    </span>
+                  )}
+                </div>
 
-                <label htmlFor="register-email">Email</label>
-                <input
-                  id="register-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className={pageStyles.input}
-                  {...registerForm.register('user')}
-                />
-                {registerForm.formState.errors.user && (
-                  <span className={pageStyles.formError}>
-                    {registerForm.formState.errors.user.message}
-                  </span>
-                )}
+                <div className={styles.field}>
+                  <label htmlFor="register-email">Email</label>
+                  <input
+                    id="register-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    className={pageStyles.input}
+                    {...registerForm.register('user')}
+                  />
+                  {registerForm.formState.errors.user && (
+                    <span className={pageStyles.formError}>
+                      {registerForm.formState.errors.user.message}
+                    </span>
+                  )}
+                </div>
 
-                <label htmlFor="register-phone">Телефон</label>
-                <input
-                  id="register-phone"
-                  type="tel"
-                  required
-                  autoComplete="tel"
-                  placeholder="+7 (900) 000-00-00"
-                  className={pageStyles.input}
-                  {...registerForm.register('phone')}
-                />
-                {registerForm.formState.errors.phone && (
-                  <span className={pageStyles.formError}>
-                    {registerForm.formState.errors.phone.message}
-                  </span>
-                )}
+                <div className={styles.field}>
+                  <label htmlFor="register-phone">Телефон</label>
+                  <input
+                    id="register-phone"
+                    type="tel"
+                    required
+                    autoComplete="tel"
+                    placeholder="+7 (900) 000-00-00"
+                    className={pageStyles.input}
+                    {...registerForm.register('phone')}
+                  />
+                  {registerForm.formState.errors.phone && (
+                    <span className={pageStyles.formError}>
+                      {registerForm.formState.errors.phone.message}
+                    </span>
+                  )}
+                </div>
 
-                <label htmlFor="register-password">Пароль</label>
-                <PasswordInput
-                  id="register-password"
-                  required
-                  autoComplete="new-password"
-                  {...registerForm.register('password')}
-                />
-                {registerForm.formState.errors.password && (
-                  <span className={pageStyles.formError}>
-                    {registerForm.formState.errors.password.message}
-                  </span>
-                )}
+                <div className={styles.field}>
+                  <label htmlFor="register-password">Пароль</label>
+                  <PasswordInput
+                    id="register-password"
+                    required
+                    autoComplete="new-password"
+                    {...registerForm.register('password')}
+                  />
+                  {registerForm.formState.errors.password && (
+                    <span className={pageStyles.formError}>
+                      {registerForm.formState.errors.password.message}
+                    </span>
+                  )}
+                </div>
 
-                <Button type="submit" fullWidth variant="secondary" disabled={isSendingCode}>
-                  {isSendingCode ? 'Отправляем код…' : 'Получить код подтверждения'}
+                <Button type="submit" fullWidth variant="secondary" loading={isSendingCode}>
+                  Получить код
                 </Button>
               </form>
             </section>
           )}
 
           {activeTab === AuthTab.Register && registerStep === RegisterStep.Code && (
-            <section className={`${styles.card} ${styles.tabPanel}`} key="register-code">
-              <h2 className="titleSection">Подтверждение</h2>
-              <p className={styles.hint}>{verificationHint}</p>
+            <section className={`${styles.card} ${styles.tabPanel} ${styles.registerCard}`} key="register-code">
+              <div className={styles.registerHero}>
+                <p className={styles.registerStep}>Шаг 2 из 2</p>
+                <h2 className={styles.registerTitle}>Код из письма</h2>
+              </div>
+              <p className={styles.emailNote}>{verificationHint}</p>
 
               <form
-                className={styles.form}
+                className={`${styles.form} ${styles.registerForm}`}
                 onSubmit={codeForm.handleSubmit(handleVerifyCode)}
                 noValidate
               >
-                <label htmlFor="register-code">Код из {verificationChannel === 'email' ? 'письма' : 'SMS'}</label>
-                <input
-                  id="register-code"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  placeholder="000000"
-                  className={`${pageStyles.input} ${styles.codeInput}`}
-                  {...codeForm.register('code')}
-                />
-                {codeForm.formState.errors.code && (
-                  <span className={pageStyles.formError}>
-                    {codeForm.formState.errors.code.message}
-                  </span>
-                )}
+                <div className={styles.field}>
+                  <label htmlFor="register-code">Код из письма</label>
+                  <input
+                    id="register-code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    className={`${pageStyles.input} ${styles.codeInput}`}
+                    {...codeForm.register('code')}
+                  />
+                  {codeForm.formState.errors.code && (
+                    <span className={pageStyles.formError}>
+                      {codeForm.formState.errors.code.message}
+                    </span>
+                  )}
+                </div>
 
-                <Button type="submit" fullWidth disabled={isVerifyingCode}>
-                  {isVerifyingCode ? 'Проверяем…' : 'Подтвердить и зарегистрироваться'}
+                <Button type="submit" fullWidth loading={isVerifyingCode}>
+                  Подтвердить и зарегистрироваться
                 </Button>
 
                 <div className={styles.secondaryActions}>
@@ -592,6 +764,7 @@ function AuthPage() {
               </form>
             </section>
           )}
+          </div>
         </div>
       </div>
     </>

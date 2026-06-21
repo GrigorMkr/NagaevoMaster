@@ -25,22 +25,22 @@ function HomePage() {
         <div className="container">
           <Reveal>
             <NewsSection
-              badge="Новости"
-              title="Новости Нагаево"
-              description="События микрорайона — концерты, праздники и жизнь поселка"
+              badge="Посёлок"
+              title="Новости"
               items={local}
               loading={newsLoading}
-              moreLinkLabel="Все новости поселка →"
+              moreLinkLabel="Все новости →"
+              direction="left"
             />
           </Reveal>
           <Reveal delay={80}>
             <NewsSection
               badge="Регион"
-              title="Новости из интернета"
-              description="Материалы о Нагаево и Башкортостане из региональных СМИ"
+              title="Из СМИ"
               items={external}
               loading={newsLoading}
-              moreLinkLabel="Все региональные новости →"
+              moreLinkLabel="Ещё →"
+              direction="right"
             />
           </Reveal>
           <Reveal delay={120}>

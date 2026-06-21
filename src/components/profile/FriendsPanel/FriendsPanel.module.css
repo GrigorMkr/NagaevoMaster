@@ -1,0 +1,199 @@
+.panel {
+  position: relative;
+}
+
+.searchRow {
+  margin-bottom: 0.65rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  background: rgba(8, 31, 24, 0.5);
+  color: inherit;
+  font: inherit;
+  font-size: 16px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: rgba(77, 208, 160, 0.45);
+  box-shadow: 0 0 0 2px rgba(77, 208, 160, 0.12);
+}
+
+.section {
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.4rem;
+  padding: 0 0.15rem;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: var(--radius-full);
+  background: rgba(77, 208, 160, 0.18);
+  color: var(--color-mint);
+  font-size: 0.68rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.list {
+  display: grid;
+  gap: 0.3rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.friendsGrid {
+  gap: 0.35rem;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-lg);
+  background: rgba(8, 31, 24, 0.28);
+  border: 1px solid transparent;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.row:hover {
+  background: rgba(12, 42, 33, 0.55);
+}
+
+.rowActive {
+  border-color: rgba(126, 200, 168, 0.28);
+  background: rgba(12, 42, 33, 0.62);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.identity {
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.userName {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userLogin {
+  display: block;
+  margin-top: 0.05rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-mint);
+  background: rgba(77, 208, 160, 0.14);
+  border: 1px solid rgba(77, 208, 160, 0.22);
+}
+
+.empty {
+  margin: 0;
+  padding: 0.35rem 0.15rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .row {
+    padding: 0.4rem 0.5rem;
+    gap: 0.45rem;
+  }
+
+  .badge {
+    display: none;
+  }
+
+  .hint {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .searchInput {
+    font-size: var(--font-size-sm);
+    padding: 0.65rem 0.95rem;
+  }
+
+  .friendsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .row {
+    padding: 0.6rem 0.7rem;
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 55%),
+      rgba(8, 31, 24, 0.42);
+  }
+
+  .row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  }
+
+  .hint {
+    display: none;
+  }
+}
+
+@media (min-width: 1100px) {
+  .friendsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

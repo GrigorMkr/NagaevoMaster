@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, readFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -48,4 +48,12 @@ const htaccessDst = path.join(root, 'dist', '.htaccess')
 if (existsSync(htaccessSrc)) {
   copyFileSync(htaccessSrc, htaccessDst)
   console.log('Скопирован .htaccess для Apache (SPA-маршруты)')
+}
+
+const apkSrc = path.join(root, 'public', 'downloads', 'nagaevomaster.apk')
+const apkDst = path.join(root, 'dist', 'downloads', 'nagaevomaster.apk')
+if (existsSync(apkSrc)) {
+  mkdirSync(path.dirname(apkDst), { recursive: true })
+  copyFileSync(apkSrc, apkDst)
+  console.log('Скопирован APK в dist/downloads/nagaevomaster.apk')
 }

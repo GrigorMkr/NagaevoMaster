@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useAppSelector } from '@/app/hooks';
+import { selectCanModerate } from '@/features/user/userSelectors';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import toast from 'react-hot-toast';
-import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
-import { ListingStatusBadge } from '@/components/listings/ListingStatusBadge/ListingStatusBadge';
-import { Button } from '@/components/ui/Button/Button';
+import { CompactListingRow } from '@/components/listings/CompactListingRow/CompactListingRow';
+import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
+import { ModerationReviewModal, type ReviewMode } from '@/components/moderation/ModerationReviewModal/ModerationReviewModal';
 import {
   fetchModerationListings,
+  fetchModerationOnlineStats,
   fetchModerationReports,
-  moderateListingStatus,
-  updateReportStatus,
-  type ModerationReport,
 } from '@/services/moderationApi';
 import type { Listing, ListingStatus } from '@/types/listing';
 import { getErrorMessage } from '@/utils/errorMessage';
@@ -26,12 +25,16 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 function ModerationDashboard() {
+  const canModerate = useAppSelector(selectCanModerate);
   const [tab, setTab] = useState<TabId>('pending');
   const [listings, setListings] = useState<Listing[]>([]);
-  const [reports, setReports] = useState<ModerationReport[]>([]);
+  const [reports, setReports] = useState<Awaited<ReturnType<typeof fetchModerationReports>>>([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [guestsOnline, setGuestsOnline] = useState(0);
+  const [usersOnline, setUsersOnline] = useState(0);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [reviewMode, setReviewMode] = useState<ReviewMode | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -58,138 +61,131 @@ function ModerationDashboard() {
     void load();
   }, [load]);
 
-  const handleModerate = async (id: string, status: 'published' | 'rejected') => {
-    setBusyId(id);
-    try {
-      await moderateListingStatus(id, status);
-      setListings((prev) => prev.filter((item) => item.id !== id));
-      toast.success(status === 'published' ? 'Объявление опубликовано' : 'Объявление отклонено');
-    } catch (error) {
-      toast.error(getErrorMessage(error, 'Ошибка модерации'));
-    } finally {
-      setBusyId(null);
-    }
+  useEffect(() => {
+    fetchModerationListings('pending')
+      .then((items) => setPendingCount(items.length))
+      .catch(() => setPendingCount(0));
+  }, [listings, reports]);
+
+  useEffect(() => {
+    const loadOnline = () => {
+      void fetchModerationOnlineStats()
+        .then((stats) => {
+          setGuestsOnline(stats.guestsOnline);
+          setUsersOnline(stats.usersOnline);
+        })
+        .catch(() => {
+          setGuestsOnline(0);
+          setUsersOnline(0);
+        });
+    };
+    loadOnline();
+    const timer = window.setInterval(loadOnline, 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const openListingReview = (listingId: string) => {
+    if (tab === 'reports') return;
+    setReviewMode({ kind: 'listing', listingId, tab: tab as ListingStatus });
   };
 
-  const handleReport = async (id: string, status: 'resolved' | 'dismissed') => {
-    setBusyId(id);
-    try {
-      await updateReportStatus(id, status);
-      setReports((prev) => prev.filter((item) => item.id !== id));
-      toast.success(status === 'resolved' ? 'Жалоба обработана' : 'Жалоба отклонена');
-    } catch (error) {
-      toast.error(getErrorMessage(error, 'Не удалось обновить жалобу'));
-    } finally {
-      setBusyId(null);
-    }
+  const openReportReview = (reportId: string) => {
+    setReviewMode({ kind: 'report', reportId });
   };
 
   return (
-    <section className={styles.section} aria-labelledby="moderation-title">
-      <h2 id="moderation-title" className={styles.title}>Панель модератора</h2>
-      <p className={styles.desc}>
-        Очередь объявлений, история решений и жалобы пользователей
-      </p>
+    <>
+      <ProfileExpandableSection title="Панель модератора" count={pendingCount} loading={loading && pendingCount === 0}>
+        {canModerate && <span className={styles.adminBadge}>Полные права</span>}
+        <div className={styles.onlineStats} aria-label="Пользователи в сети">
+          <span className={styles.onlineStat}>
+            Гости в сети: <strong>{guestsOnline}</strong>
+          </span>
+          <span className={styles.onlineStat}>
+            Зарегистрированные: <strong>{usersOnline}</strong>
+          </span>
+        </div>
 
-      <div className={styles.tabs} role="tablist" aria-label="Разделы модерации">
-        {TABS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            role="tab"
-            aria-selected={tab === item.id}
-            className={tab === item.id ? styles.tabActive : styles.tab}
-            onClick={() => setTab(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {apiError && (
-        <p className={styles.error}>
-          {apiError}
-          {apiError.includes('не найден') && (
-            <> — обновите API на сервере: <code>bash scripts/vps/deploy-api.sh</code></>
-          )}
-        </p>
-      )}
-
-      {loading ? (
-        <p className={styles.status}>Загрузка…</p>
-      ) : tab === 'reports' ? (
-        reports.length === 0 ? (
-          <p className={styles.status}>Жалоб нет</p>
-        ) : (
-          <ul className={styles.reportList}>
-            {reports.map((report) => (
-              <li key={report.id} className={styles.reportItem}>
-                <p className={styles.reportTitle}>{report.listingTitle}</p>
-                <p className={styles.reportMeta}>
-                  {report.reporterName} · {report.status} ·{' '}
-                  {format(new Date(report.createdAt), 'd MMM yyyy, HH:mm', { locale: ru })}
-                </p>
-                {report.reason && <p className={styles.reportReason}>{report.reason}</p>}
-                {report.status === 'pending' && (
-                  <div className={styles.actions}>
-                    <Button
-                      size="sm"
-                      loading={busyId === report.id}
-                      onClick={() => void handleReport(report.id, 'resolved')}
-                    >
-                      Принять меры
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      loading={busyId === report.id}
-                      onClick={() => void handleReport(report.id, 'dismissed')}
-                    >
-                      Отклонить жалобу
-                    </Button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )
-      ) : listings.length === 0 ? (
-        <p className={styles.status}>
-          {tab === 'pending' ? 'Очередь пуста — новых объявлений нет' : 'Записей нет'}
-        </p>
-      ) : (
-        <div className={styles.queue}>
-          {listings.map((listing) => (
-            <article key={listing.id} className={styles.item}>
-              <ListingStatusBadge status={listing.status} />
-              <ListingCard listing={listing} preview showFavorite={false} />
-              {tab === 'pending' && (
-                <div className={styles.actions}>
-                  <Button
-                    size="sm"
-                    loading={busyId === listing.id}
-                    onClick={() => void handleModerate(listing.id, 'published')}
-                  >
-                    Одобрить
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    loading={busyId === listing.id}
-                    onClick={() => void handleModerate(listing.id, 'rejected')}
-                  >
-                    Отклонить
-                  </Button>
-                </div>
-              )}
-            </article>
+        <div className={styles.tabs} role="tablist" aria-label="Разделы модерации">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              className={tab === item.id ? styles.tabActive : styles.tab}
+              onClick={() => setTab(item.id)}
+            >
+              {item.label}
+            </button>
           ))}
         </div>
+
+        {apiError && (
+          <p className={styles.error}>
+            {apiError}
+            {apiError.includes('не найден') && (
+              <> — обновите API: <code>npm run vps:deploy</code></>
+            )}
+          </p>
+        )}
+
+        {loading ? (
+          <p className={styles.status}>Загрузка…</p>
+        ) : tab === 'reports' ? (
+          reports.length === 0 ? (
+            <p className={styles.status}>Жалоб нет</p>
+          ) : (
+            <ul className={styles.reportList}>
+              {reports.map((report) => (
+                <li key={report.id}>
+                  <button
+                    type="button"
+                    className={styles.reportRow}
+                    onClick={() => openReportReview(report.id)}
+                  >
+                    <div className={styles.reportThumb}>!</div>
+                    <div className={styles.reportBody}>
+                      <p className={styles.reportTitle}>{report.listingTitle}</p>
+                      <p className={styles.reportMeta}>
+                        {report.reporterName} · {format(new Date(report.createdAt), 'd MMM, HH:mm', { locale: ru })}
+                      </p>
+                      {report.reason && <p className={styles.reportReason}>{report.reason}</p>}
+                    </div>
+                    <span className={styles.reportArrow} aria-hidden>→</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )
+        ) : listings.length === 0 ? (
+          <p className={styles.status}>
+            {tab === 'pending' ? 'Очередь пуста' : 'Записей нет'}
+          </p>
+        ) : (
+          <div className={styles.queue}>
+            {listings.map((listing) => (
+              <CompactListingRow
+                key={listing.id}
+                listing={listing}
+                onClick={() => openListingReview(listing.id)}
+              />
+            ))}
+          </div>
+        )}
+      </ProfileExpandableSection>
+
+      {reviewMode && (
+        <ModerationReviewModal
+          mode={reviewMode}
+          onClose={() => setReviewMode(null)}
+          onResolved={() => void load()}
+        />
       )}
-    </section>
+    </>
   );
 }
 
 export {
   ModerationDashboard,
-}
+};

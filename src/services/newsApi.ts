@@ -1,7 +1,7 @@
 import { NEWS_LOCAL_LIMIT, NEWS_SUMMARY_MAX_LENGTH } from '@/constants';
 import type { NewsCategory, NewsItem } from '@/types/news';
+import { ensureHttpsUrl } from '@/utils/secureUrl';
 import { NAGAEVO_ARTICLE_IMAGES, REAL_EXTERNAL_NEWS, REAL_LOCAL_NEWS, } from '@/data/realNews';
-const LOCAL_RSS = '/api/news/category/news/feed/';
 const SKIP_TITLE_RE = /#СВО|Меганом|Таврида/i;
 function stripHtml(html: string): string {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -16,7 +16,13 @@ function articlePath(url: string): string {
     }
 }
 function imageForArticle(url: string): string | undefined {
-    return NAGAEVO_ARTICLE_IMAGES[articlePath(url)];
+  const mapped = NAGAEVO_ARTICLE_IMAGES[articlePath(url)];
+  return mapped ? ensureHttpsUrl(mapped) : undefined;
+}
+
+function extractImageFromDescription(html: string): string {
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match?.[1] ? ensureHttpsUrl(match[1]) : '';
 }
 function parseRssItems(xml: string, category: NewsCategory, sourceName: string): NewsItem[] {
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
@@ -34,12 +40,15 @@ function parseRssItems(xml: string, category: NewsCategory, sourceName: string):
         }
         const summary = stripHtml(description).slice(0, NEWS_SUMMARY_MAX_LENGTH);
         const id = `${category}-${articlePath(link).replace(/\W/g, '') || index}`;
+        const imageUrl = ensureHttpsUrl(
+          imageForArticle(link) ?? extractImageFromDescription(description) ?? '',
+        );
         return {
             id,
             title,
             summary: summary.length > 0 ? `${summary}…` : title,
-            imageUrl: imageForArticle(link) ?? '',
-            sourceUrl: link,
+            imageUrl,
+            sourceUrl: ensureHttpsUrl(link),
             sourceName,
             publishedAt: new Date(pubDate).toISOString(),
             category,
@@ -58,7 +67,7 @@ function enrichWithLocalImages(items: NewsItem[]): NewsItem[] {
         if (!imageUrl || usedImages.has(imageUrl))
             continue;
         usedImages.add(imageUrl);
-        enriched.push({ ...item, imageUrl });
+        enriched.push({ ...item, imageUrl: ensureHttpsUrl(imageUrl) });
     }
     return enriched;
 }
@@ -81,8 +90,12 @@ function mergeWithReal(live: NewsItem[], real: NewsItem[], limit: number): NewsI
     for (const item of live) {
         const known = byUrl.get(item.sourceUrl);
         const merged: NewsItem = known
-            ? { ...item, imageUrl: known.imageUrl, summary: item.summary || known.summary }
-            : item;
+            ? {
+              ...item,
+              imageUrl: ensureHttpsUrl(known.imageUrl),
+              summary: item.summary || known.summary,
+            }
+            : { ...item, imageUrl: ensureHttpsUrl(item.imageUrl) };
         if (!merged.imageUrl || usedImages.has(merged.imageUrl))
             continue;
         usedImages.add(merged.imageUrl);
@@ -103,12 +116,12 @@ function mergeWithReal(live: NewsItem[], real: NewsItem[], limit: number): NewsI
     return result;
 }
 async function fetchLocalNews(): Promise<NewsItem[]> {
-    if (!import.meta.env.DEV) {
-        return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT);
-    }
+    const rssUrl = import.meta.env.DEV
+        ? '/api/news/category/news/feed/'
+        : `${import.meta.env.VITE_API_URL ?? '/api'}/news/feed`;
     try {
-        const live = await fetchRssFeed(LOCAL_RSS, 'local', 'ДК с. Нагаево');
-        return mergeWithReal(live, REAL_LOCAL_NEWS, 8);
+        const live = await fetchRssFeed(rssUrl, 'local', 'ДК с. Нагаево');
+        return mergeWithReal(live, REAL_LOCAL_NEWS, NEWS_LOCAL_LIMIT);
     }
     catch {
         return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT);

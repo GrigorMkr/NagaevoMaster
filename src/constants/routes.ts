@@ -14,6 +14,7 @@ const ROUTES = {
     AUTH: '/auth',
     ABOUT: '/about',
     CONTACT: '/contact',
+  APP_DOWNLOAD: '/app',
 } as const;
 function serviceDetailPath(id: string): string {
     return `/service/${id}`;
@@ -29,6 +30,26 @@ function forumCategoryPath(category: string): string {
 }
 function forumTopicPath(id: string): string {
     return `/forum/topic/${id}`;
+}
+function editListingPath(id: string): string {
+    return `/edit-listing/${id}`;
+}
+function profileMessagesPath(conversationId?: string, userId?: string): string {
+    const params = new URLSearchParams();
+    params.set('section', 'messages');
+    if (conversationId) {
+        params.set('chat', conversationId);
+    }
+    if (userId) {
+        params.set('with', userId);
+    }
+    return `${ROUTES.PROFILE}?${params.toString()}`;
+}
+function messagesPath(conversationId?: string): string {
+    return profileMessagesPath(conversationId);
+}
+function messageWithUserPath(userId: string): string {
+    return profileMessagesPath(undefined, userId);
 }
 function searchPath(query?: string, filters?: {
     category?: string;
@@ -58,5 +79,9 @@ export {
   servicesBeautyPath,
   forumCategoryPath,
   forumTopicPath,
+  editListingPath,
+  profileMessagesPath,
+  messagesPath,
+  messageWithUserPath,
   searchPath,
 }

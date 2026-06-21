@@ -88,7 +88,10 @@ async function resetPasswordWithCode(email: string, code: string, newPassword: s
 
   const user = await prisma.user.update({
     where: { id: payload.userId },
-    data: { passwordHash },
+    data: {
+      passwordHash,
+      sessionVersion: { increment: 1 },
+    },
   });
 
   await prisma.verificationChallenge.delete({ where: { id: challenge.id } });

@@ -13,6 +13,7 @@ const FOOTER_NAV_ITEMS = [
     { to: ROUTES.NEWS, label: 'Новости' },
     { to: ROUTES.ABOUT, label: 'О проекте' },
     { to: ROUTES.CONTACT, label: 'Контакты' },
+    { to: ROUTES.APP_DOWNLOAD, label: 'Скачать' },
 ] as const;
 
 export {

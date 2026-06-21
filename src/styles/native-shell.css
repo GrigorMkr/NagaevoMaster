@@ -1,0 +1,36 @@
+html.native-app {
+  --native-tab-height: 72px;
+  --header-height: 56px;
+}
+
+html.native-app body {
+  padding-bottom: 0;
+}
+
+html.native-app .site-header {
+  padding-top: 0;
+  min-height: var(--header-height);
+}
+
+html.native-app .layout {
+  padding-top: var(--header-height);
+  padding-bottom: calc(var(--native-tab-height) + 12px + env(safe-area-inset-bottom, 0px));
+}
+
+html.native-app .site-footer {
+  display: none;
+}
+
+html.native-app.mobile-chat-open .layout {
+  padding-bottom: 0;
+}
+
+html.native-app .mobileFullscreen .composeBar {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.native-app .site-header {
+    animation: none;
+  }
+}

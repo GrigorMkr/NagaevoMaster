@@ -31,7 +31,7 @@ const MapSection = memo(function MapSection() {
     let cancelled = false
     setIsLoading(true)
     fetchListings({
-      sortBy: accountLocation ? SortBy.Distance : SortBy.Rating,
+      sortBy: accountLocation ? SortBy.Distance : SortBy.Popular,
       originLat: accountLocation?.lat ?? null,
       originLng: accountLocation?.lng ?? null,
       distance: accountLocation ? GEO.radiusKm : null,
@@ -76,7 +76,7 @@ const MapSection = memo(function MapSection() {
             <ProvidersMap
               listings={listings}
               userLocation={accountLocation}
-              fitToListings={Boolean(accountLocation)}
+              fitToListings
             />
           </Suspense>
         </>

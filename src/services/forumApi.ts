@@ -7,12 +7,14 @@ interface ForumTopicListItem {
     title: string;
     category: string;
     authorName: string;
+    authorAvatarUrl?: string;
     postsCount: number;
     lastPostAt: string;
     isPinned: boolean;
 }
 interface ForumTopicDetail extends ForumTopicListItem {
     content: string;
+    authorAvatarUrl?: string;
     isClosed: boolean;
     viewCount: number;
     createdAt: string;
@@ -20,6 +22,7 @@ interface ForumTopicDetail extends ForumTopicListItem {
         id: string;
         content: string;
         authorName: string;
+        authorAvatarUrl?: string;
         likes: number;
         createdAt: string;
     }[];

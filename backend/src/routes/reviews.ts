@@ -5,6 +5,7 @@ import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { toReviewResponse } from '../utils/mappers.js';
 import { routeParam } from '../utils/params.js';
+import { assertCleanContent } from '../services/moderation/contentFilter.js';
 const reviewsRouter = Router({ mergeParams: true });
 function listingIdFrom(req: {
     params: Record<string, string | string[]>;
@@ -51,9 +52,13 @@ reviewsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const listingId = listingIdFrom(req);
         const data = createReviewSchema.parse(req.body);
+        assertCleanContent(data.text);
         const listing = await prisma.listing.findUnique({ where: { id: listingId } });
         if (!listing || listing.status !== 'published') {
             throw new HttpError(404, 'Объявление не найдено');
+        }
+        if (listing.userId === req.user!.id) {
+            throw new HttpError(403, 'Нельзя оставить отзыв на своё объявление');
         }
         const existing = await prisma.review.findFirst({
             where: { listingId, userId: req.user!.id },

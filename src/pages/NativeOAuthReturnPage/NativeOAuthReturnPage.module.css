@@ -1,0 +1,59 @@
+.page {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px 48px;
+}
+
+.card {
+  width: min(100%, 420px);
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: rgb(8 31 24 / 92%);
+  border: 1px solid rgb(255 255 255 / 8%);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 28%);
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+}
+
+.lead {
+  margin: 0 0 20px;
+  color: rgb(232 245 239 / 72%);
+  line-height: 1.6;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4a853, #b8892f);
+  color: #081f18;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.linkButton {
+  display: inline-block;
+  margin-top: 12px;
+  color: #d4a853;
+  font-size: 0.92rem;
+}
+
+.hint {
+  margin: 18px 0 0;
+  font-size: 0.92rem;
+  color: rgb(232 245 239 / 60%);
+}
+
+.link {
+  color: #d4a853;
+}

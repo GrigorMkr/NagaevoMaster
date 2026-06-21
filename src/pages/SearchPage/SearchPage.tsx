@@ -115,7 +115,7 @@ function SearchPage() {
 
         <div className="container">
 
-          <PageHeader badge="Поиск" title="Найти услугу" subtitle="Фильтры сохраняются в адресной строке"/>
+          <PageHeader badge="Поиск" title="Найти услугу" />
 
 
 

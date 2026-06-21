@@ -5,7 +5,7 @@ import styles from './UserAvatar.module.css';
 interface UserAvatarProps {
   name: string;
   src?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 

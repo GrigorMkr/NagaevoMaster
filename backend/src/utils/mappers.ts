@@ -55,6 +55,7 @@ function toListingResponse(listing: Listing, user?: Pick<User, 'id' | 'name' | '
         unit: listing.unit,
         rating: listing.rating,
         reviewsCount: listing.reviewsCount,
+        viewsCount: listing.viewsCount,
         images: parseImages(listing.images),
         location: {
             lat: listing.lat,

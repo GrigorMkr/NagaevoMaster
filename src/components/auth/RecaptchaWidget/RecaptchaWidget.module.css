@@ -1,0 +1,17 @@
+.recaptcha {
+  display: flex;
+  justify-content: center;
+  min-height: 78px;
+}
+
+.recaptchaLoading {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.recaptchaError {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger, #e85d5d);
+}

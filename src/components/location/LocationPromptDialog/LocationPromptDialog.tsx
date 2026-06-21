@@ -62,7 +62,7 @@ const LocationPromptDialog = memo(function LocationPromptDialog({
             Да, определить
           </Button>
           <Button type="button" variant="outline" onClick={onDecline} disabled={loading}>
-            Не сейчас
+            Нет
           </Button>
         </div>
       </div>

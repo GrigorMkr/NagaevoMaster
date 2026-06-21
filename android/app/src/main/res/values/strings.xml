@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Нагаево Мастер</string>
+    <string name="title_activity_main">Нагаево Мастер</string>
+    <string name="package_name">ru.nagaevomaster.app</string>
+    <string name="custom_url_scheme">ru.nagaevomaster.app</string>
+</resources>

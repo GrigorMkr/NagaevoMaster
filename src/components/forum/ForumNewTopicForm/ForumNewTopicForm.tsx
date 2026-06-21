@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { FORUM_CATEGORIES } from '@/data/categories';
 import { createForumTopic, type ForumTopicListItem } from '@/services/forumApi';
 import { forumTopicPath } from '@/utils/constants';
+import { validateUserContent } from '@/constants/communityRules';
 import { getErrorMessage } from '@/utils/errorMessage';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumNewTopicForm.module.css';
@@ -32,6 +33,11 @@ function ForumNewTopicForm({ defaultCategory, onCreated }: ForumNewTopicFormProp
 
     setSubmitting(true);
     try {
+      const contentError = validateUserContent(title, content);
+      if (contentError) {
+        toast.error(contentError);
+        return;
+      }
       const topic = await createForumTopic({
         category,
         title: title.trim(),
@@ -104,7 +110,6 @@ function ForumNewTopicForm({ defaultCategory, onCreated }: ForumNewTopicFormProp
         )}
       </label>
 
-      <p className={styles.hint}>После публикации тема появится в списке и её смогут комментировать другие жители.</p>
 
       <Button type="submit" loading={submitting} disabled={!canSubmit}>
         Опубликовать тему

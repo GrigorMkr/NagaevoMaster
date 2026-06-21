@@ -50,10 +50,7 @@ const ReviewsSection = memo(function ReviewsSection() {
           <ReviewDialog review={selectedReview} onClose={handleCloseDialog} />
         </>
       ) : (
-        <AuthRequiredPanel
-          title="Отзывы доступны после входа"
-          description="Авторизуйтесь, чтобы читать отзывы соседей и оставлять комментарии к услугам."
-        />
+        <AuthRequiredPanel title="Войдите, чтобы читать отзывы" />
       )}
     </div>
   )

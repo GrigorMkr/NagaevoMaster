@@ -8,6 +8,7 @@ import { getDistanceKm } from '../utils/geo.js';
 import { toListingResponse } from '../utils/mappers.js';
 import { routeParam } from '../utils/params.js';
 import { sendModeratorNewListingEmail } from '../services/notify/email.js';
+import { assertCleanContent } from '../services/moderation/contentFilter.js';
 const listingsRouter = Router();
 const listingUserSelect = {
     select: {
@@ -61,6 +62,15 @@ function sortListings<T extends Listing>(items: T[], sortBy: string | undefined,
     else if (sortBy === 'newest') {
         sorted.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
+    else if (sortBy === 'popular') {
+        sorted.sort((a, b) => {
+            const viewsDiff = b.viewsCount - a.viewsCount;
+            if (viewsDiff !== 0) {
+                return viewsDiff;
+            }
+            return b.reviewsCount - a.reviewsCount;
+        });
+    }
     else {
         sorted.sort((a, b) => b.rating - a.rating);
     }
@@ -80,6 +90,65 @@ listingsRouter.get('/moderation/pending', requireAuth, async (req: AuthRequest, 
             orderBy: { createdAt: 'asc' },
         });
         res.json(listings.map((item) => toListingResponse(item, item.user)));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+listingsRouter.get('/moderation/listings', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const status = z.enum(['pending', 'published', 'rejected']).parse(
+            typeof req.query.status === 'string' ? req.query.status : 'pending',
+        );
+        const listings = await prisma.listing.findMany({
+            where: { status },
+            include: { user: listingUserSelect },
+            orderBy: { updatedAt: 'desc' },
+            take: 50,
+        });
+        res.json(listings.map((item) => toListingResponse(item, item.user)));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+listingsRouter.get('/moderation/reports', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const statusFilter = typeof req.query.status === 'string' ? req.query.status : 'pending';
+        const reports = await prisma.report.findMany({
+            where: statusFilter === 'all' ? undefined : { status: statusFilter },
+            include: {
+                listing: {
+                    select: {
+                        id: true,
+                        title: true,
+                        status: true,
+                        userId: true,
+                        user: { select: { id: true, name: true, email: true, isBanned: true } },
+                    },
+                },
+                reporter: { select: { name: true, email: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+        });
+        res.json(reports.map((report) => ({
+            id: report.id,
+            listingId: report.listingId,
+            listingTitle: report.listing.title,
+            listingStatus: report.listing.status,
+            authorId: report.listing.userId,
+            authorName: report.listing.user.name,
+            authorEmail: report.listing.user.email,
+            authorIsBanned: report.listing.user.isBanned,
+            reporterName: report.reporter.name,
+            reporterEmail: report.reporter.email,
+            reason: report.reason ?? undefined,
+            status: report.status,
+            createdAt: report.createdAt.toISOString(),
+        })));
     }
     catch (error) {
         next(error);
@@ -158,13 +227,18 @@ listingsRouter.get('/', async (req, res, next) => {
 });
 listingsRouter.get('/:id', async (req, res, next) => {
     try {
-        const listing = await prisma.listing.findFirst({
-            where: { id: routeParam(req.params.id), status: 'published' },
-            include: { user: listingUserSelect },
+        const listingId = routeParam(req.params.id);
+        const existing = await prisma.listing.findFirst({
+            where: { id: listingId, status: 'published' },
         });
-        if (!listing) {
+        if (!existing) {
             throw new HttpError(404, 'Объявление не найдено');
         }
+        const listing = await prisma.listing.update({
+            where: { id: listingId },
+            data: { viewsCount: { increment: 1 } },
+            include: { user: listingUserSelect },
+        });
         res.json(toListingResponse(listing, listing.user));
     }
     catch (error) {
@@ -174,6 +248,7 @@ listingsRouter.get('/:id', async (req, res, next) => {
 listingsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const data = createListingSchema.parse(req.body);
+        assertCleanContent(data.title, data.description);
         const listing = await prisma.listing.create({
             data: {
                 userId: req.user!.id,
@@ -206,6 +281,33 @@ listingsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
         next(error);
     }
 });
+listingsRouter.post('/:id/resubmit', requireAuth, async (req: AuthRequest, res, next) => {
+    try {
+        const listingId = routeParam(req.params.id);
+        const listing = await prisma.listing.findUnique({
+            where: { id: listingId },
+            include: { user: listingUserSelect },
+        });
+        if (!listing) {
+            throw new HttpError(404, 'Объявление не найдено');
+        }
+        if (listing.userId !== req.user!.id) {
+            throw new HttpError(403, 'Недостаточно прав');
+        }
+        if (listing.status !== 'rejected') {
+            throw new HttpError(400, 'Повторно отправить можно только отклонённые объявления');
+        }
+        const updated = await prisma.listing.update({
+            where: { id: listing.id },
+            data: { status: 'pending' },
+            include: { user: listingUserSelect },
+        });
+        res.json(toListingResponse(updated, updated.user));
+    }
+    catch (error) {
+        next(error);
+    }
+});
 listingsRouter.patch('/:id', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const listingId = routeParam(req.params.id);
@@ -219,6 +321,8 @@ listingsRouter.patch('/:id', requireAuth, async (req: AuthRequest, res, next) =>
             throw new HttpError(403, 'Недостаточно прав');
         }
         const data = createListingSchema.partial().parse(req.body);
+        assertCleanContent(data.title, data.description);
+        const ownerResubmit = isOwner && !isModerator && listing.status === 'rejected';
         const updated = await prisma.listing.update({
             where: { id: listing.id },
             data: {
@@ -234,6 +338,7 @@ listingsRouter.patch('/:id', requireAuth, async (req: AuthRequest, res, next) =>
                 lng: data.location?.lng,
                 address: data.location?.address,
                 images: data.imageIds ? JSON.stringify(data.imageIds) : undefined,
+                status: ownerResubmit ? 'pending' : listing.status,
             },
             include: { user: listingUserSelect },
         });

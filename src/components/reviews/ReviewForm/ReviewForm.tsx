@@ -10,6 +10,7 @@ import { VALIDATION } from '@/constants/validation'
 import { createListingReview } from '@/services/reviewsApi'
 import type { Review } from '@/types/listing'
 import { getErrorMessage } from '@/utils/errorMessage'
+import { validateUserContent } from '@/constants/communityRules'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ReviewForm.module.css'
 
@@ -47,6 +48,11 @@ const ReviewForm = memo(function ReviewForm({
   })
 
   const handleReviewSubmit = async (data: ReviewFormData) => {
+    const contentError = validateUserContent(data.text)
+    if (contentError) {
+      toast.error(contentError)
+      return
+    }
     try {
       const review = await createListingReview(listingId, data, authorName)
       onReviewAdded(review)

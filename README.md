@@ -116,6 +116,27 @@ curl -fsSL https://raw.githubusercontent.com/GrigorMkr/NagaevoMaster/main/script
 
 После запуска API пересоберите фронт: `npm run build:hosting && npm run deploy:hosting`
 
+## Мобильное приложение (Android / iOS)
+
+Нативная оболочка [Capacitor](https://capacitorjs.com/) — внутри открывается `https://nagaevomaster.ru`.
+
+Страница скачивания: `/app` (кнопки **Android APK** и **App Store**).
+
+```bash
+# Android (нужны Android Studio + Java)
+npm run build:hosting
+npx cap sync android
+npm run build:apk          # APK → public/downloads/nagaevomaster.apk
+npm run deploy:hosting     # выложить APK на сайт
+
+# iOS (нужен Mac + Xcode)
+npm run build:hosting
+npx cap sync ios
+npm run cap:ios
+```
+
+Подробнее: [`mobile/README.md`](mobile/README.md)
+
 ## GitHub Pages
 
 Демо: https://grigormkr.github.io/NagaevoMaster/

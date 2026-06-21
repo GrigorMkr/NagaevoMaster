@@ -28,7 +28,7 @@ const FitListingsBounds = memo(function FitListingsBounds({ listings, userLocati
         const bounds = L.latLngBounds(points);
         map.fitBounds(bounds, {
             padding: [MAP_BOUNDS_PADDING_PX, MAP_BOUNDS_PADDING_PX],
-            maxZoom: GEO.defaultZoom,
+            maxZoom: points.length === 1 ? 15 : GEO.defaultZoom + 1,
         });
     }, [enabled, listings, userLocation, map]);
     return null;

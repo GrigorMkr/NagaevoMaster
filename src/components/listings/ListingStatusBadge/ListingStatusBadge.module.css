@@ -11,19 +11,20 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-radius: var(--radius-full);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
 .pending {
-  background: rgba(240, 180, 41, 0.2);
-  color: #b8860b;
+  background: rgba(240, 180, 41, 0.32);
+  color: #ffe9a8;
 }
 
 .published {
-  background: rgba(126, 200, 168, 0.25);
-  color: var(--color-mint-dark, #2d6a4f);
+  background: rgba(126, 200, 168, 0.32);
+  color: #dfffea;
 }
 
 .rejected {
-  background: rgba(220, 80, 80, 0.15);
-  color: #c0392b;
+  background: rgba(220, 80, 80, 0.32);
+  color: #ffc9c9;
 }

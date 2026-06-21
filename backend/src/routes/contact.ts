@@ -1,23 +1,37 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
+import { requireAuth, type AuthRequest } from '../middleware/auth.js';
+import { sendContactMessageEmail } from '../services/notify/email.js';
+
 const contactRouter = Router();
+
 const contactSchema = z.object({
-    name: z.string().min(2),
-    email: z.string().email(),
-    message: z.string().min(10),
+  message: z.string().min(10),
 });
-contactRouter.post('/', async (req, res, next) => {
-    try {
-        const data = contactSchema.parse(req.body);
-        await prisma.contactMessage.create({ data });
-        res.status(201).json({ message: 'Сообщение отправлено' });
-    }
-    catch (error) {
-        next(error);
-    }
+
+contactRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const { message } = contactSchema.parse(req.body);
+    const user = req.user!;
+    const data = {
+      name: user.name,
+      email: user.email,
+      message,
+    };
+
+    await prisma.contactMessage.create({ data });
+
+    void sendContactMessageEmail(data).catch((error) => {
+      console.error('[email:contact] failed', error);
+    });
+
+    res.status(201).json({ message: 'Сообщение отправлено' });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export {
   contactRouter,
-}
+};

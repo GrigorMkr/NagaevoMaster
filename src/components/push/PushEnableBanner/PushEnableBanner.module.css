@@ -1,0 +1,47 @@
+.banner,
+.bannerCompact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 214, 80, 0.35);
+  background: linear-gradient(135deg, rgba(42, 32, 8, 0.55), rgba(12, 42, 33, 0.45));
+}
+
+.bannerCompact {
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.copy strong {
+  display: block;
+  font-size: var(--font-size-sm);
+}
+
+.copy p {
+  margin: 0.2rem 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.button {
+  min-height: 40px;
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #ffd76a, #f0b429);
+  color: #1a1408;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

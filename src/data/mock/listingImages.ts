@@ -93,6 +93,7 @@ const FORUM_COVER_FILES: Record<string, string> = {
   cleaning: 'waste-1',
   beauty: 'beauty-1',
   general: 'default-1',
+  other: 'default-2',
 };
 
 function getCategoryCover(slug: string): string {

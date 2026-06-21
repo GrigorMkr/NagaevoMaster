@@ -75,7 +75,18 @@ if (!existsSync(distDir)) {
 
 const localFiles = walkLocal(distDir)
 const localMap = new Map(localFiles.map((f) => [f.rel, f]))
-const required = ['index.html', '.htaccess', '404.html', 'favicon.svg', 'site.webmanifest']
+const required = [
+  'index.html',
+  '.htaccess',
+  '404.html',
+  'favicon.svg',
+  'favicon-32.png',
+  'apple-touch-icon.png',
+  'og-image.png',
+  'site.webmanifest',
+  'sw.js',
+  'sounds/message.mp3',
+]
 
 const client = new Client(120_000)
 try {

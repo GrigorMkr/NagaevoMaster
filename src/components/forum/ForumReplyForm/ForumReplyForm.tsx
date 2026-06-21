@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button/Button';
 import { createForumReply } from '@/services/forumApi';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { validateUserContent } from '@/constants/communityRules';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumReplyForm.module.css';
 
@@ -24,6 +25,11 @@ function ForumReplyForm({ topicId, disabled, onReplyAdded }: ForumReplyFormProps
 
     setSubmitting(true);
     try {
+      const contentError = validateUserContent(content);
+      if (contentError) {
+        toast.error(contentError);
+        return;
+      }
       await createForumReply(topicId, content.trim());
       setContent('');
       toast.success('Ответ опубликован');

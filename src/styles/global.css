@@ -4,6 +4,7 @@
 @import './theme.css';
 @import './motion.css';
 @import './site-background.css';
+@import './native-shell.css';
 
 *,
 *::before,
@@ -28,6 +29,25 @@ body {
   background: var(--color-bg-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.mobile-chat-open {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.mobile-chat-open {
+  overflow: hidden;
+  height: 100%;
+}
+
+body.mobile-chat-open .site-header,
+body.mobile-chat-open .site-footer,
+body.mobile-chat-open .native-tab-bar {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 ::selection {

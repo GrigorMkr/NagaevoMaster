@@ -2,6 +2,7 @@ import { memo, useCallback, useState } from 'react';
 import { Button } from '@/components/ui/Button/Button';
 import { COOKIE_CONSENT_FULL_TEXT, COOKIE_CONSENT_SHORT_TEXT } from '@/constants/cookie-consent';
 import { useCookieConsent } from '@/hooks/useCookieConsent';
+import { isNativeApp } from '@/utils/nativeApp';
 import styles from './CookieConsent.module.css';
 const CookieConsent = memo(function CookieConsent() {
     const { isVisible, handleAccept } = useCookieConsent();
@@ -9,7 +10,7 @@ const CookieConsent = memo(function CookieConsent() {
     const handleToggleDetails = useCallback(() => {
         setIsExpanded((current) => !current);
     }, []);
-    if (!isVisible) {
+    if (!isVisible || isNativeApp()) {
         return null;
     }
     return (<aside className={styles.banner} role="dialog" aria-labelledby="cookie-consent-title" aria-live="polite">

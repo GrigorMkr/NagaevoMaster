@@ -1,7 +1,6 @@
 import { getListingAuthor } from '@/data/mock/listingAuthors';
 import { getListingImages } from '@/data/mock/listingImages';
 import type { Listing } from '@/types/listing';
-import { buildAvatarUrl } from '@/utils/avatarUrl';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 
 function enrichListing(listing: Listing): Listing {
@@ -14,7 +13,7 @@ function enrichListing(listing: Listing): Listing {
   const author = listing.author
     ? {
         ...listing.author,
-        avatarUrl: listing.author.avatarUrl || buildAvatarUrl(listing.author.name, listing.author.login),
+        avatarUrl: listing.author.avatarUrl ?? undefined,
       }
     : getListingAuthor(listing.userId);
 

@@ -15,15 +15,20 @@ function patchWebManifestPlugin(base: string) {
       if (!fs.existsSync(manifestPath)) return
 
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as {
+        id?: string
+        scope?: string
         start_url?: string
-        icons?: { src: string; sizes: string; type: string }[]
+        icons?: { src: string; sizes: string; type: string; purpose?: string }[]
       }
 
-      manifest.start_url = base
+      const normalizedBase = base.endsWith('/') ? base : `${base}/`
+      manifest.id = normalizedBase
+      manifest.scope = normalizedBase
+      manifest.start_url = normalizedBase
       if (manifest.icons) {
         manifest.icons = manifest.icons.map((icon) => ({
           ...icon,
-          src: icon.src.startsWith('/') ? icon.src : `${base}${icon.src}`,
+          src: icon.src.startsWith('/') ? icon.src : `${normalizedBase}${icon.src.replace(/^\.\//, '')}`,
         }))
       }
 

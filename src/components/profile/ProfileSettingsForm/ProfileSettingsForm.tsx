@@ -12,6 +12,9 @@ import { uploadImage } from '@/services/uploadsApi';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { ensurePushNotifications, unsubscribeFromPush } from '@/services/pushApi';
+import { isPushEnabledPreference, setPushEnabledPreference } from '@/utils/pushPreferences';
+import { isPushApiAvailable } from '@/utils/pushEnvironment';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ProfileSettingsForm.module.css';
 
@@ -33,6 +36,9 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(isPushEnabledPreference);
+  const [pushLoading, setPushLoading] = useState(false);
+  const showPushToggle = isPushApiAvailable();
 
   const handleAvatarPick = () => {
     fileInputRef.current?.click();
@@ -77,6 +83,29 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
     } finally {
       setIsUploading(false);
       event.target.value = '';
+    }
+  };
+
+  const handlePushToggle = async (event: ChangeEvent<HTMLInputElement>) => {
+    const enabled = event.target.checked;
+    setPushEnabled(enabled);
+    setPushEnabledPreference(enabled);
+    setPushLoading(true);
+
+    try {
+      if (enabled) {
+        const ok = await ensurePushNotifications({ requestPermission: true });
+        if (!ok && Notification.permission === 'denied') {
+          toast.error('Разрешите уведомления в настройках телефона');
+        }
+      } else {
+        await unsubscribeFromPush();
+        toast.success('Уведомления отключены');
+      }
+    } catch {
+      toast.error('Не удалось изменить настройку');
+    } finally {
+      setPushLoading(false);
     }
   };
 
@@ -155,6 +184,22 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
           <input className={pageStyles.input} type="email" value={user.email} readOnly disabled />
           <p className={styles.hint}>Email меняется через поддержку</p>
         </label>
+
+        {showPushToggle && (
+          <label className={styles.toggleRow}>
+            <input
+              type="checkbox"
+              className={styles.toggleInput}
+              checked={pushEnabled}
+              disabled={pushLoading}
+              onChange={(event) => void handlePushToggle(event)}
+            />
+            <span className={styles.toggleText}>
+              <strong>Уведомления о сообщениях</strong>
+              <small>Включены по умолчанию — снимите галочку, чтобы отключить</small>
+            </span>
+          </label>
+        )}
 
         <Button type="submit" loading={isSaving}>
           Сохранить изменения

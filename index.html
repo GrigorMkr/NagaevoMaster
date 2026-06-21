@@ -2,16 +2,41 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
-    <link rel="apple-touch-icon" href="%BASE_URL%favicon.svg" />
-    <link rel="manifest" href="%BASE_URL%site.webmanifest" />
+    <script>
+      (function () {
+        var host = location.hostname;
+        if (host === 'www.nagaevomaster.ru') {
+          location.replace('https://nagaevomaster.ru' + location.pathname + location.search + location.hash);
+          return;
+        }
+        if (
+          location.protocol === 'http:'
+          && host !== 'localhost'
+          && host !== '127.0.0.1'
+        ) {
+          location.replace('https://nagaevomaster.ru' + location.pathname + location.search + location.hash);
+        }
+      })();
+    </script>
+    <link rel="canonical" href="https://nagaevomaster.ru/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Нагаево Мастер" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#17624a" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <meta
       name="description"
       content="Нагаево Мастер — агрегатор услуг и форум для поселка Нагаево. Поиск специалистов, техники и услуг в Нагаево и окрестностях."
     />
+    <meta property="og:image" content="https://nagaevomaster.ru/og-image.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content="https://nagaevomaster.ru/og-image.png" />
     <title>Нагаево Мастер — Все услуги поселка Нагаево</title>
   </head>
   <body>

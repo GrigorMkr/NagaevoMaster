@@ -1,8 +1,10 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { ScrollToTop } from '@/components/routing/ScrollToTop';
+import { IosSafariPushBanner } from '@/components/push/IosSafariPushBanner/IosSafariPushBanner';
 import { Header } from '../Header/Header';
 import { Footer } from '../Footer/Footer';
 import { CookieConsent } from '../CookieConsent/CookieConsent';
+import { NativeTabBar } from '@/components/native/NativeTabBar/NativeTabBar';
 import styles from './Layout.module.css';
 function Layout() {
     const location = useLocation();
@@ -30,12 +32,14 @@ function Layout() {
       </div>
 
       <Header />
+      <IosSafariPushBanner />
       <main className={styles.main}>
         <div className={styles.mainInner}>
           <Outlet key={location.pathname}/>
         </div>
       </main>
       <Footer />
+      <NativeTabBar />
       <CookieConsent />
     </div>);
 }

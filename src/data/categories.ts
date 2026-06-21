@@ -183,6 +183,7 @@ const FORUM_CATEGORIES = [
     { slug: 'cleaning', name: 'Уборка и вывоз мусора', icon: '🧹' },
     { slug: 'beauty', name: 'Красота и здоровье', icon: '💇' },
     { slug: 'general', name: 'Общие вопросы', icon: '💬' },
+    { slug: 'other', name: 'Другие', icon: '📋' },
 ] as const;
 function getCategoryBySlug(slug: string): ServiceCategory | undefined {
     return SERVICE_CATEGORIES.find((c) => c.slug === slug);

@@ -10,6 +10,8 @@ import { CategoryCard } from '@/components/categories/CategoryCard/CategoryCard'
 import { ForumNewTopicForm } from '@/components/forum/ForumNewTopicForm/ForumNewTopicForm';
 import { FORUM_CATEGORIES } from '@/data/categories';
 import { getForumCategoryCover } from '@/data/mock/listingImages';
+import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
+import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { fetchForumTopics, type ForumTopicListItem } from '@/services/forumApi';
 import { forumCategoryPath, forumTopicPath, ROUTES } from '@/utils/constants';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
@@ -30,7 +32,7 @@ function ForumPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader badge="Сообщество" title="Форум Нагаево" subtitle="8 категорий — строительство, сантехника, спецтехника и общие вопросы"/>
+          <PageHeader badge="Сообщество" title="Форум" />
 
           <Reveal delay={80}>
             <div className={`${styles.categoryGrid} motion-stagger`}>
@@ -52,13 +54,22 @@ function ForumPage() {
             <ul className={`${styles.list} motion-stagger`}>
             {topics.map((topic) => (<li key={topic.id}>
                 <Link to={forumTopicPath(topic.id)} className={styles.topic}>
-                  <span className={styles.topicTitle}>
-                    {topic.isPinned && '📌 '}{topic.title}
-                  </span>
-                  <span className={styles.meta}>
-                    {topic.authorName} · {topic.postsCount} ответов ·{' '}
-                    {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
-                  </span>
+                  <div className={styles.topicRow}>
+                    <UserAvatar
+                      name={topic.authorName}
+                      src={resolveAuthorAvatar(topic.authorName, topic.authorName, topic.authorAvatarUrl)}
+                      size="xs"
+                    />
+                    <div className={styles.topicBody}>
+                      <span className={styles.topicTitle}>
+                        {topic.isPinned && '📌 '}{topic.title}
+                      </span>
+                      <span className={styles.meta}>
+                        {topic.authorName} · {topic.postsCount} ответов ·{' '}
+                        {format(new Date(topic.lastPostAt), 'd MMM', { locale: ru })}
+                      </span>
+                    </div>
+                  </div>
                 </Link>
               </li>))}
           </ul>

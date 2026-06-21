@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useAppDispatch } from '@/app/hooks';
 import { setForumNotifications } from '@/features/ui/uiSlice';
+import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
 import { Button } from '@/components/ui/Button/Button';
 import { fetchNotifications } from '@/services/notificationsApi';
 import type { NotificationItem } from '@/types/notification';
@@ -37,6 +38,8 @@ function NotificationsPanel() {
     void load();
   }, [load]);
 
+  const unreadCount = countUnreadNotifications(items.map((item) => item.id));
+
   const handleMarkAllRead = () => {
     markNotificationsRead(items.map((item) => item.id));
     dispatch(setForumNotifications(false));
@@ -51,45 +54,39 @@ function NotificationsPanel() {
   };
 
   return (
-    <section className={styles.panel} aria-labelledby="notifications-title">
-      <h2 id="notifications-title" className={styles.title}>Уведомления</h2>
-      <p className={styles.desc}>Ответы на форуме, модерация объявлений и статусы публикации</p>
-
-      {loading ? (
-        <p className={styles.empty}>Загрузка…</p>
-      ) : items.length === 0 ? (
+    <ProfileExpandableSection title="Уведомления" count={unreadCount || items.length} loading={loading}>
+      {items.length === 0 ? (
         <p className={styles.empty}>Новых уведомлений нет</p>
       ) : (
-        <ul className={styles.list}>
-          {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                to={item.link}
-                className={`${styles.item} ${isNotificationUnread(item.id) ? styles.itemUnread : ''}`}
-                onClick={() => handleItemClick(item.id)}
-              >
-                <span className={styles.itemTitle}>{item.title}</span>
-                <span className={styles.itemMessage}>{item.message}</span>
-                <span className={styles.itemMeta}>
-                  {format(new Date(item.createdAt), 'd MMM yyyy, HH:mm', { locale: ru })}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className={styles.list}>
+            {items.map((item) => (
+              <li key={item.id}>
+                <Link
+                  to={item.link}
+                  className={`${styles.item} ${isNotificationUnread(item.id) ? styles.itemUnread : ''}`}
+                  onClick={() => handleItemClick(item.id)}
+                >
+                  <span className={styles.itemTitle}>{item.title}</span>
+                  <span className={styles.itemMessage}>{item.message}</span>
+                  <span className={styles.itemMeta}>
+                    {format(new Date(item.createdAt), 'd MMM, HH:mm', { locale: ru })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className={styles.actions}>
+            <Button type="button" size="sm" variant="outline" onClick={handleMarkAllRead}>
+              Прочитать все
+            </Button>
+          </div>
+        </>
       )}
-
-      {items.length > 0 && (
-        <div className={styles.actions}>
-          <Button type="button" size="sm" variant="outline" onClick={handleMarkAllRead}>
-            Отметить все прочитанными
-          </Button>
-        </div>
-      )}
-    </section>
+    </ProfileExpandableSection>
   );
 }
 
 export {
   NotificationsPanel,
-}
+};

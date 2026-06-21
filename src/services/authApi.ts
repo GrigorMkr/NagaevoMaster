@@ -1,8 +1,11 @@
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
+import { API_TIMEOUT_MS } from '@/constants';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { createMockToken, findMockAccount, getMockUserFromToken, isMockEmailRegistered, saveMockUserSession, } from '@/data/mock/authUsers';
 import type { User } from '@/types/user';
 import { isRecord } from '@/utils/apiGuards';
+import { resolveAbsoluteApiBase } from '@/utils/apiBase';
+import axios from 'axios';
 import { api } from './api';
 
 type VerificationChannel = 'email' | 'sms';
@@ -28,6 +31,15 @@ interface SendCodeResponse {
 interface RecoverySendResponse {
     message: string;
     target?: string;
+}
+
+interface OAuthStatus {
+    google: boolean;
+    vk: boolean;
+    vkAppId: string | null;
+    siteUrl: string;
+    googleCallback: string;
+    vkCallback: string;
 }
 
 const MOCK_VERIFICATION_CODE = '123456';
@@ -101,12 +113,19 @@ function mockRegister(data: RegisterPayload): AuthResponse {
     return response;
 }
 
-async function loginRequest(email: string, password: string): Promise<AuthResponse> {
+async function loginRequest(
+    email: string,
+    password: string,
+    remember = true,
+    captchaToken?: string,
+): Promise<AuthResponse> {
     const normalizedEmail = normalizeEmail(email);
     try {
         const response = await api.post<AuthResponse>('/auth/login', {
             user: normalizedEmail,
             password,
+            remember,
+            ...(captchaToken ? { captchaToken } : {}),
         });
         return response.data;
     }
@@ -251,6 +270,71 @@ async function fetchCurrentUser(): Promise<User> {
     return response.data;
 }
 
+interface CaptchaConfig {
+    required: boolean;
+    siteKey: string | null;
+}
+
+async function fetchCaptchaConfig(): Promise<CaptchaConfig> {
+    try {
+        const response = await api.get<CaptchaConfig>('/auth/captcha-config');
+        return response.data;
+    } catch {
+        const fallbackKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+        if (fallbackKey) {
+            return { required: true, siteKey: fallbackKey };
+        }
+        return { required: false, siteKey: null };
+    }
+}
+
+async function fetchOAuthStatus(): Promise<OAuthStatus> {
+    const response = await api.get<OAuthStatus>('/auth/oauth/status');
+    return response.data;
+}
+
+async function exchangeOAuthCode(code: string): Promise<string> {
+    const apiBase = resolveAbsoluteApiBase();
+    const response = await axios.post<{ token: string }>(
+        `${apiBase}/auth/oauth/exchange`,
+        { code },
+        {
+            timeout: API_TIMEOUT_MS,
+            headers: { 'Content-Type': 'application/json' },
+        },
+    );
+    if (!isRecord(response.data) || typeof response.data.token !== 'string') {
+        throw new Error('Invalid OAuth exchange response');
+    }
+    return response.data.token;
+}
+
+async function exchangeOAuthHandoff(handoff: string): Promise<string> {
+    const apiBase = resolveAbsoluteApiBase();
+    const response = await axios.post<{ token: string }>(
+        `${apiBase}/auth/oauth/handoff`,
+        { handoff },
+        {
+            timeout: API_TIMEOUT_MS,
+            headers: { 'Content-Type': 'application/json' },
+        },
+    );
+    if (!isRecord(response.data) || typeof response.data.token !== 'string') {
+        throw new Error('Invalid OAuth handoff response');
+    }
+    return response.data.token;
+}
+
+async function completeVkLogin(accessToken: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/vk/complete', {
+        access_token: accessToken,
+    });
+    if (!isRecord(response.data) || typeof response.data.token !== 'string') {
+        throw new Error('Invalid VK auth response');
+    }
+    return response.data;
+}
+
 export {
   getAuthToken,
   saveAuthToken,
@@ -263,6 +347,11 @@ export {
   resetPasswordRequest,
   recoveryRequest,
   fetchCurrentUser,
+  fetchCaptchaConfig,
+  fetchOAuthStatus,
+  exchangeOAuthCode,
+  exchangeOAuthHandoff,
+  completeVkLogin,
   normalizeEmail,
   MOCK_VERIFICATION_CODE,
 }
@@ -273,4 +362,6 @@ export type {
   SendCodeResponse,
   RecoverySendResponse,
   VerificationChannel,
+  OAuthStatus,
+  CaptchaConfig,
 }

@@ -1,30 +1,55 @@
 .list {
   display: grid;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
 }
 
 .item {
-  padding: var(--spacing-lg);
-  background: var(--color-bg-warm);
-  border: 1px solid var(--color-border);
+  padding: 0.65rem 0.75rem;
+  background: rgba(8, 31, 24, 0.28);
   border-radius: var(--radius-lg);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: 0.35rem;
+}
+
+.headBody {
+  min-width: 0;
 }
 
 .stars {
   color: var(--color-accent);
   font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-sm);
+  letter-spacing: 0.04em;
 }
 
 .text {
+  margin: 0;
   color: var(--color-text-muted);
-  line-height: 1.7;
-  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
 }
 
 .meta {
-  font-size: var(--font-size-sm);
+  margin: 0.1rem 0 0;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-light);
+}
+
+.modActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.empty {
+  margin: var(--spacing-md) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }

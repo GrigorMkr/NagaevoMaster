@@ -21,6 +21,18 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition);
+  text-decoration: none;
+}
+
+.topicRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.topicBody {
+  flex: 1;
+  min-width: 0;
 }
 
 .topic:hover {

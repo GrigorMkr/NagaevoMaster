@@ -77,6 +77,15 @@ function filterMockListings(params: Partial<SearchParams>): Listing[] {
     else if (params.sortBy === SortBy.Newest) {
         result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
+    else if (params.sortBy === SortBy.Popular) {
+        result.sort((a, b) => {
+            const viewsDiff = (b.viewsCount ?? 0) - (a.viewsCount ?? 0);
+            if (viewsDiff !== 0) {
+                return viewsDiff;
+            }
+            return b.reviewsCount - a.reviewsCount;
+        });
+    }
     else {
         result.sort((a, b) => b.rating - a.rating);
     }
@@ -169,6 +178,18 @@ async function createListing(payload: CreateListingPayload): Promise<Listing> {
     return enrichListing(response.data);
 }
 
+interface UpdateListingPayload extends Partial<CreateListingPayload> {}
+
+async function updateListing(id: string, payload: UpdateListingPayload): Promise<Listing> {
+    const response = await api.patch<Listing>(`/listings/${id}`, payload);
+    return enrichListing(response.data);
+}
+
+async function resubmitListing(id: string): Promise<Listing> {
+    const response = await api.post<Listing>(`/listings/${id}/resubmit`);
+    return enrichListing(response.data);
+}
+
 async function fetchPendingListings(): Promise<Listing[]> {
     try {
         return await fetchModerationListings('pending');
@@ -195,6 +216,8 @@ export {
   fetchMyListings,
   uploadListingImage,
   createListing,
+  updateListing,
+  resubmitListing,
   fetchPendingListings,
   moderateListing,
 }
@@ -202,4 +225,5 @@ export {
 export type {
   ListingsResponse,
   CreateListingPayload,
+  UpdateListingPayload,
 }

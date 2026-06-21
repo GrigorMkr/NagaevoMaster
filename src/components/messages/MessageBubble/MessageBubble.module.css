@@ -1,0 +1,74 @@
+.mineWrap,
+.otherWrap {
+  display: flex;
+  max-width: min(85%, 520px);
+}
+
+.mineWrap {
+  align-self: flex-end;
+}
+
+.otherWrap {
+  align-self: flex-start;
+}
+
+.bubbleMine,
+.bubbleOther {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.bubbleMine {
+  background: #2a9d6a;
+  border-radius: 1.1rem 1.1rem 0.25rem 1.1rem;
+  box-shadow: none;
+}
+
+.bubbleMine [class*='badge'] {
+  margin-bottom: 0.25rem;
+}
+
+.bubbleOther {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 1.1rem 1.1rem 1.1rem 0.25rem;
+}
+
+.bubbleOther .badge,
+.bubbleOther [class*='badge'] {
+  margin-bottom: 0.25rem;
+}
+
+.text {
+  white-space: pre-wrap;
+  margin-top: 0.35rem;
+}
+
+.imageLink {
+  display: block;
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+
+.fileLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-mint);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.fileLink:hover {
+  text-decoration: underline;
+}

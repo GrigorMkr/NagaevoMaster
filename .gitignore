@@ -15,6 +15,9 @@ dist-ssr
 deploy.env
 deploy/regru.env
 deploy/notify.env
+deploy/oauth.env
+deploy/push.env
+deploy/captcha.env
 deploy/ssl-local/
 hosting.reg.ru.env
 nagaevo-hosting.zip

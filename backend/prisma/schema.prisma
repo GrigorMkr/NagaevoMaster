@@ -11,10 +11,16 @@ model User {
   id            String        @id @default(uuid())
   email         String        @unique
   passwordHash  String
+  googleId      String?       @unique
+  vkId          String?       @unique
   name          String
   phone         String?       @unique
   avatarUrl     String?
   role          String        @default("user")
+  isBanned      Boolean       @default(false)
+  bannedAt      DateTime?
+  banReason     String?
+  sessionVersion Int          @default(0)
   emailVerified Boolean       @default(false)
   phoneVerified Boolean       @default(false)
   lastLat           Float?
@@ -25,9 +31,31 @@ model User {
   listings      Listing[]
   reviews       Review[]
   favorites     Favorite[]
-  forumTopics   ForumTopic[]
-  forumPosts    ForumPost[]
-  reports       Report[]
+  forumTopics        ForumTopic[]
+  forumPosts         ForumPost[]
+  reports            Report[]
+  conversationsLow   Conversation[] @relation("ConversationLow")
+  conversationsHigh  Conversation[] @relation("ConversationHigh")
+  sentMessages       Message[]
+  friendRequestsSent     Friendship[] @relation("FriendshipRequester")
+  friendRequestsReceived Friendship[] @relation("FriendshipAddressee")
+  blocksSent             UserBlock[]  @relation("BlocksSent")
+  blocksReceived         UserBlock[]  @relation("BlocksReceived")
+  pushSubscriptions      PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model VerificationChallenge {
@@ -56,6 +84,7 @@ model Listing {
   unit         String
   rating       Float      @default(0)
   reviewsCount Int        @default(0)
+  viewsCount   Int        @default(0)
   images       String     @default("[]")
   lat          Float
   lng          Float
@@ -135,4 +164,63 @@ model Report {
   reason     String?
   status     String   @default("pending")
   createdAt  DateTime @default(now())
+}
+
+model Conversation {
+  id                String    @id @default(uuid())
+  participantLowId  String
+  participantHighId String
+  participantLow    User      @relation("ConversationLow", fields: [participantLowId], references: [id], onDelete: Cascade)
+  participantHigh   User      @relation("ConversationHigh", fields: [participantHighId], references: [id], onDelete: Cascade)
+  messages          Message[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([participantLowId, participantHighId])
+  @@index([participantLowId])
+  @@index([participantHighId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  type           String       @default("text")
+  body           String       @default("")
+  attachmentUrl  String?
+  attachmentName String?
+  attachmentMime String?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Friendship {
+  id          String   @id @default(uuid())
+  requesterId String
+  addresseeId String
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  requester   User     @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User     @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+model UserBlock {
+  id        String   @id @default(uuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker   User     @relation("BlocksSent", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
 }

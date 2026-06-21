@@ -1,6 +1,7 @@
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { ABOUT_IMAGES } from '@/data/aboutImages';
+import { COMMUNITY_RULES, BAN_POLICY_TEXT } from '@/constants/communityRules';
 import { APP_DESCRIPTION, APP_NAME, GEO } from '@/utils/constants';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { AboutCard } from './AboutCard';
@@ -14,18 +15,13 @@ const audience = [
   'Мужчины и женщины от 18 до 65 лет',
 ];
 
-const moderationRules = [
-  'Запрещены оскорбления, спам и реклама без согласования',
-  'Объявления должны относиться к услугам в радиусе 50 км от Нагаево',
-  'Контакты и цены указываются честно и актуально',
-  'Модератор может скрыть объявление при жалобах жителей',
-];
+const moderationRules = [...COMMUNITY_RULES];
 
 const platformRules = [
   'Регистрация доступна жителям и мастерам из окрестностей',
   'Один аккаунт — один исполнитель или компания',
-  'Отзывы публикуются только после проверки модератором',
-  'Администрация оставляет за собой право блокировать нарушителей',
+  'Отзывы публикуются только от реальных клиентов услуги',
+  BAN_POLICY_TEXT,
 ];
 
 function AboutPage() {

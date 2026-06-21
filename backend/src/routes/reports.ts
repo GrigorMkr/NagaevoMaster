@@ -16,6 +16,9 @@ reportsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
         if (!listing) {
             throw new HttpError(404, 'Объявление не найдено');
         }
+        if (listing.userId === req.user!.id) {
+            throw new HttpError(403, 'Нельзя пожаловаться на своё объявление');
+        }
         const report = await prisma.report.create({
             data: {
                 listingId,

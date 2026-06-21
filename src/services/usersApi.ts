@@ -1,4 +1,5 @@
 import type { Review } from '@/types/listing';
+import type { Listing } from '@/types/listing';
 import type { User } from '@/types/user';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
 import {
@@ -69,14 +70,31 @@ async function clearUserLocation(): Promise<void> {
   await api.delete('/users/me/location');
 }
 
+interface PublicUserProfile {
+  user: {
+    id: string;
+    name: string;
+    login: string;
+    avatarUrl?: string;
+  };
+  listings: Listing[];
+}
+
+async function fetchUserPublicProfile(userId: string): Promise<PublicUserProfile> {
+  const response = await api.get<PublicUserProfile>(`/users/${userId}/profile`);
+  return response.data;
+}
+
 export {
   updateProfile,
   fetchMyReviews,
   saveUserLocation,
   clearUserLocation,
+  fetchUserPublicProfile,
 }
 
 export type {
   UpdateProfilePayload,
   UserReviewItem,
+  PublicUserProfile,
 }

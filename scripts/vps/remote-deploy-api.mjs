@@ -61,11 +61,18 @@ function upload(conn, localPath, remotePath) {
   });
 }
 
-console.log('Создаём архив для деплоя...');
-execSync(
-  `git archive --format=tar.gz -o "${archivePath}" HEAD backend scripts package.json package-lock.json`,
-  { cwd: root, stdio: 'inherit' },
-);
+console.log('Создаём архив для деплоя (рабочая копия)...');
+const tarExcludes = [
+  '--exclude=backend/node_modules',
+  '--exclude=backend/dist',
+  '--exclude=backend/uploads',
+  '--exclude=backend/.env',
+].join(' ');
+execSync(`tar -czf "${archivePath}" ${tarExcludes} backend scripts package.json package-lock.json`, {
+  cwd: root,
+  stdio: 'inherit',
+  shell: true,
+});
 
 const conn = await connect();
 console.log(`SSH ${host} — загрузка и деплой API...\n`);

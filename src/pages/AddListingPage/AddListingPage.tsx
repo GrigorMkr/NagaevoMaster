@@ -7,12 +7,14 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { Button } from '@/components/ui/Button/Button';
 import { ListingCard } from '@/components/listings/ListingCard/ListingCard';
+import { ListingTermsAgreement } from '@/components/listings/ListingTermsAgreement/ListingTermsAgreement';
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { NAGAEVO_CENTER } from '@/constants/geo-data';
+import { validateUserContent } from '@/constants/communityRules';
 import { createListing, uploadListingImage } from '@/services/listingsApi';
 import type { Listing, PriceUnit } from '@/types/listing';
 import { ROUTES } from '@/utils/constants';
@@ -106,6 +108,7 @@ function AddListingPage() {
   }));
   const [uploading, setUploading] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const selectedCat = useMemo(
     () => SERVICE_CATEGORIES.find((c) => c.slug === form.category),
@@ -166,6 +169,10 @@ function AddListingPage() {
   };
 
   const handlePublish = async () => {
+    if (!termsAccepted) {
+      toast.error('Подтвердите согласие с условиями размещения');
+      return;
+    }
     if (!canProceed(2, form)) {
       toast.error('Заполните описание и цену');
       setStep(2);
@@ -173,6 +180,11 @@ function AddListingPage() {
     }
     setPublishing(true);
     try {
+      const contentError = validateUserContent(form.title, form.description);
+      if (contentError) {
+        toast.error(contentError);
+        return;
+      }
       await createListing({
         category: form.category,
         subcategory: form.subcategory,
@@ -201,11 +213,7 @@ function AddListingPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader
-            badge="Мастерам"
-            title="Добавить объявление"
-            subtitle="6 шагов — после проверки объявление появится в каталоге"
-          />
+          <PageHeader badge="Мастерам" title="Добавить объявление" />
 
           <Reveal delay={60}>
             <ol className={styles.steps}>
@@ -369,6 +377,7 @@ function AddListingPage() {
 
               {step === 5 && (
                 <div className={styles.publishInfo}>
+                  <ListingTermsAgreement checked={termsAccepted} onChange={setTermsAccepted} />
                   <p>После нажатия «Отправить» объявление получит статус <strong>На модерации</strong>.</p>
                   <p>Администратор проверит текст и фото, затем опубликует или отклонит. Вы увидите статус в личном кабинете.</p>
                   <ul>
@@ -387,7 +396,13 @@ function AddListingPage() {
               {step < STEPS.length - 1 ? (
                 <Button onClick={() => setStep((s) => s + 1)} disabled={nextDisabled}>Далее</Button>
               ) : (
-                <Button onClick={() => void handlePublish()} loading={publishing}>Отправить на модерацию</Button>
+                <Button
+                  onClick={() => void handlePublish()}
+                  loading={publishing}
+                  disabled={!termsAccepted}
+                >
+                  Отправить на модерацию
+                </Button>
               )}
             </div>
           </Reveal>
