@@ -1,10 +1,12 @@
 import { SortBy } from '@/enums/sort';
+import type { ListingKind } from '@/types/listing';
 import type { DistanceFilter as DistanceFilterEnum, RatingFilter as RatingFilterEnum } from '@/enums/filters';
 export { SortBy };
 type DistanceFilter = DistanceFilterEnum | null;
 type RatingFilter = RatingFilterEnum;
 interface SearchParams {
     query: string;
+    kind?: ListingKind | null;
     category: string | null;
     subcategory: string | null;
     priceMin: number | null;

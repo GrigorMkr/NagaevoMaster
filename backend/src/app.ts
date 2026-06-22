@@ -26,6 +26,7 @@ import { blocksRouter } from './routes/blocks.js';
 import { friendsRouter } from './routes/friends.js';
 import { newsRouter } from './routes/news.js';
 import { pushRouter } from './routes/push.js';
+import { listingSocialRouter } from './routes/listingSocial.js';
 
 function createApp() {
   const app = express();
@@ -51,6 +52,7 @@ function createApp() {
   app.use('/api/listings/:listingId/reviews', reviewsRouter);
   app.use('/api/listings/:listingId/report', reportsRouter);
   app.use('/api/favorites', favoritesRouter);
+  app.use('/api/listing-social', listingSocialRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/moderation', moderationRouter);
   app.use('/api/messages', messagesRouter);

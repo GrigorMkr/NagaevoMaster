@@ -11,7 +11,7 @@
   font-weight: 600;
   color: var(--color-button-active-text);
   background: var(--color-button-active-bg);
-  border: 2px solid var(--color-button-border);
+  border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
   transition:

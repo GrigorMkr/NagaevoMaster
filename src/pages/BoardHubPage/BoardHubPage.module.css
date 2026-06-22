@@ -1,0 +1,18 @@
+.hero {
+  margin-bottom: 1.5rem;
+}
+
+.note {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: rgba(8, 31, 24, 0.35);
+  border: none;
+}
+
+.note a {
+  color: var(--color-mint);
+  font-weight: 600;
+}

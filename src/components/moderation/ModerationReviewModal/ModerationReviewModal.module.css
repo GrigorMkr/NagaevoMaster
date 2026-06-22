@@ -16,7 +16,7 @@
   margin: auto;
   padding: var(--spacing-xl);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card-hover);
 }
@@ -57,7 +57,7 @@
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
   background: rgba(8, 31, 24, 0.45);
-  border: 1px solid var(--color-border);
+  border: none;
 }
 
 .reportLine,
@@ -136,7 +136,7 @@
 .textInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-lg);
   background: rgba(8, 31, 24, 0.45);
   color: var(--color-text);
@@ -152,7 +152,7 @@
 .banInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-lg);
   background: rgba(8, 31, 24, 0.45);
   color: var(--color-text);
@@ -165,6 +165,46 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-top: var(--spacing-sm);
+}
+
+.photoSection {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 0.5rem;
+}
+
+.photoThumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.photoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoRemove {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 @media (width <= 640px) {

@@ -29,7 +29,8 @@
 .sidebar {
   border-radius: var(--radius-lg);
   background: rgba(6, 24, 19, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: none;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   min-height: 280px;
@@ -40,7 +41,8 @@
 .chatPanel {
   border-radius: var(--radius-lg);
   background: rgba(6, 24, 19, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: none;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   min-height: 360px;
@@ -50,7 +52,8 @@
 
 .sidebarHeader {
   padding: 0.75rem var(--spacing-md);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
+  box-shadow: inset 0 -1px 0 var(--color-border-subtle);
 }
 
 .sidebarTitle {
@@ -144,7 +147,8 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.55rem 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  box-shadow: inset 0 -1px 0 var(--color-border-subtle);
   flex-shrink: 0;
   background: rgba(8, 28, 22, 0.96);
 }
@@ -220,6 +224,37 @@
   overscroll-behavior: contain;
 }
 
+.messageListWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.jumpToLatest {
+  position: absolute;
+  left: 50%;
+  bottom: 0.65rem;
+  z-index: 2;
+  transform: translateX(-50%);
+  padding: 0.4rem 0.85rem;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: #0a1f18;
+  background: var(--color-mint);
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-out-expo);
+}
+
+.jumpToLatest:hover {
+  transform: translateX(-50%) translateY(-2px);
+}
+
 @media (min-width: 900px) {
   .messageList {
     flex: 1 1 0;
@@ -246,7 +281,8 @@
   gap: 0.5rem;
   padding: 0.45rem 0.85rem;
   background: rgba(220, 60, 60, 0.15);
-  border-top: 1px solid rgba(220, 60, 60, 0.25);
+  border-top: none;
+  box-shadow: inset 0 1px 0 rgba(220, 60, 60, 0.12);
   font-size: var(--font-size-sm);
   flex-shrink: 0;
 }
@@ -298,9 +334,9 @@
   gap: 0.25rem;
   padding: 0.35rem 0.4rem;
   border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: none;
   background: rgba(8, 28, 22, 0.72);
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px var(--color-border-subtle);
   box-sizing: border-box;
 }
 
@@ -430,6 +466,11 @@
   .mobileFullscreen .chatHeader {
     padding-top: max(0.55rem, env(safe-area-inset-top));
     flex-shrink: 0;
+  }
+
+  .mobileFullscreen .messageListWrap {
+    flex: 1;
+    min-height: 0;
   }
 
   .mobileFullscreen .messageList {

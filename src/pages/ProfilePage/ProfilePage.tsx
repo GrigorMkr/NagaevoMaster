@@ -54,7 +54,10 @@ function ProfilePage() {
   const handleUnreadChange = useCallback((count: number) => {
     if (count > prevUnreadRef.current && prevUnreadRef.current > 0) {
       setFlashUnread(true)
-      showMessageLightning('Новое сообщение', 'Откройте переписку')
+      showMessageLightning({
+        senderName: 'Новое сообщение',
+        preview: 'Откройте переписку',
+      })
       window.setTimeout(() => setFlashUnread(false), 1200)
     }
     prevUnreadRef.current = count

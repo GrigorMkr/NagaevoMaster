@@ -1,9 +1,10 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { ListingGallery } from '@/components/listings/ListingGallery/ListingGallery';
 import { ListingStatusBadge } from '@/components/listings/ListingStatusBadge/ListingStatusBadge';
+import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { Button } from '@/components/ui/Button/Button';
 import { AppLoadingScreen } from '@/components/ui/AppLoadingScreen/AppLoadingScreen';
 import { BAN_POLICY_TEXT, CONTENT_VIOLATION_MESSAGE } from '@/constants/communityRules';
@@ -20,9 +21,13 @@ import {
   type ModerationReport,
   type ModerationReportDetail,
 } from '@/services/moderationApi';
+import { uploadListingImage } from '@/services/listingsApi';
 import type { Listing, ListingStatus } from '@/types/listing';
 import { getErrorMessage } from '@/utils/errorMessage';
 import styles from './ModerationReviewModal.module.css';
+
+const MAX_PHOTOS = 5;
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 type ReviewMode =
   | { kind: 'listing'; listingId: string; tab: ListingStatus }
@@ -62,6 +67,10 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editImages, setEditImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +83,8 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
             setListing(item);
             setEditTitle(item.title);
             setEditDescription(item.description);
+            setEditPhone(item.phone);
+            setEditImages(item.images);
             setReport(null);
           }
         } else {
@@ -83,6 +94,8 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
             setListing({ ...item.listing, authorMeta: item.authorMeta });
             setEditTitle(item.listing.title);
             setEditDescription(item.listing.description);
+            setEditPhone(item.listing.phone);
+            setEditImages(item.listing.images);
           }
         }
       } catch (error) {
@@ -137,8 +150,10 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
       const updated = await adminEditModerationListing(activeListing.id, {
         title: editTitle.trim(),
         description: editDescription.trim(),
+        phone: editPhone.trim(),
+        imageIds: editImages,
       });
-      setListing((current) => ({ ...current, ...updated }));
+      setListing((current) => (current ? { ...current, ...updated } : updated));
       setIsEditing(false);
       toast.success('Объявление обновлено');
     } catch (error) {
@@ -146,6 +161,39 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
     } finally {
       setBusy(false);
     }
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (editImages.length >= MAX_PHOTOS) {
+      toast.error(`Максимум ${MAX_PHOTOS} фото`);
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      toast.error('Файл больше 2 МБ');
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadListingImage(file);
+      setEditImages((prev) => [...prev, url]);
+      toast.success('Фото добавлено');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось загрузить фото'));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const startEditing = () => {
+    if (!activeListing) return;
+    setEditTitle(activeListing.title);
+    setEditDescription(activeListing.description);
+    setEditPhone(activeListing.phone);
+    setEditImages(activeListing.images);
+    setIsEditing(true);
   };
 
   const handleDelete = async () => {
@@ -299,6 +347,49 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
                   value={editDescription}
                   onChange={(event) => setEditDescription(event.target.value)}
                 />
+                <label className={styles.banLabel} htmlFor="edit-phone">Телефон</label>
+                <input
+                  id="edit-phone"
+                  className={styles.textInput}
+                  value={editPhone}
+                  onChange={(event) => setEditPhone(event.target.value)}
+                  placeholder="+7 ..."
+                />
+                <div className={styles.photoSection}>
+                  <p className={styles.banLabel}>Фото</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(event) => void handlePhotoUpload(event)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    loading={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Добавить фото
+                  </Button>
+                  {editImages.length > 0 && (
+                    <div className={styles.photoGrid}>
+                      {editImages.map((url) => (
+                        <div key={url} className={styles.photoThumb}>
+                          <ListingPhoto src={url} alt="" className={styles.photoImage} />
+                          <button
+                            type="button"
+                            className={styles.photoRemove}
+                            aria-label="Удалить фото"
+                            onClick={() => setEditImages((prev) => prev.filter((item) => item !== url))}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className={styles.actions}>
                   <Button loading={busy} onClick={() => void handleSaveEdit()}>Сохранить</Button>
                   <Button variant="outline" onClick={() => setIsEditing(false)}>Отмена</Button>
@@ -346,7 +437,7 @@ const ModerationReviewModal = memo(function ModerationReviewModal({
                   </>
                 )}
 
-                <Button loading={busy} variant="secondary" onClick={() => setIsEditing(true)}>
+                <Button loading={busy} variant="secondary" onClick={startEditing}>
                   Редактировать
                 </Button>
 

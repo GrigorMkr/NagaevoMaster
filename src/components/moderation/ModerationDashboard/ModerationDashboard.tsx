@@ -1,47 +1,71 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useAppSelector } from '@/app/hooks';
-import { selectCanModerate } from '@/features/user/userSelectors';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useAppSelector } from '@/app/hooks';
+import { selectCanModerate, selectIsAdmin } from '@/features/user/userSelectors';
 import { CompactListingRow } from '@/components/listings/CompactListingRow/CompactListingRow';
+import { NewsAdminPanel } from '@/components/moderation/NewsAdminPanel/NewsAdminPanel';
+import { AdminDashboardOverview } from '@/components/moderation/AdminDashboardOverview/AdminDashboardOverview';
+import { AdminUsersPanel } from '@/components/moderation/AdminUsersPanel/AdminUsersPanel';
+import { CircularStatRing } from '@/components/ui/CircularStatRing/CircularStatRing';
 import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
 import { ModerationReviewModal, type ReviewMode } from '@/components/moderation/ModerationReviewModal/ModerationReviewModal';
 import {
+  fetchAdminDashboardStats,
   fetchModerationListings,
-  fetchModerationOnlineStats,
   fetchModerationReports,
 } from '@/services/moderationApi';
+import type { AdminDashboardStats } from '@/services/moderationApi';
 import type { Listing, ListingStatus } from '@/types/listing';
 import { getErrorMessage } from '@/utils/errorMessage';
 import styles from './ModerationDashboard.module.css';
 
-type TabId = 'pending' | 'published' | 'rejected' | 'reports';
+type TabId = 'overview' | 'pending' | 'published' | 'rejected' | 'reports' | 'news' | 'users';
 
-const TABS: { id: TabId; label: string }[] = [
+const BASE_TABS: { id: TabId; label: string }[] = [
+  { id: 'overview', label: 'Обзор' },
   { id: 'pending', label: 'На модерации' },
   { id: 'published', label: 'Одобренные' },
   { id: 'rejected', label: 'Отклонённые' },
   { id: 'reports', label: 'Жалобы' },
+  { id: 'news', label: 'Новости' },
 ];
 
 function ModerationDashboard() {
   const canModerate = useAppSelector(selectCanModerate);
-  const [tab, setTab] = useState<TabId>('pending');
+  const isAdmin = useAppSelector(selectIsAdmin);
+  const tabs = useMemo(
+    () => (isAdmin
+      ? [...BASE_TABS, { id: 'users' as const, label: 'Пользователи' }]
+      : BASE_TABS),
+    [isAdmin],
+  );
+  const [tab, setTab] = useState<TabId>('overview');
   const [listings, setListings] = useState<Listing[]>([]);
   const [reports, setReports] = useState<Awaited<ReturnType<typeof fetchModerationReports>>>([]);
+  const [dashboardStats, setDashboardStats] = useState<AdminDashboardStats | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
-  const [guestsOnline, setGuestsOnline] = useState(0);
-  const [usersOnline, setUsersOnline] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [reviewMode, setReviewMode] = useState<ReviewMode | null>(null);
 
-  const load = useCallback(async () => {
+  const loadTabData = useCallback(async () => {
+    if (tab === 'overview' || tab === 'users') {
+      setListings([]);
+      setReports([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setApiError(null);
     try {
       if (tab === 'reports') {
         setReports(await fetchModerationReports('all'));
+        setListings([]);
+      } else if (tab === 'news') {
+        setReports([]);
         setListings([]);
       } else {
         setListings(await fetchModerationListings(tab as ListingStatus));
@@ -57,32 +81,28 @@ function ModerationDashboard() {
     }
   }, [tab]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => {
-    fetchModerationListings('pending')
-      .then((items) => setPendingCount(items.length))
-      .catch(() => setPendingCount(0));
-  }, [listings, reports]);
-
-  useEffect(() => {
-    const loadOnline = () => {
-      void fetchModerationOnlineStats()
-        .then((stats) => {
-          setGuestsOnline(stats.guestsOnline);
-          setUsersOnline(stats.usersOnline);
-        })
-        .catch(() => {
-          setGuestsOnline(0);
-          setUsersOnline(0);
-        });
-    };
-    loadOnline();
-    const timer = window.setInterval(loadOnline, 30_000);
-    return () => window.clearInterval(timer);
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const stats = await fetchAdminDashboardStats();
+      setDashboardStats(stats);
+      setPendingCount(stats.moderation.listingsPending);
+    } catch {
+      setDashboardStats(null);
+    } finally {
+      setStatsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadTabData();
+  }, [loadTabData]);
+
+  useEffect(() => {
+    void loadStats();
+    const timer = window.setInterval(() => void loadStats(), 30_000);
+    return () => window.clearInterval(timer);
+  }, [loadStats]);
 
   const openListingReview = (listingId: string) => {
     if (tab === 'reports') return;
@@ -93,21 +113,51 @@ function ModerationDashboard() {
     setReviewMode({ kind: 'report', reportId });
   };
 
+  const panelTitle = isAdmin ? 'Панель администратора' : 'Панель модератора';
+
   return (
     <>
-      <ProfileExpandableSection title="Панель модератора" count={pendingCount} loading={loading && pendingCount === 0}>
-        {canModerate && <span className={styles.adminBadge}>Полные права</span>}
-        <div className={styles.onlineStats} aria-label="Пользователи в сети">
-          <span className={styles.onlineStat}>
-            Гости в сети: <strong>{guestsOnline}</strong>
-          </span>
-          <span className={styles.onlineStat}>
-            Зарегистрированные: <strong>{usersOnline}</strong>
-          </span>
-        </div>
+      <ProfileExpandableSection title={panelTitle} count={pendingCount} loading={statsLoading && pendingCount === 0}>
+        {isAdmin ? (
+          <span className={styles.adminBadge}>Администратор</span>
+        ) : (
+          canModerate && <span className={styles.adminBadge}>Модератор</span>
+        )}
+
+        {dashboardStats && (
+          <div className={styles.liveBar} aria-label="Краткая сводка">
+            <CircularStatRing
+              compact
+              label="В сети"
+              value={dashboardStats.presence.totalOnline}
+              max={Math.max(dashboardStats.users.total, 1)}
+              accent="gold"
+            />
+            <CircularStatRing
+              compact
+              label="Пользователей"
+              value={dashboardStats.users.online}
+              max={Math.max(dashboardStats.users.total, 1)}
+            />
+            <CircularStatRing
+              compact
+              label="Рег. сегодня"
+              value={dashboardStats.users.registeredToday}
+              max={Math.max(dashboardStats.users.total, 1)}
+              accent="gold"
+            />
+            <CircularStatRing
+              compact
+              label="Объявл. сегодня"
+              value={dashboardStats.listings.addedToday}
+              max={Math.max(dashboardStats.listings.total, 1)}
+              accent="blue"
+            />
+          </div>
+        )}
 
         <div className={styles.tabs} role="tablist" aria-label="Разделы модерации">
-          {TABS.map((item) => (
+          {tabs.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -130,8 +180,20 @@ function ModerationDashboard() {
           </p>
         )}
 
-        {loading ? (
+        {tab === 'overview' ? (
+          statsLoading && !dashboardStats ? (
+            <p className={styles.status}>Загрузка статистики…</p>
+          ) : dashboardStats ? (
+            <AdminDashboardOverview stats={dashboardStats} />
+          ) : (
+            <p className={styles.status}>Статистика недоступна — обновите API</p>
+          )
+        ) : tab === 'users' ? (
+          isAdmin ? <AdminUsersPanel /> : null
+        ) : loading && tab !== 'news' ? (
           <p className={styles.status}>Загрузка…</p>
+        ) : tab === 'news' ? (
+          <NewsAdminPanel />
         ) : tab === 'reports' ? (
           reports.length === 0 ? (
             <p className={styles.status}>Жалоб нет</p>
@@ -148,7 +210,9 @@ function ModerationDashboard() {
                     <div className={styles.reportBody}>
                       <p className={styles.reportTitle}>{report.listingTitle}</p>
                       <p className={styles.reportMeta}>
-                        {report.reporterName} · {format(new Date(report.createdAt), 'd MMM, HH:mm', { locale: ru })}
+                        {report.reporterName}
+                        {' · '}
+                        {format(new Date(report.createdAt), 'd MMM, HH:mm', { locale: ru })}
                       </p>
                       {report.reason && <p className={styles.reportReason}>{report.reason}</p>}
                     </div>
@@ -179,7 +243,10 @@ function ModerationDashboard() {
         <ModerationReviewModal
           mode={reviewMode}
           onClose={() => setReviewMode(null)}
-          onResolved={() => void load()}
+          onResolved={() => {
+            void loadTabData();
+            void loadStats();
+          }}
         />
       )}
     </>

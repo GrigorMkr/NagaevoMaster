@@ -1,11 +1,12 @@
 import { memo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button/Button';
+import { ListingModeratorEditSheet } from '@/components/listings/ListingModeratorEditSheet/ListingModeratorEditSheet';
 import {
   deleteModerationListing,
   moderateListingStatus,
 } from '@/services/moderationApi';
-import type { ListingStatus } from '@/types/listing';
+import type { Listing, ListingStatus } from '@/types/listing';
 import { getErrorMessage } from '@/utils/errorMessage';
 import styles from './ListingModerationActions.module.css';
 
@@ -13,20 +14,25 @@ type ModerationAction = 'rejected' | 'deleted' | 'published';
 
 interface ListingModerationActionsProps {
   listingId: string;
+  listing?: Listing;
   listingTitle?: string;
   status?: ListingStatus;
   variant?: 'compact' | 'bar';
   onDone?: (action: ModerationAction) => void;
+  onEdited?: (listing: Listing) => void;
 }
 
 const ListingModerationActions = memo(function ListingModerationActions({
   listingId,
+  listing,
   listingTitle,
   status,
   variant = 'bar',
   onDone,
+  onEdited,
 }: ListingModerationActionsProps) {
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
   const label = listingTitle ? `«${listingTitle}»` : 'это объявление';
 
   const handleReject = async () => {
@@ -76,28 +82,43 @@ const ListingModerationActions = memo(function ListingModerationActions({
   };
 
   return (
-    <div
-      className={variant === 'compact' ? styles.compact : styles.bar}
-      role="toolbar"
-      aria-label="Модерация объявления"
-      onClick={stopClick}
-      onKeyDown={(event) => event.stopPropagation()}
-    >
-      <span className={styles.badge}>Модерация</span>
-      {status === 'pending' || status === 'rejected' ? (
-        <Button type="button" size="sm" loading={busy} onClick={() => void handleApprove()}>
-          Одобрить
+    <>
+      <div
+        className={variant === 'compact' ? styles.compact : styles.bar}
+        role="toolbar"
+        aria-label="Модерация объявления"
+        onClick={stopClick}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        <span className={styles.badge}>Модерация</span>
+        {listing && (
+          <Button type="button" size="sm" variant="secondary" onClick={() => setEditing(true)}>
+            Изменить
+          </Button>
+        )}
+        {status === 'pending' || status === 'rejected' ? (
+          <Button type="button" size="sm" loading={busy} onClick={() => void handleApprove()}>
+            Одобрить
+          </Button>
+        ) : null}
+        {status !== 'rejected' && status !== 'pending' && (
+          <Button type="button" size="sm" variant="outline" loading={busy} onClick={() => void handleReject()}>
+            Отклонить
+          </Button>
+        )}
+        <Button type="button" size="sm" variant="danger" loading={busy} onClick={() => void handleDelete()}>
+          Удалить
         </Button>
-      ) : null}
-      {status !== 'rejected' && status !== 'pending' && (
-        <Button type="button" size="sm" variant="outline" loading={busy} onClick={() => void handleReject()}>
-          Отклонить
-        </Button>
+      </div>
+
+      {editing && listing && (
+        <ListingModeratorEditSheet
+          listing={listing}
+          onClose={() => setEditing(false)}
+          onSaved={(updated) => onEdited?.(updated)}
+        />
       )}
-      <Button type="button" size="sm" variant="danger" loading={busy} onClick={() => void handleDelete()}>
-        Удалить
-      </Button>
-    </div>
+    </>
   );
 });
 

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAppSelector } from '@/app/hooks';
 import { selectCurrentUser, selectIsAuthenticated, selectAuthLoading } from '@/features/user/userSelectors';
@@ -12,18 +12,20 @@ import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { SERVICE_CATEGORIES } from '@/data/categories';
+import { getBoardKindConfig } from '@/data/boardKinds';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { NAGAEVO_CENTER } from '@/constants/geo-data';
 import { validateUserContent } from '@/constants/communityRules';
 import { createListing, uploadListingImage } from '@/services/listingsApi';
-import type { Listing, PriceUnit } from '@/types/listing';
+import type { Listing, ListingKind, PriceUnit } from '@/types/listing';
+import { BOARD_PRICE_UNITS } from '@/utils/listingPriceLabel';
 import { ROUTES } from '@/utils/constants';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AddListingPage.module.css';
 
 const STEPS = ['Категория', 'Подкатегория', 'Описание', 'Фото', 'Предпросмотр', 'Публикация'] as const;
-const UNITS: PriceUnit[] = ['час', 'день', 'м²', 'услуга', 'шт'];
+const UNITS: PriceUnit[] = ['час', 'день', 'м²', 'услуга', 'шт', 'договор', 'награда'];
 const MAX_PHOTOS = 5;
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
@@ -51,14 +53,18 @@ const INITIAL_FORM: FormState = {
   imageUrls: [],
 };
 
-function canProceed(step: number, form: FormState): boolean {
+function canProceed(step: number, form: FormState, listingKind: ListingKind): boolean {
+  const boardConfig = getBoardKindConfig(listingKind);
   if (step === 0) return Boolean(form.category);
-  if (step === 1) return Boolean(form.subcategory);
+  if (step === 1) return boardConfig ? Boolean(form.category) : Boolean(form.subcategory);
   if (step === 2) {
+    const priceOk = boardConfig
+      ? Number(form.priceFrom) >= 0
+      : Number(form.priceFrom) > 0;
     return (
       form.title.trim().length >= 3 &&
       form.description.trim().length >= 10 &&
-      Number(form.priceFrom) > 0 &&
+      priceOk &&
       form.phone.trim().length >= 10 &&
       form.address.trim().length >= 3
     );
@@ -66,10 +72,15 @@ function canProceed(step: number, form: FormState): boolean {
   return true;
 }
 
-function buildPreviewListing(form: FormState, user: NonNullable<ReturnType<typeof selectCurrentUser>>): Listing {
+function buildPreviewListing(
+  form: FormState,
+  user: NonNullable<ReturnType<typeof selectCurrentUser>>,
+  listingKind: ListingKind,
+): Listing {
   return {
     id: 'preview',
     userId: user.id,
+    kind: listingKind,
     title: form.title.trim(),
     category: form.category,
     subcategory: form.subcategory,
@@ -96,6 +107,16 @@ function buildPreviewListing(form: FormState, user: NonNullable<ReturnType<typeo
 
 function AddListingPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const kindParam = searchParams.get('kind');
+  const listingKind: ListingKind = kindParam === 'sale' || kindParam === 'vacancy' || kindParam === 'lost'
+    ? kindParam
+    : 'service';
+  const boardConfig = getBoardKindConfig(listingKind);
+  const categoryOptions = boardConfig
+    ? boardConfig.categories.map((cat) => ({ slug: cat.slug, name: cat.name, icon: cat.icon }))
+    : SERVICE_CATEGORIES.map((cat) => ({ slug: cat.slug, name: cat.name, icon: cat.icon }));
+  const unitOptions = boardConfig ? BOARD_PRICE_UNITS : UNITS;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAuthLoading = useAppSelector(selectAuthLoading);
   const currentUser = useAppSelector(selectCurrentUser);
@@ -105,19 +126,26 @@ function AddListingPage() {
   const [form, setForm] = useState<FormState>(() => ({
     ...INITIAL_FORM,
     phone: currentUser?.phone ?? '',
+    unit: (boardConfig?.defaultUnit as PriceUnit) ?? 'услуга',
   }));
   const [uploading, setUploading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const selectedCat = useMemo(
-    () => SERVICE_CATEGORIES.find((c) => c.slug === form.category),
-    [form.category],
+    () => boardConfig
+      ? boardConfig.categories.find((c) => c.slug === form.category)
+      : undefined,
+    [boardConfig, form.category],
+  );
+  const serviceSelectedCat = useMemo(
+    () => (!boardConfig ? SERVICE_CATEGORIES.find((c) => c.slug === form.category) : undefined),
+    [boardConfig, form.category],
   );
 
   const previewListing = useMemo(
-    () => (currentUser ? buildPreviewListing(form, currentUser) : null),
-    [form, currentUser],
+    () => (currentUser ? buildPreviewListing(form, currentUser, listingKind) : null),
+    [form, currentUser, listingKind],
   );
 
   if (isAuthLoading) {
@@ -173,7 +201,7 @@ function AddListingPage() {
       toast.error('Подтвердите согласие с условиями размещения');
       return;
     }
-    if (!canProceed(2, form)) {
+    if (!canProceed(2, form, listingKind)) {
       toast.error('Заполните описание и цену');
       setStep(2);
       return;
@@ -186,11 +214,12 @@ function AddListingPage() {
         return;
       }
       await createListing({
+        kind: listingKind,
         category: form.category,
-        subcategory: form.subcategory,
+        subcategory: boardConfig ? form.category : form.subcategory,
         title: form.title.trim(),
         description: form.description.trim(),
-        priceFrom: Number(form.priceFrom),
+        priceFrom: Number(form.priceFrom) || 0,
         unit: form.unit,
         phone: form.phone.trim(),
         location: { ...NAGAEVO_CENTER, address: form.address.trim() },
@@ -205,7 +234,7 @@ function AddListingPage() {
     }
   };
 
-  const nextDisabled = !canProceed(step, form) || uploading;
+  const nextDisabled = !canProceed(step, form, listingKind) || uploading;
 
   return (
     <>
@@ -213,7 +242,10 @@ function AddListingPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <PageHeader badge="Мастерам" title="Добавить объявление" />
+          <PageHeader
+            badge={boardConfig ? 'Доска' : 'Мастерам'}
+            title={boardConfig ? `Добавить: ${boardConfig.title}` : 'Добавить объявление'}
+          />
 
           <Reveal delay={60}>
             <ol className={styles.steps}>
@@ -229,15 +261,22 @@ function AddListingPage() {
             <div className={styles.panel} key={step}>
               {step === 0 && (
                 <div className={`${styles.categoryGrid} motion-stagger`}>
-                  {SERVICE_CATEGORIES.map((cat) => (
+                  {categoryOptions.map((cat) => (
                     <button
                       key={cat.slug}
                       type="button"
                       className={form.category === cat.slug ? styles.categoryButtonActive : styles.categoryButton}
-                      onClick={() => patch({ category: cat.slug, subcategory: '' })}
+                      onClick={() => patch({
+                        category: cat.slug,
+                        subcategory: boardConfig ? cat.slug : '',
+                      })}
                     >
                       <span className={styles.categoryThumb}>
-                        <ListingPhoto className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
+                        {boardConfig ? (
+                          <span className={styles.categoryEmoji}>{cat.icon}</span>
+                        ) : (
+                          <ListingPhoto className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
+                        )}
                       </span>
                       <span className={styles.categoryName}>{cat.name}</span>
                     </button>
@@ -245,9 +284,15 @@ function AddListingPage() {
                 </div>
               )}
 
-              {step === 1 && selectedCat && (
+              {step === 1 && boardConfig && selectedCat && (
+                <p className={styles.boardConfirm}>
+                  Категория: <strong>{selectedCat.name}</strong>
+                </p>
+              )}
+
+              {step === 1 && !boardConfig && serviceSelectedCat && (
                 <div className={styles.subcategoryGrid}>
-                  {selectedCat.subcategories.map((sub) => (
+                  {serviceSelectedCat.subcategories.map((sub) => (
                     <button
                       key={sub.slug}
                       type="button"
@@ -287,11 +332,11 @@ function AddListingPage() {
                   </label>
                   <div className={styles.formRow}>
                     <label className={styles.field}>
-                      <span>Цена от, ₽</span>
+                      <span>{boardConfig?.priceLabel ?? 'Цена от'}, ₽</span>
                       <input
                         className={pageStyles.input}
                         type="number"
-                        min={1}
+                        min={0}
                         value={form.priceFrom}
                         onChange={(e) => patch({ priceFrom: e.target.value })}
                       />
@@ -303,7 +348,7 @@ function AddListingPage() {
                         value={form.unit}
                         onChange={(e) => patch({ unit: e.target.value as PriceUnit })}
                       >
-                        {UNITS.map((u) => (
+                        {unitOptions.map((u) => (
                           <option key={u} value={u}>{u}</option>
                         ))}
                       </select>
@@ -368,7 +413,9 @@ function AddListingPage() {
                   <ListingCard listing={previewListing} preview />
                   <div className={styles.editLinks}>
                     <Button type="button" variant="outline" size="sm" onClick={() => setStep(0)}>Категория</Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setStep(1)}>Подкатегория</Button>
+                    {!boardConfig && (
+                      <Button type="button" variant="outline" size="sm" onClick={() => setStep(1)}>Подкатегория</Button>
+                    )}
                     <Button type="button" variant="outline" size="sm" onClick={() => setStep(2)}>Описание</Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => setStep(3)}>Фото</Button>
                   </div>
@@ -381,8 +428,14 @@ function AddListingPage() {
                   <p>После нажатия «Отправить» объявление получит статус <strong>На модерации</strong>.</p>
                   <p>Администратор проверит текст и фото, затем опубликует или отклонит. Вы увидите статус в личном кабинете.</p>
                   <ul>
-                    <li>Категория: {selectedCat?.name}</li>
-                    <li>Подкатегория: {selectedCat?.subcategories.find((s) => s.slug === form.subcategory)?.name}</li>
+                    <li>Категория: {boardConfig ? selectedCat?.name : serviceSelectedCat?.name}</li>
+                    {!boardConfig && (
+                      <li>
+                        Подкатегория:
+                        {' '}
+                        {serviceSelectedCat?.subcategories.find((s) => s.slug === form.subcategory)?.name}
+                      </li>
+                    )}
                     <li>Фото: {form.imageUrls.length || 'без фото'}</li>
                   </ul>
                 </div>

@@ -1,0 +1,59 @@
+/* Depth-first surfaces — без жёстких контуров */
+
+.surface-card {
+  background: var(--color-bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: none;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.surface-elevated {
+  background: var(--color-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: none;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.surface-pill {
+  background: var(--color-bg-card);
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+}
+
+.surface-divider {
+  height: 1px;
+  border: none;
+  margin: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-border) 18%,
+    var(--color-border) 82%,
+    transparent 100%
+  );
+}
+
+.surface-input {
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(8, 31, 24, 0.5);
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
+}
+
+.surface-input:focus {
+  outline: none;
+  border-color: rgba(126, 200, 168, 0.28);
+  box-shadow:
+    0 0 0 3px rgba(126, 200, 168, 0.1),
+    var(--shadow-sm);
+  background: rgba(8, 31, 24, 0.62);
+}

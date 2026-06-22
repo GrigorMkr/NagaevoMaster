@@ -36,3 +36,19 @@
 .hint a:hover {
   color: var(--color-primary-dark);
 }
+
+.newsSlide {
+  flex: 0 0 clamp(13.5rem, 30vw, 16.25rem);
+}
+
+.skeletonRow {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow: hidden;
+}
+
+.skeletonCard {
+  flex: 0 0 clamp(13.5rem, 30vw, 16.25rem);
+  height: 11.5rem;
+  border-radius: var(--radius-xl);
+}

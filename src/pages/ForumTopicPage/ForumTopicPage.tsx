@@ -19,6 +19,7 @@ import {
 } from '@/services/moderationApi';
 import { ROUTES, forumTopicPath } from '@/utils/constants';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { DetailBackdropLayout } from '@/components/layout/DetailBackdropLayout/DetailBackdropLayout';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumTopicPage.module.css';
 
@@ -125,9 +126,10 @@ function ForumTopicPage() {
 
       <div className={pageStyles.page}>
         <div className="container">
-          <Link to={ROUTES.FORUM} className={styles.back}>← Форум</Link>
+          <DetailBackdropLayout className={styles.shell}>
+            <Link to={ROUTES.FORUM} className={styles.back} data-detail-surface>← Форум</Link>
 
-          <article className={styles.card}>
+            <article className={styles.card} data-detail-surface>
             <h1 className="titlePage">{topic.title}</h1>
             <div className={styles.topicHead}>
               <UserAvatar
@@ -208,6 +210,7 @@ function ForumTopicPage() {
               )}
             </div>
           </article>
+          </DetailBackdropLayout>
         </div>
       </div>
     </>);

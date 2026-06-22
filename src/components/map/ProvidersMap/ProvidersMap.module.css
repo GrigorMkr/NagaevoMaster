@@ -2,7 +2,7 @@
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: none;
   box-shadow: var(--shadow-card);
   background: var(--color-bg-card);
   animation: map-rise 0.85s var(--ease-out-expo) both;
@@ -19,7 +19,7 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: none;
   background: var(--color-bg-card);
 }
 
@@ -33,7 +33,7 @@
   font-weight: 600;
   color: var(--color-text-muted);
   background: var(--color-bg-warm);
-  border: 2px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
   cursor: pointer;

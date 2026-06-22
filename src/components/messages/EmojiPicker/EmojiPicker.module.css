@@ -45,7 +45,7 @@
   max-height: min(17.5rem, calc(100dvh - 16px));
   padding: 0.45rem;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: none;
   background: rgba(8, 31, 24, 0.98);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
   animation: panel-pop 0.22s var(--ease-out-expo) both;
@@ -67,7 +67,7 @@
   gap: 0.25rem;
   margin-bottom: 0.35rem;
   padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
   overflow-x: auto;
   scrollbar-width: none;
 }

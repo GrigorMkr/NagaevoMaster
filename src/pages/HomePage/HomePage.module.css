@@ -284,11 +284,11 @@
   background: rgba(8, 31, 24, 0.42);
   backdrop-filter: blur(12px) saturate(1.2);
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-2xl);
   box-shadow:
-    0 12px 36px rgba(8, 31, 24, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    0 16px 44px rgba(8, 31, 24, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
 
@@ -419,17 +419,16 @@
   background: rgba(8, 31, 24, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-card);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: box-shadow var(--transition), background var(--transition);
 }
 
 .heroSearchInner:focus-within {
-  border-color: var(--color-primary-light);
   box-shadow:
     var(--shadow-card-hover),
-    0 0 0 4px rgba(23, 98, 74, 0.08);
+    0 0 0 3px rgba(126, 200, 168, 0.1);
 }
 
 .heroSearchIcon {
@@ -503,19 +502,17 @@
   font-weight: var(--font-weight-ui);
   color: var(--color-text);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition:
     background var(--transition),
-    border-color var(--transition),
     box-shadow var(--transition),
     transform var(--transition);
 }
 
 .heroPopularItem:hover {
   color: var(--color-accent);
-  border-color: rgba(23, 98, 74, 0.25);
   box-shadow: var(--shadow-card);
   transform: translateY(-2px);
 }
@@ -531,7 +528,16 @@
   justify-content: center;
   gap: var(--spacing-xl);
   padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
+  border-top: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border) 20%,
+    var(--color-border) 80%,
+    transparent
+  );
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
   animation: fadeInUp 0.8s 0.4s var(--ease-out-expo) both;
 }
 
@@ -612,10 +618,35 @@
   padding-bottom: var(--section-gap);
 }
 
+.newsCarouselSlide {
+  flex: 0 0 clamp(13.5rem, 30vw, 16.25rem);
+}
+
+.listingCarouselSlide {
+  flex: 0 0 min(280px, 78vw);
+}
+
+.newsSkeletonRow {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow: hidden;
+}
+
+.newsSkeletonCard {
+  flex: 0 0 clamp(13.5rem, 30vw, 16.25rem);
+  height: 11.5rem;
+  border-radius: var(--radius-xl);
+}
+
 .contentBlock .moreLink {
   display: flex;
   justify-content: center;
   margin-top: var(--spacing-xl);
+}
+
+.boardMore {
+  margin: 0.85rem 0 0;
+  text-align: center;
 }
 
 .contentBlock:last-child {
@@ -661,19 +692,17 @@
   position: relative;
   padding: var(--spacing-2xl) var(--spacing-xl);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   transition:
     transform 0.4s var(--ease-out-expo),
-    box-shadow 0.4s var(--ease-out-expo),
-    border-color 0.3s ease;
+    box-shadow 0.4s var(--ease-out-expo);
 }
 
 .stepCard:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-md);
-  border-color: rgba(23, 98, 74, 0.18);
 }
 
 .stepCard:hover .stepNumber {
@@ -721,7 +750,7 @@
   position: relative;
   padding: var(--spacing-2xl) var(--spacing-2xl);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -757,7 +786,8 @@
   margin-bottom: var(--spacing-lg);
   border-radius: var(--radius-lg);
   background: var(--color-bg-warm);
-  border: 1px solid var(--color-border);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--color-border-subtle);
 }
 
 .featureImage {
@@ -828,14 +858,13 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition:
     transform 0.35s var(--ease-out-expo),
-    box-shadow 0.35s var(--ease-out-expo),
-    border-color 0.3s ease;
+    box-shadow 0.35s var(--ease-out-expo);
 }
 
 .popularMedia {
@@ -862,7 +891,6 @@
 .popularCard:hover {
   transform: translateY(-6px) scale(1.02);
   box-shadow: var(--shadow-card-hover);
-  border-color: rgba(23, 98, 74, 0.2);
   color: var(--color-text);
 }
 
@@ -901,19 +929,17 @@
   display: block;
   padding: var(--spacing-lg);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition:
     transform 0.35s var(--ease-out-expo),
-    box-shadow 0.35s var(--ease-out-expo),
-    border-color 0.3s ease;
+    box-shadow 0.35s var(--ease-out-expo);
 }
 
 .forumItem:hover {
   transform: translateX(6px);
   box-shadow: var(--shadow-card);
-  border-color: rgba(23, 98, 74, 0.18);
 }
 
 .forumTitle {
@@ -956,20 +982,18 @@
   padding: var(--spacing-xl);
   text-align: left;
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   cursor: pointer;
   transition:
     transform 0.35s var(--ease-out-expo),
-    box-shadow 0.35s var(--ease-out-expo),
-    border-color 0.3s ease;
+    box-shadow 0.35s var(--ease-out-expo);
 }
 
 .reviewCard:hover {
   transform: translateY(-5px) scale(1.01);
   box-shadow: var(--shadow-card-hover, var(--shadow-card));
-  border-color: rgba(23, 98, 74, 0.16);
 }
 
 .reviewCard:focus-visible {
@@ -1017,19 +1041,17 @@
   gap: var(--spacing-2xl);
   padding: var(--spacing-3xl) var(--spacing-3xl);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-card);
   transition:
     transform 0.4s var(--ease-out-expo),
-    box-shadow 0.4s var(--ease-out-expo),
-    border-color 0.3s ease;
+    box-shadow 0.4s var(--ease-out-expo);
 }
 
 .callToActionCard:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
-  border-color: rgba(23, 98, 74, 0.2);
 }
 
 .callToActionContent .badge {

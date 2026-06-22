@@ -29,6 +29,13 @@ function toUserResponse(user: User) {
             updatedAt: (user.lastLocationAt ?? user.createdAt).toISOString(),
         }
         : undefined;
+    const homeLocation = user.homeLat != null && user.homeLng != null && user.homeAddress
+        ? {
+            lat: user.homeLat,
+            lng: user.homeLng,
+            address: user.homeAddress,
+        }
+        : undefined;
     return {
         id: user.id,
         email: user.email,
@@ -38,7 +45,9 @@ function toUserResponse(user: User) {
         role: user.role,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
+        birthYear: user.birthYear ?? undefined,
         savedLocation,
+        homeLocation,
         createdAt: user.createdAt.toISOString(),
     };
 }
@@ -46,6 +55,7 @@ function toListingResponse(listing: Listing, user?: Pick<User, 'id' | 'name' | '
     return {
         id: listing.id,
         userId: listing.userId,
+        kind: listing.kind,
         title: listing.title,
         category: listing.category,
         subcategory: listing.subcategory,
@@ -56,6 +66,9 @@ function toListingResponse(listing: Listing, user?: Pick<User, 'id' | 'name' | '
         rating: listing.rating,
         reviewsCount: listing.reviewsCount,
         viewsCount: listing.viewsCount,
+        likesCount: listing.likesCount,
+        dislikesCount: listing.dislikesCount,
+        repostsCount: listing.repostsCount,
         images: parseImages(listing.images),
         location: {
             lat: listing.lat,

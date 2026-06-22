@@ -6,6 +6,7 @@ import { fetchUserPublicProfile } from '@/services/usersApi';
 import { serviceDetailPath } from '@/utils/constants';
 import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { AvatarLightbox } from './AvatarLightbox';
 import styles from './FriendProfileSheet.module.css';
 
 interface FriendProfileSheetProps {
@@ -17,11 +18,13 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Awaited<ReturnType<typeof fetchUserPublicProfile>> | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) {
       setProfile(null);
       setError(null);
+      setPhotoOpen(false);
       return;
     }
     let cancelled = false;
@@ -50,49 +53,108 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
   const avatar = profile
     ? resolveAuthorAvatar(profile.user.name, profile.user.login, profile.user.avatarUrl)
     : undefined;
+  const hasContacts = !!(profile?.user.phone || profile?.user.email);
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
-      <div className={styles.sheet} onClick={(event) => event.stopPropagation()}>
-        <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
-          ×
-        </button>
+    <>
+      <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
+        <div className={styles.sheet} onClick={(event) => event.stopPropagation()}>
+          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+            ×
+          </button>
 
-        {loading ? (
-          <div className={styles.center}><Spinner /></div>
-        ) : error ? (
-          <p className={styles.error}>{error}</p>
-        ) : profile ? (
-          <>
-            <div className={styles.hero}>
-              <UserAvatar name={profile.user.name} src={avatar} size="lg" />
-              <div>
-                <h3 className={styles.name}>{profile.user.name}</h3>
-                <p className={styles.login}>@{profile.user.login}</p>
+          {loading ? (
+            <div className={styles.center}><Spinner /></div>
+          ) : error ? (
+            <p className={styles.error}>{error}</p>
+          ) : profile ? (
+            <>
+              <div className={styles.hero}>
+                <button
+                  type="button"
+                  className={styles.avatarButton}
+                  onClick={() => avatar && setPhotoOpen(true)}
+                  disabled={!avatar}
+                  aria-label={avatar ? 'Открыть фото' : 'Нет фото'}
+                >
+                  <UserAvatar name={profile.user.name} src={avatar} size="lg" />
+                </button>
+                <div>
+                  <h3 className={styles.name}>{profile.user.name}</h3>
+                  <p className={styles.login}>@{profile.user.login}</p>
+                </div>
               </div>
-            </div>
 
-            <h4 className={styles.sectionTitle}>
-              Объявления ({profile.listings.length})
-            </h4>
-            {profile.listings.length === 0 ? (
-              <p className={styles.empty}>Пока нет опубликованных объявлений</p>
-            ) : (
-              <ul className={styles.listings}>
-                {profile.listings.map((listing) => (
-                  <li key={listing.id}>
-                    <Link className={styles.listingLink} to={serviceDetailPath(listing.id)} onClick={onClose}>
-                      <span className={styles.listingTitle}>{listing.title}</span>
-                      <span className={styles.listingPrice}>от {listing.priceFrom} ₽</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        ) : null}
+              {hasContacts && (
+                <section className={styles.contacts}>
+                  <h4 className={styles.sectionTitle}>Контакты</h4>
+                  <ul className={styles.contactList}>
+                    {profile.user.birthYear && (
+                      <li>Год рождения: {profile.user.birthYear}</li>
+                    )}
+                    {profile.user.phone && (
+                      <li>
+                        <a className={styles.contactLink} href={`tel:${profile.user.phone}`}>
+                          {profile.user.phone}
+                        </a>
+                      </li>
+                    )}
+                    {profile.user.email && (
+                      <li>
+                        <a className={styles.contactLink} href={`mailto:${profile.user.email}`}>
+                          {profile.user.email}
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                </section>
+              )}
+
+              {profile.user.homeLocation && (
+                <section className={styles.contacts}>
+                  <h4 className={styles.sectionTitle}>Адрес</h4>
+                  <p className={styles.addressLine}>{profile.user.homeLocation.address}</p>
+                  <a
+                    className={styles.mapLink}
+                    href={`https://www.openstreetmap.org/?mlat=${profile.user.homeLocation.lat}&mlon=${profile.user.homeLocation.lng}#map=16/${profile.user.homeLocation.lat}/${profile.user.homeLocation.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Показать на карте →
+                  </a>
+                </section>
+              )}
+
+              <h4 className={styles.sectionTitle}>
+                Объявления ({profile.listings.length})
+              </h4>
+              {profile.listings.length === 0 ? (
+                <p className={styles.empty}>Пока нет опубликованных объявлений</p>
+              ) : (
+                <ul className={styles.listings}>
+                  {profile.listings.map((listing) => (
+                    <li key={listing.id}>
+                      <Link className={styles.listingLink} to={serviceDetailPath(listing.id)} onClick={onClose}>
+                        <span className={styles.listingTitle}>{listing.title}</span>
+                        <span className={styles.listingPrice}>от {listing.priceFrom} ₽</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ) : null}
+        </div>
       </div>
-    </div>
+
+      {photoOpen && avatar && (
+        <AvatarLightbox
+          src={avatar}
+          alt={profile?.user.name ?? ''}
+          onClose={() => setPhotoOpen(false)}
+        />
+      )}
+    </>
   );
 }
 

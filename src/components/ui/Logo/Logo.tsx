@@ -3,7 +3,7 @@ import { LOGO_ICON_SIZE_COMPACT, LOGO_ICON_SIZE_DEFAULT } from '@/constants';
 import { LogoIcon } from './LogoIcon';
 import styles from './Logo.module.css';
 
-type LogoVariant = 'default' | 'footer' | 'icon';
+type LogoVariant = 'default' | 'footer' | 'icon' | 'hero';
 
 interface LogoProps {
   variant?: LogoVariant;
@@ -13,17 +13,24 @@ interface LogoProps {
 function Logo({ variant = 'default', className }: LogoProps) {
   const isIconOnly = variant === 'icon';
   const isFooter = variant === 'footer';
+  const isHero = variant === 'hero';
   const label = 'Нагаево Мастер';
 
   return (
     <span
-      className={classNames(styles.logo, isFooter && styles.footer, isIconOnly && styles.iconOnly, className)}
+      className={classNames(
+        styles.logo,
+        isFooter && styles.footer,
+        isIconOnly && styles.iconOnly,
+        isHero && styles.hero,
+        className,
+      )}
       role="img"
       aria-label={label}
     >
       <span className={styles.logomark}>
         <LogoIcon
-          size={isFooter ? LOGO_ICON_SIZE_COMPACT : LOGO_ICON_SIZE_DEFAULT}
+          size={isHero ? 88 : isFooter ? LOGO_ICON_SIZE_COMPACT : LOGO_ICON_SIZE_DEFAULT}
           ariaHidden
         />
       </span>

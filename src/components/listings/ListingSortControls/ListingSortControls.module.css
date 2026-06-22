@@ -9,7 +9,7 @@
 .buttonActive {
   padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-strong);
+  border: none;
   background: rgba(8, 31, 24, 0.45);
   color: var(--color-text-muted);
   font-family: var(--font-ui);

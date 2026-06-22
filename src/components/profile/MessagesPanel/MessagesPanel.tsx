@@ -19,10 +19,14 @@ import {
   markConversationRead,
   sendMessage,
   startConversation,
+  editMessage,
+  deleteMessage,
+  forwardMessage,
 } from '@/services/messagesApi';
 import { blockUser, fetchBlockStatus, unblockUser } from '@/services/blocksApi';
 import { uploadMessageAttachment } from '@/services/uploadsApi';
 import type { ChatMessage, ConversationSummary } from '@/types/message';
+import { ForwardMessageModal } from '@/components/messages/ForwardMessageModal/ForwardMessageModal';
 import { EmojiPicker } from '@/components/messages/EmojiPicker/EmojiPicker';
 import { PushEnableBanner } from '@/components/push/PushEnableBanner/PushEnableBanner';
 import { useChatLiveSync, mergeMessages } from '@/hooks/useChatLiveSync';
@@ -54,11 +58,16 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
   const [uploading, setUploading] = useState(false);
   const [blockedByMe, setBlockedByMe] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
+  const [forwardTarget, setForwardTarget] = useState<ChatMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const draftRef = useRef<HTMLTextAreaElement>(null);
   const composeBarRef = useRef<HTMLFormElement>(null);
+  const isNearBottomRef = useRef(true);
+  const shouldStickToBottomRef = useRef(true);
+  const prevLastMessageIdRef = useRef<string | null>(null);
+  const [newBelowCount, setNewBelowCount] = useState(0);
   const {
     isRecording,
     seconds: recordingSeconds,
@@ -139,28 +148,115 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     };
   }, [chatId, onChatChange, withUserId]);
 
-  const scrollChatToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
-    requestAnimationFrame(() => {
+  const scrollChatToBottom = useCallback((smooth = false) => {
+    const run = () => {
       const list = messageListRef.current;
       if (!list) return;
-      list.scrollTo({ top: list.scrollHeight, behavior });
-    });
+
+      if (smooth) {
+        list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+      } else {
+        list.scrollTop = list.scrollHeight;
+      }
+      isNearBottomRef.current = true;
+      shouldStickToBottomRef.current = true;
+      setNewBelowCount(0);
+    };
+
+    run();
+    if (!smooth) {
+      requestAnimationFrame(run);
+    }
   }, []);
+
+  const updateScrollStickiness = useCallback(() => {
+    const list = messageListRef.current;
+    if (!list) return;
+    const distanceFromBottom = list.scrollHeight - list.scrollTop - list.clientHeight;
+    const nearBottom = distanceFromBottom < 120;
+    isNearBottomRef.current = nearBottom;
+    if (nearBottom) {
+      shouldStickToBottomRef.current = true;
+      setNewBelowCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    const list = messageListRef.current;
+    if (!list) return undefined;
+
+    const onScroll = () => {
+      updateScrollStickiness();
+    };
+
+    list.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      list.removeEventListener('scroll', onScroll);
+    };
+  }, [activeId, loadingChat, updateScrollStickiness]);
 
   useEffect(() => {
     if (!chatId) {
       setMessages([]);
+      setNewBelowCount(0);
+      shouldStickToBottomRef.current = true;
+      isNearBottomRef.current = true;
       if (!withUserId) {
         setActiveConversation(null);
       }
       return;
     }
+    shouldStickToBottomRef.current = true;
+    isNearBottomRef.current = true;
+    prevLastMessageIdRef.current = null;
     void openConversation(chatId);
   }, [chatId, openConversation, withUserId]);
 
   useEffect(() => {
-    scrollChatToBottom('smooth');
-  }, [messages, scrollChatToBottom]);
+    if (!activeId || loadingChat) return;
+
+    const lastMessage = messages.at(-1);
+    if (!lastMessage) return;
+
+    const previousLastId = prevLastMessageIdRef.current;
+    const isNewTail = previousLastId !== null && previousLastId !== lastMessage.id;
+    prevLastMessageIdRef.current = lastMessage.id;
+
+    const stick = shouldStickToBottomRef.current
+      || isNearBottomRef.current
+      || lastMessage.isMine
+      || previousLastId === null;
+
+    if (stick) {
+      scrollChatToBottom();
+      return;
+    }
+
+    if (isNewTail && !lastMessage.isMine) {
+      setNewBelowCount((count) => count + 1);
+    }
+  }, [activeId, loadingChat, messages, scrollChatToBottom]);
+
+  useEffect(() => {
+    if (!activeId || loadingChat) return undefined;
+
+    const list = messageListRef.current;
+    if (!list || typeof ResizeObserver === 'undefined') return undefined;
+
+    const observer = new ResizeObserver(() => {
+      if (!shouldStickToBottomRef.current && !isNearBottomRef.current) return;
+      scrollChatToBottom();
+    });
+
+    observer.observe(list);
+    for (const child of list.children) {
+      observer.observe(child);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeId, loadingChat, messages.length, scrollChatToBottom]);
 
   const handleLiveMessages = useCallback((incoming: ChatMessage[]) => {
     setMessages((current) => mergeMessages(current, incoming));
@@ -222,10 +318,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
 
   const handleDraftFocus = useCallback(() => {
     unlockMessageSound();
-    scrollChatToBottom('auto');
-    if (window.matchMedia('(max-width: 899px)').matches) {
-      window.scrollTo(0, 0);
-    }
+    scrollChatToBottom();
   }, [scrollChatToBottom]);
 
   const submitDraft = useCallback(async () => {
@@ -240,7 +333,6 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       if (draftRef.current) {
         draftRef.current.style.height = '';
       }
-      scrollChatToBottom('auto');
       void loadConversations();
     } catch (error) {
       toast.error(getErrorMessage(error, 'Не удалось отправить сообщение'));
@@ -269,7 +361,6 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       registerOutgoingMessage(message.id);
       setMessages((current) => [...current, message]);
       setDraft('');
-      scrollChatToBottom('auto');
       void loadConversations();
     } catch (error) {
       toast.error(getErrorMessage(error, 'Не удалось отправить файл'));
@@ -305,7 +396,6 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
         });
         registerOutgoingMessage(message.id);
         setMessages((current) => [...current, message]);
-        scrollChatToBottom('auto');
         void loadConversations();
       } catch (error) {
         toast.error(getErrorMessage(error, 'Не удалось отправить голосовое'));
@@ -352,6 +442,42 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       .then((status) => setBlockedByMe(status.blockedByMe))
       .catch(() => setBlockedByMe(false));
   }, [otherUserId]);
+
+  const handleEditMessage = useCallback(async (messageId: string, body: string) => {
+    try {
+      const updated = await editMessage(messageId, body);
+      setMessages((current) => current.map((item) => (item.id === messageId ? updated : item)));
+      void loadConversations();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось изменить сообщение'));
+      throw error;
+    }
+  }, [loadConversations]);
+
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    try {
+      const updated = await deleteMessage(messageId);
+      setMessages((current) => current.map((item) => (item.id === messageId ? updated : item)));
+      void loadConversations();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось удалить сообщение'));
+      throw error;
+    }
+  }, [loadConversations]);
+
+  const handleForwardSelect = useCallback(async (conversationId: string) => {
+    if (!forwardTarget) return;
+    try {
+      await forwardMessage(forwardTarget.id, conversationId);
+      toast.success(
+        forwardTarget.type === 'listing' ? 'Объявление переслано' : 'Сообщение переслано',
+      );
+      setForwardTarget(null);
+      void loadConversations();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось переслать'));
+    }
+  }, [forwardTarget, loadConversations]);
 
   const handleBlockToggle = async () => {
     if (!otherUserId) return;
@@ -479,6 +605,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
               <p className={styles.blockedNotice}>Пользователь заблокирован — разблокируйте, чтобы писать</p>
             ) : (
             <>
+            <div className={styles.messageListWrap}>
             <div className={styles.messageList} ref={messageListRef}>
               {loadingChat ? (
                 <p className={styles.emptySidebar}>Загрузка сообщений…</p>
@@ -486,10 +613,29 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                 <p className={styles.emptySidebar}>Сообщений пока нет — напишите первым</p>
               ) : (
                 messages.map((message) => (
-                  <MessageBubble key={message.id} message={message} />
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    onEdit={handleEditMessage}
+                    onDelete={handleDeleteMessage}
+                    onForward={setForwardTarget}
+                  />
                 ))
               )}
               <div ref={messagesEndRef} />
+            </div>
+
+            {newBelowCount > 0 && (
+              <button
+                type="button"
+                className={styles.jumpToLatest}
+                onClick={() => scrollChatToBottom(true)}
+              >
+                ↓
+                {' '}
+                {newBelowCount === 1 ? 'Новое сообщение' : `Новых: ${newBelowCount}`}
+              </button>
+            )}
             </div>
 
             {isRecording && (
@@ -564,6 +710,15 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
           </>
         )}
       </section>
+
+      {forwardTarget && (
+        <ForwardMessageModal
+          conversations={conversations}
+          excludeConversationId={activeId ?? undefined}
+          onSelect={(id) => void handleForwardSelect(id)}
+          onClose={() => setForwardTarget(null)}
+        />
+      )}
     </div>
   );
 }

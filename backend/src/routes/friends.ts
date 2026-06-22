@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { routeParam } from '../utils/params.js';
+import { sendFriendPush } from '../services/push/webPush.js';
 
 const friendsRouter = Router();
 
@@ -201,6 +202,11 @@ friendsRouter.post('/request', requireAuth, async (req: AuthRequest, res, next) 
           addressee: { select: userSelect },
         },
       });
+      void sendFriendPush({
+        recipientUserId: existing.requesterId,
+        senderName: req.user!.name,
+        kind: 'friend_accepted',
+      }).catch(() => undefined);
       res.status(200).json(mapFriendship(accepted, currentUserId));
       return;
     }
@@ -215,6 +221,11 @@ friendsRouter.post('/request', requireAuth, async (req: AuthRequest, res, next) 
         addressee: { select: userSelect },
       },
     });
+    void sendFriendPush({
+      recipientUserId: userId,
+      senderName: req.user!.name,
+      kind: 'friend_request',
+    }).catch(() => undefined);
     res.status(201).json(mapFriendship(created, currentUserId));
   } catch (error) {
     next(error);
@@ -246,6 +257,11 @@ friendsRouter.post('/:id/accept', requireAuth, async (req: AuthRequest, res, nex
         addressee: { select: userSelect },
       },
     });
+    void sendFriendPush({
+      recipientUserId: friendship.requesterId,
+      senderName: req.user!.name,
+      kind: 'friend_accepted',
+    }).catch(() => undefined);
     res.json(mapFriendship(accepted, req.user!.id));
   } catch (error) {
     next(error);

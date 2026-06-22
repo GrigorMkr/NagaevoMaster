@@ -17,33 +17,59 @@ import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { FriendActionMenu, type FriendMenuAction } from './FriendActionMenu';
 import { FriendProfileSheet } from './FriendProfileSheet';
+import { AvatarLightbox } from './AvatarLightbox';
 import styles from './FriendsPanel.module.css';
 
 interface FriendUserRowProps {
   user: FriendUser;
   badge?: string;
+  onOpenProfile: () => void;
+  onOpenAvatar: () => void;
   onOpenMenu: () => void;
   menuOpen: boolean;
   menu: ReactNode;
 }
 
-function FriendUserRow({ user, badge, onOpenMenu, menuOpen, menu }: FriendUserRowProps) {
+function FriendUserRow({
+  user,
+  badge,
+  onOpenProfile,
+  onOpenAvatar,
+  onOpenMenu,
+  menuOpen,
+  menu,
+}: FriendUserRowProps) {
   const avatar = resolveAuthorAvatar(user.name, user.login, user.avatarUrl);
 
   return (
     <li className={classNames(styles.row, menuOpen && styles.rowActive)}>
-      <UserAvatar name={user.name} src={avatar} size="sm" />
+      <button
+        type="button"
+        className={styles.avatarBtn}
+        onClick={onOpenAvatar}
+        aria-label="Открыть фото"
+      >
+        <UserAvatar name={user.name} src={avatar} size="sm" />
+      </button>
       <button
         type="button"
         className={styles.identity}
-        onClick={onOpenMenu}
-        aria-expanded={menuOpen}
-        aria-haspopup="menu"
+        onClick={onOpenProfile}
       >
         <span className={styles.userName}>{user.name}</span>
         <span className={styles.userLogin}>@{user.login}</span>
       </button>
       {badge && <span className={styles.badge}>{badge}</span>}
+      <button
+        type="button"
+        className={styles.menuBtn}
+        onClick={onOpenMenu}
+        aria-expanded={menuOpen}
+        aria-haspopup="menu"
+        aria-label="Действия"
+      >
+        ⋯
+      </button>
       {menu}
     </li>
   );
@@ -129,6 +155,8 @@ function FriendEntryRow({
   setMenuUserId,
   closeMenu,
   runAction,
+  onOpenProfile,
+  onOpenAvatar,
 }: {
   entry: FriendEntry;
   onMessageUser?: (userId: string) => void;
@@ -136,6 +164,8 @@ function FriendEntryRow({
   setMenuUserId: (id: string | null) => void;
   closeMenu: () => void;
   runAction: ReturnType<typeof useFriendActions>['runAction'];
+  onOpenProfile: (userId: string) => void;
+  onOpenAvatar: (user: FriendUser) => void;
 }) {
   const isOpen = menuUserId === entry.user.id;
   const canMessage = entry.status === 'accepted';
@@ -148,7 +178,6 @@ function FriendEntryRow({
     if (entry.direction === 'incoming' && entry.status === 'pending') {
       items.push({ id: 'accept', label: 'Принять заявку' });
     }
-    items.push({ id: 'profile', label: 'Просмотр профиля' });
     items.push({
       id: 'remove',
       label: entry.status === 'accepted' ? 'Удалить из друзей' : entry.direction === 'incoming' ? 'Отклонить' : 'Отменить заявку',
@@ -169,6 +198,8 @@ function FriendEntryRow({
       user={entry.user}
       badge={badge}
       menuOpen={isOpen}
+      onOpenProfile={() => onOpenProfile(entry.user.id)}
+      onOpenAvatar={() => onOpenAvatar(entry.user)}
       onOpenMenu={() => setMenuUserId(isOpen ? null : entry.user.id)}
       menu={(
         <FriendActionMenu
@@ -196,6 +227,8 @@ function SearchResultRow({
   setMenuUserId,
   closeMenu,
   runAction,
+  onOpenProfile,
+  onOpenAvatar,
 }: {
   user: FriendSearchResult;
   onChanged: () => void;
@@ -205,6 +238,8 @@ function SearchResultRow({
   setMenuUserId: (id: string | null) => void;
   closeMenu: () => void;
   runAction: ReturnType<typeof useFriendActions>['runAction'];
+  onOpenProfile: (userId: string) => void;
+  onOpenAvatar: (user: FriendUser) => void;
 }) {
   const [adding, setAdding] = useState(false);
   const isOpen = menuUserId === user.id;
@@ -233,7 +268,6 @@ function SearchResultRow({
     if (user.relation === 'pending_received' && user.friendshipId) {
       items.push({ id: 'accept', label: 'Принять заявку' });
     }
-    items.push({ id: 'profile', label: 'Просмотр профиля' });
     if (user.friendshipId && user.relation !== 'none') {
       items.push({
         id: 'remove',
@@ -270,6 +304,8 @@ function SearchResultRow({
       user={user}
       badge={badge}
       menuOpen={isOpen}
+      onOpenProfile={() => onOpenProfile(user.id)}
+      onOpenAvatar={() => onOpenAvatar(user)}
       onOpenMenu={() => setMenuUserId(isOpen ? null : user.id)}
       menu={(
         <FriendActionMenu
@@ -316,6 +352,20 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
     runAction,
   } = useFriendActions({ onChanged: load, onMessageUser });
 
+  const [avatarLightbox, setAvatarLightbox] = useState<{ src: string; alt: string } | null>(null);
+
+  const openProfile = useCallback((userId: string) => {
+    closeMenu();
+    setProfileUserId(userId);
+  }, [closeMenu, setProfileUserId]);
+
+  const openAvatar = useCallback((user: FriendUser) => {
+    const src = resolveAuthorAvatar(user.name, user.login, user.avatarUrl);
+    if (src) {
+      setAvatarLightbox({ src, alt: user.name });
+    }
+  }, []);
+
   useEffect(() => {
     void load();
   }, [load]);
@@ -348,6 +398,8 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
     onMessageUser,
     canModerate,
     onChanged: () => { void load(); setSearchQuery(''); },
+    onOpenProfile: openProfile,
+    onOpenAvatar: openAvatar,
   };
 
   return (
@@ -394,6 +446,20 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
         </section>
       )}
 
+      {overview.outgoing.length > 0 && (
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>
+            Исходящие
+            <span className={styles.count}>{overview.outgoing.length}</span>
+          </h3>
+          <ul className={styles.list}>
+            {overview.outgoing.map((entry) => (
+              <FriendEntryRow key={entry.id} entry={entry} {...rowProps} />
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>
           Друзья
@@ -402,7 +468,7 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
         {overview.friends.length === 0 ? (
           <p className={styles.empty}>Пока нет друзей — найдите человека через поиск</p>
         ) : (
-          <ul className={classNames(styles.list, styles.friendsGrid)}>
+          <ul className={styles.list}>
             {overview.friends.map((entry) => (
               <FriendEntryRow key={entry.id} entry={entry} {...rowProps} />
             ))}
@@ -410,12 +476,20 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
         )}
       </section>
 
-      <p className={styles.hint}>Нажмите на имя — меню действий</p>
+      <p className={styles.hint}>Нажмите на имя — профиль и контакты · ⋯ — действия</p>
 
       <FriendProfileSheet
         userId={profileUserId}
         onClose={() => setProfileUserId(null)}
       />
+
+      {avatarLightbox && (
+        <AvatarLightbox
+          src={avatarLightbox.src}
+          alt={avatarLightbox.alt}
+          onClose={() => setAvatarLightbox(null)}
+        />
+      )}
     </div>
   );
 }

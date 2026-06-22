@@ -19,6 +19,7 @@ function enrichListing(listing: Listing): Listing {
 
   return {
     ...listing,
+    kind: listing.kind ?? 'service',
     images,
     author,
   };

@@ -7,7 +7,7 @@ import styles from './NewsCard.module.css';
 
 interface NewsCardProps {
   item: NewsItem;
-  variant?: 'default' | 'compact' | 'tile' | 'showcase' | 'showcaseLarge';
+  variant?: 'default' | 'compact' | 'tile' | 'showcase' | 'showcaseLarge' | 'showcaseCompact';
 }
 
 const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardProps) {
@@ -17,8 +17,12 @@ const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardP
   );
   const categoryLabel = NEWS_CATEGORY_LABELS[item.category];
 
-  if (variant === 'showcase' || variant === 'showcaseLarge') {
-    const showcaseClass = variant === 'showcaseLarge' ? styles.cardShowcaseLarge : styles.cardShowcase;
+  if (variant === 'showcase' || variant === 'showcaseLarge' || variant === 'showcaseCompact') {
+    const showcaseClass = variant === 'showcaseLarge'
+      ? styles.cardShowcaseLarge
+      : variant === 'showcaseCompact'
+        ? styles.cardShowcaseCompact
+        : styles.cardShowcase;
 
     return (
       <article className={showcaseClass}>

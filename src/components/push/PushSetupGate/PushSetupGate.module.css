@@ -64,7 +64,7 @@
 
 .secondary,
 .linkBtn {
-  border: 1px solid var(--color-border);
+  border: none;
   background: transparent;
   color: var(--color-text-muted);
 }

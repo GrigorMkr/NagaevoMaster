@@ -5,6 +5,13 @@ interface AccountLocation {
     updatedAt: string;
 }
 
+interface HomeLocation {
+    lat: number;
+    lng: number;
+    address: string;
+}
+
 export type {
   AccountLocation,
+  HomeLocation,
 }

@@ -1,0 +1,158 @@
+.shell {
+  position: relative;
+}
+
+.shellAuto {
+  margin: 0 calc(-1 * var(--container-pad, 1rem));
+}
+
+.viewportAuto {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 4%,
+    #000 96%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 4%,
+    #000 96%,
+    transparent 100%
+  );
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--color-mint);
+  background: rgba(126, 200, 168, 0.08);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    opacity var(--transition),
+    transform 0.2s var(--ease-out-expo);
+}
+
+.arrow:hover:not(:disabled) {
+  background: rgba(126, 200, 168, 0.2);
+  transform: translateY(-1px);
+}
+
+.arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.track {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trackLoop {
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-xl);
+  scroll-snap-type: none;
+}
+
+.trackLoopStatic {
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  overflow-x: visible;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.slideEnter {
+  animation: carouselSlideInLeft 0.55s var(--ease-out-expo) backwards;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-out-expo),
+    background var(--transition);
+}
+
+.dot:hover {
+  transform: scale(1.15);
+  background: rgba(126, 200, 168, 0.45);
+}
+
+.dotActive {
+  width: 1.1rem;
+  background: var(--color-mint);
+}
+
+@keyframes carouselSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .shellAuto {
+    margin: 0 calc(-1 * var(--spacing-xl));
+  }
+
+  .trackLoop {
+    gap: var(--spacing-lg);
+    padding-inline: var(--spacing-2xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slideEnter {
+    animation: none;
+  }
+}

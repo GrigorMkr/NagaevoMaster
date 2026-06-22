@@ -1,24 +1,49 @@
 import toast from 'react-hot-toast';
+import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
+import { buildAvatarUrl } from '@/utils/avatarUrl';
 import styles from './messageLightningToast.module.css';
 
-function showMessageLightning(senderName: string, preview: string) {
+interface MessageLightningOptions {
+  senderName: string;
+  preview: string;
+  avatarUrl?: string;
+  conversationId?: string;
+}
+
+function openChat(conversationId?: string) {
+  if (!conversationId) return;
+  window.location.href = `/profile?section=messages&chat=${conversationId}`;
+}
+
+function showMessageLightning(options: MessageLightningOptions) {
+  const { senderName, preview, avatarUrl, conversationId } = options;
+  const avatarSrc = avatarUrl || buildAvatarUrl(senderName, senderName);
+
   toast.custom(
     (t) => (
-      <div
+      <button
+        type="button"
         className={`${styles.root} ${t.visible ? styles.visible : styles.hidden}`}
-        role="status"
-        aria-live="polite"
+        onClick={() => {
+          toast.dismiss(t.id);
+          openChat(conversationId);
+        }}
+        aria-label={`Новое сообщение от ${senderName}`}
       >
-        <span className={styles.bolt} aria-hidden>⚡</span>
+        <span className={styles.avatarWrap}>
+          <UserAvatar name={senderName} src={avatarSrc} size="sm" />
+          <span className={styles.dot} aria-hidden />
+        </span>
         <div className={styles.body}>
           <strong className={styles.title}>{senderName}</strong>
           <p className={styles.preview}>{preview}</p>
+          {conversationId && <span className={styles.cta}>Открыть чат →</span>}
         </div>
-      </div>
+      </button>
     ),
     {
-      id: 'message-lightning',
-      duration: 2800,
+      id: conversationId ? `message-${conversationId}` : 'message-lightning',
+      duration: 4200,
       position: 'top-center',
     },
   );
@@ -26,4 +51,8 @@ function showMessageLightning(senderName: string, preview: string) {
 
 export {
   showMessageLightning,
+};
+
+export type {
+  MessageLightningOptions,
 };

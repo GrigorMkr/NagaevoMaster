@@ -1,5 +1,6 @@
 export * from './app'
 export * from './mobileApp'
+export * from './siteVersion'
 export * from './auth'
 export * from './geo'
 export * from './geolocation'

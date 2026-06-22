@@ -40,6 +40,8 @@
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",
     "build:apk": "node scripts/build-apk.mjs",
+    "version:sync": "node scripts/sync-app-version.mjs",
+    "site:sync": "node scripts/sync-site-version.mjs",
     "build:mobile": "node scripts/build-mobile.mjs"
   },
   "dependencies": {

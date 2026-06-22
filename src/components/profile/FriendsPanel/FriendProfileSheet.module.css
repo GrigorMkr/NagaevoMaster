@@ -18,7 +18,7 @@
   padding: var(--spacing-lg);
   border-radius: var(--radius-xl);
   background: linear-gradient(165deg, #0f3328, #081f18);
-  border: 1px solid rgba(126, 200, 168, 0.22);
+  border: none;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 }
 
@@ -55,6 +55,45 @@
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
   padding-right: 2rem;
+}
+
+.avatarButton {
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatarButton:disabled {
+  cursor: default;
+}
+
+.contacts {
+  margin-bottom: var(--spacing-lg);
+}
+
+.contactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.contactLink {
+  display: inline-flex;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-mint);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  word-break: break-all;
+}
+
+.contactLink:hover {
+  background: rgba(23, 98, 74, 0.22);
 }
 
 .name {
@@ -124,6 +163,24 @@
   font-size: var(--font-size-xs);
   color: var(--color-mint);
   font-weight: 700;
+}
+
+.addressLine {
+  margin: 0 0 0.35rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.mapLink {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-mint);
+  text-decoration: none;
+}
+
+.mapLink:hover {
+  text-decoration: underline;
 }
 
 @media (min-width: 768px) {

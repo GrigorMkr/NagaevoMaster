@@ -18,6 +18,19 @@ const updateProfileSchema = z.object({
     name: z.string().min(2).optional(),
     phone: z.string().min(10).optional(),
     avatarUrl: z.string().url().max(2048).optional(),
+    birthYear: z.number().int().min(1920).max(new Date().getFullYear()).nullable().optional(),
+    homeAddress: z.string().max(240).nullable().optional(),
+    homeLat: z.number().min(-90).max(90).nullable().optional(),
+    homeLng: z.number().min(-180).max(180).nullable().optional(),
+}).superRefine((data, ctx) => {
+    const hasAddress = Boolean(data.homeAddress?.trim());
+    const hasCoords = data.homeLat != null && data.homeLng != null;
+    if (hasAddress && !hasCoords) {
+        ctx.addIssue({ code: 'custom', message: 'Укажите точку на карте для адреса' });
+    }
+    if (!hasAddress && (data.homeLat != null || data.homeLng != null)) {
+        ctx.addIssue({ code: 'custom', message: 'Укажите текст адреса' });
+    }
 });
 usersRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
     try {
@@ -130,13 +143,32 @@ usersRouter.get('/:userId/profile', requireAuth, async (req: AuthRequest, res, n
             throw new HttpError(403, 'Профиль недоступен');
         }
 
+        const viewerRole = req.user!.role;
+        const isStaff = ['admin', 'moderator'].includes(viewerRole);
+
+        const friendship = await prisma.friendship.findFirst({
+            where: {
+                status: 'accepted',
+                OR: [
+                    { requesterId: viewerId, addresseeId: userId },
+                    { requesterId: userId, addresseeId: viewerId },
+                ],
+            },
+        });
+        const showContacts = isStaff || !!friendship;
+
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
                 name: true,
                 email: true,
+                phone: true,
                 avatarUrl: true,
+                birthYear: true,
+                homeAddress: true,
+                homeLat: true,
+                homeLng: true,
                 isBanned: true,
             },
         });
@@ -151,12 +183,28 @@ usersRouter.get('/:userId/profile', requireAuth, async (req: AuthRequest, res, n
             take: 12,
         });
 
+        const homeLocation = showContacts && user.homeLat != null && user.homeLng != null && user.homeAddress
+            ? {
+                lat: user.homeLat,
+                lng: user.homeLng,
+                address: user.homeAddress,
+            }
+            : undefined;
+
         res.json({
             user: {
                 id: user.id,
                 name: user.name,
                 login: user.email.split('@')[0] ?? user.email,
                 avatarUrl: user.avatarUrl ?? undefined,
+                ...(showContacts
+                    ? {
+                        phone: user.phone ?? undefined,
+                        email: user.email,
+                        birthYear: user.birthYear ?? undefined,
+                        homeLocation,
+                    }
+                    : {}),
             },
             listings: listings.map((listing) => toListingResponse(listing, listing.user)),
         });

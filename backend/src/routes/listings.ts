@@ -20,14 +20,18 @@ const listingUserSelect = {
 } as const;
 const NAGAEVO_CENTER = { lat: 54.6245, lng: 56.1082 };
 const PAGE_SIZE = 24;
+const PRICE_UNITS = ['час', 'день', 'м²', 'услуга', 'шт', 'договор', 'награда'] as const;
+const LISTING_KINDS = ['service', 'sale', 'vacancy', 'lost'] as const;
+
 const createListingSchema = z.object({
+    kind: z.enum(LISTING_KINDS).optional().default('service'),
     category: z.string().min(1),
     subcategory: z.string().min(1),
     title: z.string().min(3),
     description: z.string().min(10),
-    priceFrom: z.number().positive(),
+    priceFrom: z.number().nonnegative(),
     priceTo: z.number().positive().optional(),
-    unit: z.enum(['час', 'день', 'м²', 'услуга', 'шт']),
+    unit: z.enum(PRICE_UNITS),
     phone: z.string().min(10),
     location: z.object({
         lat: z.number(),
@@ -182,6 +186,9 @@ listingsRouter.get('/', async (req, res, next) => {
         const origin = resolveOrigin(query as Record<string, unknown>);
         const page = Math.max(1, Number(query.page) || 1);
         const where: Record<string, unknown> = { status: 'published' };
+        if (typeof query.kind === 'string' && query.kind) {
+            where.kind = query.kind;
+        }
         if (typeof query.category === 'string' && query.category) {
             where.category = query.category;
         }
@@ -249,9 +256,13 @@ listingsRouter.post('/', requireAuth, async (req: AuthRequest, res, next) => {
     try {
         const data = createListingSchema.parse(req.body);
         assertCleanContent(data.title, data.description);
+        if (data.kind === 'service' && data.priceFrom <= 0) {
+            throw new HttpError(400, 'Укажите цену для услуги');
+        }
         const listing = await prisma.listing.create({
             data: {
                 userId: req.user!.id,
+                kind: data.kind,
                 title: data.title,
                 category: data.category,
                 subcategory: data.subcategory,

@@ -15,7 +15,7 @@
   padding: 0.85rem 0.85rem max(0.85rem, env(safe-area-inset-bottom));
   border-radius: 1.1rem 1.1rem 0 0;
   background: linear-gradient(180deg, #123528, #081f18);
-  border: 1px solid rgba(126, 200, 168, 0.2);
+  border: none;
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
   animation: sheet-up 0.28s var(--ease-out-expo) both;
 }

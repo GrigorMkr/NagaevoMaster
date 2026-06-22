@@ -10,10 +10,16 @@ import { getAuthToken } from '@/services/authApi';
 import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 
+import type { HomeLocation } from '@/types/location';
+
 interface UpdateProfilePayload {
   name?: string;
   phone?: string;
   avatarUrl?: string;
+  birthYear?: number | null;
+  homeAddress?: string | null;
+  homeLat?: number | null;
+  homeLng?: number | null;
 }
 
 interface UserReviewItem extends Review {
@@ -41,7 +47,15 @@ async function updateProfile(payload: UpdateProfilePayload): Promise<User> {
 
     const updatedUser: User = {
       ...currentUser,
-      ...payload,
+      name: payload.name ?? currentUser.name,
+      phone: payload.phone ?? currentUser.phone,
+      avatarUrl: payload.avatarUrl ?? currentUser.avatarUrl,
+      birthYear: payload.birthYear === null ? undefined : (payload.birthYear ?? currentUser.birthYear),
+      homeLocation: payload.homeAddress === null
+        ? undefined
+        : (payload.homeLat != null && payload.homeLng != null && payload.homeAddress
+          ? { lat: payload.homeLat, lng: payload.homeLng, address: payload.homeAddress }
+          : currentUser.homeLocation),
     };
 
     saveMockUserSession(currentUser.email, updatedUser);
@@ -76,6 +90,10 @@ interface PublicUserProfile {
     name: string;
     login: string;
     avatarUrl?: string;
+    phone?: string;
+    email?: string;
+    birthYear?: number;
+    homeLocation?: HomeLocation;
   };
   listings: Listing[];
 }

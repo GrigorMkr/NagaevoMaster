@@ -2,6 +2,7 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { useNews } from '@/hooks/useNews';
 import { APP_DESCRIPTION } from '@/constants';
+import { BoardPortalSection } from './components/BoardPortalSection';
 import { CategoriesSection } from './components/CategoriesSection';
 import { CtaSection } from './components/CtaSection';
 import { FeaturesSection } from './components/FeaturesSection';
@@ -30,7 +31,6 @@ function HomePage() {
               items={local}
               loading={newsLoading}
               moreLinkLabel="Все новости →"
-              direction="left"
             />
           </Reveal>
           <Reveal delay={80}>
@@ -40,11 +40,13 @@ function HomePage() {
               items={external}
               loading={newsLoading}
               moreLinkLabel="Ещё →"
-              direction="right"
             />
           </Reveal>
           <Reveal delay={120}>
             <PopularServicesSection />
+          </Reveal>
+          <Reveal delay={100}>
+            <BoardPortalSection />
           </Reveal>
           <Reveal delay={100}>
             <MapSection />

@@ -47,6 +47,13 @@ const listingsSlice = createSlice({
                 state.currentListing = null;
             }
         },
+        updateListingInStore(state, action: PayloadAction<Listing>) {
+            const listing = action.payload;
+            state.items = state.items.map((item) => (item.id === listing.id ? listing : item));
+            if (state.currentListing?.id === listing.id) {
+                state.currentListing = listing;
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -79,7 +86,7 @@ const listingsSlice = createSlice({
         });
     },
 });
-const { setListingsLoading, setListings, setCurrentListing, setListingsPage, setListingsError, removeListingFromStore, } = listingsSlice.actions;
+const { setListingsLoading, setListings, setCurrentListing, setListingsPage, setListingsError, removeListingFromStore, updateListingInStore, } = listingsSlice.actions;
 
 export {
   setListingsLoading,
@@ -88,6 +95,7 @@ export {
   setListingsPage,
   setListingsError,
   removeListingFromStore,
+  updateListingInStore,
 }
 
 export default listingsSlice.reducer

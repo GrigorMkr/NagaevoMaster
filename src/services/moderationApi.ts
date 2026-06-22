@@ -121,6 +121,7 @@ interface AdminEditListingPayload {
   priceFrom?: number;
   unit?: string;
   phone?: string;
+  imageIds?: string[];
   status?: ListingStatus;
 }
 
@@ -240,6 +241,124 @@ async function fetchModerationOnlineStats(): Promise<{ guestsOnline: number; use
   return response.data;
 }
 
+export interface AdminDashboardStats {
+  generatedAt: string;
+  presence: {
+    guestsOnline: number;
+    usersOnline: number;
+    totalOnline: number;
+  };
+  users: {
+    total: number;
+    online: number;
+    offline: number;
+    registeredToday: number;
+    banned: number;
+  };
+  listings: {
+    total: number;
+    published: number;
+    pending: number;
+    rejected: number;
+    addedToday: number;
+    servicesPublished: number;
+    boardPublished: number;
+    boardSalePublished: number;
+    boardVacancyPublished: number;
+    boardLostPublished: number;
+    addedTodayServices: number;
+    addedTodayBoard: number;
+  };
+  messages: {
+    conversations: number;
+    total: number;
+    today: number;
+  };
+  forum: {
+    topics: number;
+    postsToday: number;
+  };
+  social: {
+    friendships: number;
+    pendingFriendRequests: number;
+  };
+  moderation: {
+    reportsPending: number;
+    listingsPending: number;
+  };
+  reviews: {
+    total: number;
+  };
+  contact: {
+    messagesToday: number;
+  };
+}
+
+async function fetchAdminDashboardStats(): Promise<AdminDashboardStats> {
+  const response = await api.get<AdminDashboardStats>('/moderation/dashboard-stats');
+  return response.data;
+}
+
+export interface ModerationUserItem {
+  id: string;
+  name: string;
+  email: string;
+  login: string;
+  role: string;
+  isBanned: boolean;
+  phone?: string;
+  createdAt: string;
+}
+
+async function fetchModerationUsers(query = ''): Promise<ModerationUserItem[]> {
+  const response = await api.get<ModerationUserItem[]>('/moderation/users', {
+    params: query.trim() ? { q: query.trim() } : undefined,
+  });
+  return asArray<ModerationUserItem>(response.data);
+}
+
+async function updateModerationUserRole(userId: string, role: string): Promise<void> {
+  await api.patch(`/moderation/users/${userId}/role`, { role });
+}
+
+export interface SiteNewsItem {
+  id: string;
+  title: string;
+  summary: string;
+  imageUrl?: string;
+  sourceUrl?: string;
+  publishedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface SiteNewsPayload {
+  title: string;
+  summary?: string;
+  imageUrl?: string | null;
+  sourceUrl?: string | null;
+  publishedAt?: string;
+}
+
+async function fetchModerationSiteNews(): Promise<SiteNewsItem[]> {
+  const response = await api.get<SiteNewsItem[]>('/moderation/site-news');
+  return asArray<SiteNewsItem>(response.data);
+}
+
+async function createModerationSiteNews(payload: SiteNewsPayload): Promise<SiteNewsItem> {
+  const response = await api.post<SiteNewsItem>('/moderation/site-news', payload);
+  return response.data;
+}
+
+async function updateModerationSiteNews(id: string, payload: Partial<SiteNewsPayload>): Promise<SiteNewsItem> {
+  const response = await api.patch<SiteNewsItem>(`/moderation/site-news/${id}`, payload);
+  return response.data;
+}
+
+async function deleteModerationSiteNews(id: string): Promise<void> {
+  await api.delete(`/moderation/site-news/${id}`);
+}
+
 export {
   fetchModerationRules,
   fetchModerationListings,
@@ -259,9 +378,17 @@ export {
   editModerationForumPost,
   deleteModerationForumPost,
   fetchModerationOnlineStats,
+  fetchAdminDashboardStats,
+  fetchModerationUsers,
+  updateModerationUserRole,
+  fetchModerationSiteNews,
+  createModerationSiteNews,
+  updateModerationSiteNews,
+  deleteModerationSiteNews,
 };
 
 export type {
   AdminEditListingPayload,
   UpdateReportOptions,
+  SiteNewsPayload,
 };

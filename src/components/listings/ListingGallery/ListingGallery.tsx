@@ -6,10 +6,12 @@ import styles from './ListingGallery.module.css';
 interface ListingGalleryProps {
   images: string[];
   title: string;
+  variant?: 'default' | 'compact';
 }
 
-function ListingGallery({ images, title }: ListingGalleryProps) {
+function ListingGallery({ images, title, variant = 'default' }: ListingGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const isCompact = variant === 'compact';
 
   if (images.length === 0) {
     return null;
@@ -18,17 +20,20 @@ function ListingGallery({ images, title }: ListingGalleryProps) {
   const activeImage = images[activeIndex] ?? images[0]!;
 
   return (
-    <section className={styles.gallery} aria-label="Фото работ и техники">
-      <div className={styles.mainFrame}>
+    <section
+      className={isCompact ? styles.galleryCompact : styles.gallery}
+      aria-label="Фото работ и техники"
+    >
+      <div className={isCompact ? styles.mainFrameCompact : styles.mainFrame}>
         <ListingPhoto
-          className={styles.mainImage}
+          className={isCompact ? styles.mainImageCompact : styles.mainImage}
           src={activeImage}
           alt={`${title} — фото ${activeIndex + 1}`}
           loading="lazy"
         />
       </div>
       {images.length > 1 && (
-        <div className={styles.thumbs}>
+        <div className={isCompact ? styles.thumbsCompact : styles.thumbs}>
           {images.map((image, index) => (
             <button
               key={image}
@@ -38,7 +43,12 @@ function ListingGallery({ images, title }: ListingGalleryProps) {
               aria-label={`Показать фото ${index + 1}`}
               aria-pressed={index === activeIndex}
             >
-              <ListingPhoto className={styles.thumbImage} src={image} alt="" loading="lazy" />
+              <ListingPhoto
+                className={isCompact ? styles.thumbImageCompact : styles.thumbImage}
+                src={image}
+                alt=""
+                loading="lazy"
+              />
             </button>
           ))}
         </div>

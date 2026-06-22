@@ -22,6 +22,22 @@ function loadProductionEnv() {
 
 loadProductionEnv()
 
+const versionSync = spawnSync('node', ['scripts/sync-app-version.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+})
+if (versionSync.status !== 0) {
+  process.exit(versionSync.status ?? 1)
+}
+
+const siteVersionSync = spawnSync('node', ['scripts/sync-site-version.mjs', '--bump'], {
+  cwd: root,
+  stdio: 'inherit',
+})
+if (siteVersionSync.status !== 0) {
+  process.exit(siteVersionSync.status ?? 1)
+}
+
 process.env.VITE_BASE = process.env.VITE_BASE ?? '/'
 process.env.VITE_API_URL = process.env.VITE_API_URL ?? '/api'
 

@@ -18,7 +18,7 @@
 
 .stepActive {
   background: var(--color-button-active-bg);
-  border: 2px solid var(--color-button-border);
+  border: none;
   color: var(--color-button-active-text);
 }
 
@@ -29,7 +29,7 @@
 .panel {
   padding: var(--spacing-2xl);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   margin-bottom: var(--spacing-xl);
@@ -51,7 +51,7 @@
   padding: var(--spacing-md);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  border: 2px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-xl);
   background: var(--color-bg-warm);
   color: var(--color-text);
@@ -102,12 +102,31 @@
   letter-spacing: -0.02em;
 }
 
+.categoryEmoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 2rem;
+}
+
+.boardConfirm {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  background: rgba(8, 31, 24, 0.35);
+  border-radius: var(--radius-lg);
+}
+
 .subcategoryTag,
 .subcategoryActive {
   padding: 0.5rem 1rem;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  border: 2px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   background: var(--color-bg-warm);
   color: var(--color-text);
@@ -155,7 +174,7 @@
 .textarea,
 .select {
   padding: 0.9rem 1.125rem;
-  border: 1px solid var(--color-border-strong);
+  border: none;
   border-radius: var(--radius-lg);
   font-family: var(--font-body);
   font-size: var(--font-size-base);

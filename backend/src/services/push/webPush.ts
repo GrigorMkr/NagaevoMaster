@@ -87,8 +87,80 @@ async function sendMessagePush(payload: MessagePushPayload) {
   }));
 }
 
+interface FriendPushPayload {
+  recipientUserId: string;
+  senderName: string;
+  kind: 'friend_request' | 'friend_accepted';
+}
+
+async function sendFriendPush(payload: FriendPushPayload) {
+  const subscriptions = await prisma.pushSubscription.findMany({
+    where: { userId: payload.recipientUserId },
+    orderBy: { updatedAt: 'desc' },
+  });
+  if (subscriptions.length === 0) return;
+
+  const isRequest = payload.kind === 'friend_request';
+  const body = {
+    title: isRequest ? 'Заявка в друзья' : 'Друзья',
+    body: isRequest
+      ? `${payload.senderName} хочет добавить вас в друзья`
+      : `${payload.senderName} принял(а) вашу заявку`,
+    senderName: payload.senderName,
+    url: '/profile?section=friends',
+    tag: `friend-${payload.kind}-${Date.now()}`,
+    icon: '/apple-touch-icon.png',
+  };
+
+  const pushPayload = JSON.stringify(body);
+
+  await Promise.all(subscriptions.map(async (sub) => {
+    if (!ensureWebPush() && !isFcmEndpoint(sub.endpoint)) return;
+
+    if (isFcmEndpoint(sub.endpoint)) {
+      await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `key=${env.FCM_SERVER_KEY}`,
+        },
+        body: JSON.stringify({
+          to: extractFcmToken(sub.endpoint),
+          priority: 'high',
+          notification: {
+            title: body.title,
+            body: body.body,
+            sound: 'default',
+          },
+          data: { url: body.url },
+        }),
+      }).catch(() => undefined);
+      return;
+    }
+
+    if (!ensureWebPush()) return;
+
+    try {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        pushPayload,
+        { TTL: 60 * 60 * 24, urgency: 'high' },
+      );
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode;
+      if (status === 404 || status === 410) {
+        await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => undefined);
+      }
+    }
+  }));
+}
+
 export {
   ensureWebPush,
   isPushConfigured,
   sendMessagePush,
+  sendFriendPush,
 };

@@ -21,6 +21,8 @@ const POLL_HIDDEN_IOS_MS = 700;
 interface NewMessageNotice {
   senderName: string;
   preview: string;
+  avatarUrl?: string;
+  conversationId?: string;
 }
 
 interface UseChatLiveSyncOptions {
@@ -62,7 +64,7 @@ function fireNotice(
     void playMessageSound();
   }
   onNewMessage?.(notice);
-  showMessageLightning(notice.senderName, notice.preview);
+  showMessageLightning(notice);
 }
 
 function shouldNotifyMessage(
@@ -149,7 +151,12 @@ function useChatLiveSync({
               notifyIncomingMessage(bumped.otherUser.name, preview, bumpedMessageId);
             } else {
               fireNotice(
-                { senderName: bumped.otherUser.name, preview },
+                {
+                  senderName: bumped.otherUser.name,
+                  preview,
+                  avatarUrl: bumped.otherUser.avatarUrl,
+                  conversationId: bumped.id,
+                },
                 soundsOn,
                 onNewMessageRef.current,
               );
@@ -181,7 +188,16 @@ function useChatLiveSync({
               if (tabHidden) {
                 notifyIncomingMessage(senderName, preview, lastIncoming.id);
               } else {
-                fireNotice({ senderName, preview }, soundsOn, onNewMessageRef.current);
+                fireNotice(
+                  {
+                    senderName,
+                    preview,
+                    avatarUrl: detail.otherUser.avatarUrl,
+                    conversationId: activeConversationId,
+                  },
+                  soundsOn,
+                  onNewMessageRef.current,
+                );
                 void markConversationRead(activeConversationId);
               }
             } else if (!tabHidden) {

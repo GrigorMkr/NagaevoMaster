@@ -1,5 +1,6 @@
 type UserRole = 'guest' | 'user' | 'master' | 'moderator' | 'admin';
 import type { AccountLocation } from '@/types/location';
+import type { HomeLocation } from '@/types/location';
 
 interface User {
     id: string;
@@ -10,7 +11,9 @@ interface User {
     role: UserRole;
     emailVerified?: boolean;
     phoneVerified?: boolean;
+    birthYear?: number;
     savedLocation?: AccountLocation;
+    homeLocation?: HomeLocation;
     createdAt: string;
 }
 

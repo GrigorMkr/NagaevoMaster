@@ -26,7 +26,7 @@
 
 .sidebarHeader {
   padding: var(--spacing-md);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
 }
 
 .sidebarTitle {
@@ -116,7 +116,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
 }
 
 .chatHeaderInfo {
@@ -184,7 +184,7 @@
   display: grid;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: none;
 }
 
 .composeTools {
@@ -210,7 +210,7 @@
   max-height: 120px;
   resize: vertical;
   padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: none;
   border-radius: var(--radius-lg);
   background: rgba(8, 31, 24, 0.5);
   color: inherit;
@@ -219,7 +219,9 @@
 
 .composeInput:focus {
   outline: none;
-  border-color: rgba(77, 208, 160, 0.45);
+  box-shadow:
+    inset 0 0 0 1px rgba(126, 200, 168, 0.12),
+    0 0 0 2px rgba(77, 208, 160, 0.08);
 }
 
 .chatPlaceholder {

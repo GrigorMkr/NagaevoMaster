@@ -39,7 +39,7 @@ function ServicesPage() {
         defaultValues: { search: filters.query ?? '' },
     });
     useEffect(() => {
-        dispatch(fetchListingsThunk({ sortBy }));
+        dispatch(fetchListingsThunk({ sortBy, kind: 'service' }));
     }, [dispatch, sortBy]);
     const onSubmit = (data: SearchFormData) => {
         const query = data.search ?? '';

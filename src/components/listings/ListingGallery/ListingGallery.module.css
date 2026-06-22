@@ -5,7 +5,7 @@
 .mainFrame {
   overflow: hidden;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border);
+  border: none;
   box-shadow: var(--shadow-card);
   background: var(--color-bg-warm);
 }
@@ -49,5 +49,43 @@
   display: block;
   width: 88px;
   height: 64px;
+  object-fit: cover;
+}
+
+.galleryCompact {
+  margin-bottom: 0;
+}
+
+.mainFrameCompact {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: rgba(8, 31, 24, 0.45);
+}
+
+.mainImageCompact {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+
+.thumbsCompact {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.thumbsCompact::-webkit-scrollbar {
+  display: none;
+}
+
+.thumbImageCompact {
+  display: block;
+  width: 52px;
+  height: 40px;
   object-fit: cover;
 }

@@ -7,6 +7,8 @@ import { isPushEnabledPreference } from '@/utils/pushPreferences';
 import { setUnauthorizedHandler } from '@/services/api';
 import { fetchFavorites } from '@/services/favoritesApi';
 import { setFavorites } from '@/features/favorites/favoritesSlice';
+import { fetchMyListingReactions } from '@/services/listingSocialApi';
+import { setListingReactions } from '@/features/listingReactions/listingReactionsSlice';
 import { loadStoredAccountLocation, saveStoredAccountLocation } from '@/utils/accountLocationStorage';
 import { saveUserLocation } from '@/services/usersApi';
 function AuthBootstrap() {
@@ -42,12 +44,20 @@ function AuthBootstrap() {
                 dispatch(setAccountLocation(user.savedLocation));
             }
             if (token.startsWith('mock:'))
-                return null;
-            return fetchFavorites();
+                return { favorites: null, reactions: null };
+            const [favorites, reactions] = await Promise.all([
+                fetchFavorites(),
+                fetchMyListingReactions(),
+            ]);
+            return { favorites, reactions };
         })
-            .then((ids) => {
-            if (ids)
-                dispatch(setFavorites(ids));
+            .then((result) => {
+            if (!result)
+                return;
+            if (result.favorites)
+                dispatch(setFavorites(result.favorites));
+            if (result.reactions)
+                dispatch(setListingReactions(result.reactions));
         })
             .catch(() => {
             clearAuthToken();

@@ -17,7 +17,7 @@
   font-size: var(--font-size-base);
   color: #fff;
   background: var(--gradient-primary);
-  border: 2px solid var(--color-button-border);
+  border: none;
   border-radius: var(--radius-full);
   text-decoration: none;
   cursor: pointer;

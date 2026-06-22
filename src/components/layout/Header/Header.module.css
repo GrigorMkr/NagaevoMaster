@@ -10,10 +10,10 @@
   background: var(--color-bg-glass);
   backdrop-filter: blur(20px) saturate(1.6);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  border-bottom: 1px solid var(--color-border-strong);
+  border-bottom: none;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 8px 32px rgba(0, 0, 0, 0.22);
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 40px rgba(0, 0, 0, 0.24);
 }
 
 .inner {
@@ -47,7 +47,7 @@
   height: 46px;
   padding: var(--spacing-sm);
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -204,7 +204,7 @@
     background: rgba(8, 31, 24, 0.97);
     backdrop-filter: blur(20px) saturate(1.4);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border-bottom: 1px solid var(--color-border-strong);
+    border-bottom: none;
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-xl);
     transform: translateY(-12px);

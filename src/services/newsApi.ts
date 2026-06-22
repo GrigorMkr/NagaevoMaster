@@ -1,6 +1,8 @@
 import { NEWS_LOCAL_LIMIT, NEWS_SUMMARY_MAX_LENGTH } from '@/constants';
 import type { NewsCategory, NewsItem } from '@/types/news';
 import { ensureHttpsUrl } from '@/utils/secureUrl';
+import { asArray } from '@/utils/apiGuards';
+import { api } from './api';
 import { NAGAEVO_ARTICLE_IMAGES, REAL_EXTERNAL_NEWS, REAL_LOCAL_NEWS, } from '@/data/realNews';
 const SKIP_TITLE_RE = /#СВО|Меганом|Таврида/i;
 function stripHtml(html: string): string {
@@ -115,15 +117,72 @@ function mergeWithReal(live: NewsItem[], real: NewsItem[], limit: number): NewsI
     }
     return result;
 }
+async function fetchSiteNews(): Promise<NewsItem[]> {
+    interface SiteNewsApiItem {
+        id: string;
+        title: string;
+        summary: string;
+        imageUrl?: string;
+        sourceUrl?: string;
+        publishedAt: string;
+    }
+    try {
+        const response = await api.get<SiteNewsApiItem[]>('/news/site');
+        return asArray<SiteNewsApiItem>(response.data).map((item) => ({
+            id: `site-${item.id}`,
+            title: item.title,
+            summary: item.summary || item.title,
+            imageUrl: item.imageUrl ? ensureHttpsUrl(item.imageUrl) : '',
+            sourceUrl: item.sourceUrl ? ensureHttpsUrl(item.sourceUrl) : `#site-${item.id}`,
+            sourceName: 'НагаевоМастер',
+            publishedAt: item.publishedAt,
+            category: 'local' as NewsCategory,
+        }));
+    }
+    catch {
+        return [];
+    }
+}
+
+function mergeSiteNewsWithFeed(siteNews: NewsItem[], feed: NewsItem[], limit: number): NewsItem[] {
+    const usedImages = new Set<string>();
+    const result: NewsItem[] = [];
+    for (const item of siteNews) {
+        if (!item.imageUrl || usedImages.has(item.imageUrl))
+            continue;
+        usedImages.add(item.imageUrl);
+        result.push(item);
+        if (result.length >= limit)
+            return result;
+    }
+    for (const item of feed) {
+        if (!item.imageUrl || usedImages.has(item.imageUrl))
+            continue;
+        usedImages.add(item.imageUrl);
+        result.push(item);
+        if (result.length >= limit)
+            return result;
+    }
+    return result;
+}
+
 async function fetchLocalNews(): Promise<NewsItem[]> {
     const rssUrl = import.meta.env.DEV
         ? '/api/news/category/news/feed/'
         : `${import.meta.env.VITE_API_URL ?? '/api'}/news/feed`;
     try {
-        const live = await fetchRssFeed(rssUrl, 'local', 'ДК с. Нагаево');
-        return mergeWithReal(live, REAL_LOCAL_NEWS, NEWS_LOCAL_LIMIT);
+        const [siteNews, live] = await Promise.all([
+            fetchSiteNews(),
+            fetchRssFeed(rssUrl, 'local', 'ДК с. Нагаево'),
+        ]);
+        const merged = mergeWithReal(live, REAL_LOCAL_NEWS, NEWS_LOCAL_LIMIT);
+        return mergeSiteNewsWithFeed(siteNews, merged, NEWS_LOCAL_LIMIT);
     }
     catch {
+        const siteNews = await fetchSiteNews();
+        if (siteNews.length > 0) {
+            return siteNews.slice(0, NEWS_LOCAL_LIMIT);
+        }
         return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT);
     }
 }

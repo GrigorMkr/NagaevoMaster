@@ -1,0 +1,125 @@
+.root {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  background: rgba(8, 31, 24, 0.35);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.status {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.row,
+.rowBanned {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-lg);
+  background: rgba(8, 31, 24, 0.32);
+  border: none;
+}
+
+.rowBanned {
+  border-color: rgba(240, 138, 126, 0.28);
+  opacity: 0.88;
+}
+
+@media (min-width: 720px) {
+  .row,
+  .rowBanned {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}
+
+.main {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.bannedTag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  color: #ffc9c9;
+  background: rgba(240, 138, 126, 0.18);
+}
+
+.meta {
+  margin: 0.15rem 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.roleSelect {
+  min-width: 8.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: rgba(8, 31, 24, 0.45);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+}
+
+.banBtn,
+.unbanBtn {
+  padding: 0.4rem 0.65rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.banBtn {
+  color: #ffc9c9;
+  background: rgba(240, 138, 126, 0.2);
+}
+
+.unbanBtn {
+  color: var(--color-mint);
+  background: rgba(23, 98, 74, 0.25);
+}
+
+.banBtn:disabled,
+.unbanBtn:disabled,
+.roleSelect:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { NewsMarquee } from '@/components/news/NewsMarquee/NewsMarquee';
-import type { MarqueeDirection } from '@/components/news/NewsMarquee/NewsMarquee';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel/HorizontalCarousel';
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
+import { NewsCard } from '@/components/news/NewsCard/NewsCard';
 import { ROUTES } from '@/constants';
 import type { NewsItem } from '@/types/news';
 import { SectionHead } from './SectionHead';
@@ -14,7 +15,6 @@ interface NewsSectionProps {
   items: NewsItem[];
   loading: boolean;
   moreLinkLabel: string;
-  direction?: MarqueeDirection;
 }
 
 const NewsSection = memo(function NewsSection({
@@ -24,17 +24,26 @@ const NewsSection = memo(function NewsSection({
   items,
   loading,
   moreLinkLabel,
-  direction = 'left',
 }: NewsSectionProps) {
   return (
     <div className={styles.contentBlock}>
       <SectionHead badge={badge} title={title} description={description} />
-      <NewsMarquee
-        items={items}
-        direction={direction}
-        size="home"
-        loading={loading}
-      />
+      {loading ? (
+        <div className={styles.newsSkeletonRow}>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} variant="card" className={styles.newsSkeletonCard} />
+          ))}
+        </div>
+      ) : items.length === 0 ? null : (
+        <HorizontalCarousel
+          ariaLabel={`${title}: лента`}
+          slideClassName={styles.newsCarouselSlide}
+        >
+          {items.map((item) => (
+            <NewsCard key={item.id} item={item} variant="showcaseCompact" />
+          ))}
+        </HorizontalCarousel>
+      )}
       <Link to={ROUTES.NEWS} className={styles.moreLink}>
         {moreLinkLabel}
       </Link>

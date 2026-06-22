@@ -1,144 +1,79 @@
 # NagaevoMaster
 
-Агрегатор услуг и форум для поселка Нагаево и окрестностей (радиус до 50 км).
+Агрегатор услуг для Нагаево. Сайт: https://nagaevomaster.ru
 
-## Стек
-
-- React 19 + TypeScript (strict)
-- Vite
-- React Router DOM
-- Redux Toolkit
-- Axios
-- Leaflet + React-Leaflet
-- React Helmet Async
-- CSS Modules + classnames
-- React Hook Form + Zod
-- React Hot Toast
-- date-fns
-
-## Запуск
+## Установка
 
 ```bash
 npm install
+cd backend && npm install && cd ..
+```
+
+## Локальная разработка
+
+**База (Docker, один раз):**
+
+```bash
+docker compose up -d
+cd backend
+cp .env.example .env    # если ещё нет .env
+npm run db:setup
+```
+
+**Запуск (два терминала):**
+
+```bash
+# Терминал 1 — API
+cd backend && npm run dev
+
+# Терминал 2 — сайт
 npm run dev
 ```
 
-Приложение откроется на http://localhost:3000
+Сайт: http://localhost:3000 · API: http://localhost:4000/api/health
+
+Тест: `admin@nagaevomaster.ru` / `admin123`
 
 ## Сборка
 
 ```bash
-npm run build          # GitHub Pages (/NagaevoMaster/)
-npm run build:hosting  # свой домен (REG.RU), base /
+npm run build:hosting     # прод, base /
+npm run build             # GitHub Pages
 npm run preview
 ```
 
-## Структура
-
-```
-src/
-├── app/           # Redux store, providers, hooks
-├── components/    # UI и layout
-├── features/      # Redux slices по доменам
-├── pages/         # Страницы SPA
-├── routes/        # Маршрутизация
-├── services/      # API (Axios)
-├── styles/        # Глобальные стили
-├── types/         # TypeScript типы
-└── utils/         # Константы и утилиты
-```
-
-## Backend API
-
-Полный REST API в папке `backend/`. См. [backend/README.md](backend/README.md).
+## Деплой
 
 ```bash
-# Терминал 1 — API
-cd backend && npm install && npm run db:setup && npm run dev
-
-# Терминал 2 — фронтенд
-npm run dev
-```
-
-## Переменные окружения
-
-Скопируйте `.env.example` в `.env`:
-
-```
-VITE_API_URL=/api
-```
-
-Для GitHub Pages без сервера: `VITE_USE_MOCK_FALLBACK=true`
-
-## Деплой на REG.RU (свой домен)
-
-### 1. Сборка
-
-```bash
-cp .env.production.example .env.production   # при необходимости отредактируйте
-npm run build:hosting
-npm run package:hosting   # создаст nagaevo-hosting.zip
-```
-
-### 2. Загрузка на хостинг
-
-**Вариант A — архив:** ISPmanager → Менеджер файлов → папка сайта (`www/домен.ru/data`) → распакуйте содержимое `nagaevo-hosting.zip`.
-
-**Вариант B — FTP:**
-
-```bash
-cp deploy.env.example deploy.env   # FTP из ISPmanager → FTP-пользователи
+# Фронт на REG.RU (нужен deploy.env)
+npm run build:hosting   # bump версии сайта в футере + сборка
 npm run deploy:hosting
+
+# API на VPS
+npm run vps:deploy
 ```
 
-### 3. SSL
+Версия и дата «последнего обновления» в футере обновляются автоматически при `build:hosting` (файл `site/site-version.json`).
 
-ISPmanager → WWW-домены → ваш домен → Let's Encrypt.
+Подробнее: [`deploy/VPS-REG.RU.md`](deploy/VPS-REG.RU.md) · [`deploy/HOSTING-SSL.md`](deploy/HOSTING-SSL.md)
 
-Подробнее для **DomainSSL (GlobalSign)**: [`deploy/HOSTING-SSL.md`](deploy/HOSTING-SSL.md)
-
-```powershell
-node scripts/prepare-hosting-ssl.mjs   # собрать .crt/.key для панели
-```
-
-### 4. Backend (VPS REG.RU)
-
-На виртуальном хостинге Node.js не запускается. API разворачивается на **VPS REG.RU**:
+## Android APK
 
 ```bash
-# На VPS (Ubuntu 22.04), после заказа и A-записи api → IP:
-curl -fsSL https://raw.githubusercontent.com/GrigorMkr/NagaevoMaster/main/scripts/vps/install.sh | sudo bash
-```
-
-Полная инструкция: [`deploy/VPS-REG.RU.md`](deploy/VPS-REG.RU.md)
-
-**Email/SMS при регистрации:** [`deploy/NOTIFY.md`](deploy/NOTIFY.md)
-
-После запуска API пересоберите фронт: `npm run build:hosting && npm run deploy:hosting`
-
-## Мобильное приложение (Android / iOS)
-
-Нативная оболочка [Capacitor](https://capacitorjs.com/) — внутри открывается `https://nagaevomaster.ru`.
-
-Страница скачивания: `/app` (кнопки **Android APK** и **App Store**).
-
-```bash
-# Android (нужны Android Studio + Java)
 npm run build:hosting
-npx cap sync android
-npm run build:apk          # APK → public/downloads/nagaevomaster.apk
-npm run deploy:hosting     # выложить APK на сайт
-
-# iOS (нужен Mac + Xcode)
-npm run build:hosting
-npx cap sync ios
-npm run cap:ios
+npm run android:env       # один раз
+npm run build:apk         # → public/downloads/nagaevomaster.apk
+npm run deploy:hosting
 ```
 
 Подробнее: [`mobile/README.md`](mobile/README.md)
 
-## GitHub Pages
+## Полезное
 
-Демо: https://grigormkr.github.io/NagaevoMaster/
+```bash
+npm run lint
+npm run test
+npm run type-check
+```
 
-Деплой автоматический при push в `main` (workflow `deploy.yml`).
+Backend: [`backend/README.md`](backend/README.md)

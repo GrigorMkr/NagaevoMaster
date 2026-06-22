@@ -2,6 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout/Layout';
 import { RequireAuth } from '@/components/routing/RequireAuth/RequireAuth';
 import { HomePage } from '@/pages/HomePage/HomePage';
+import { BoardKindPage } from '@/pages/BoardKindPage/BoardKindPage';
+import { BoardHubPage } from '@/pages/BoardHubPage/BoardHubPage';
 import { ServicesPage } from '@/pages/ServicesPage/ServicesPage';
 import { ServicesCategoryPage } from '@/pages/ServicesCategoryPage/ServicesCategoryPage';
 import { ServiceDetailPage } from '@/pages/ServiceDetailPage/ServiceDetailPage';
@@ -26,6 +28,22 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
+        <Route
+          path="board"
+          element={(
+            <RequireAuth>
+              <BoardHubPage />
+            </RequireAuth>
+          )}
+        />
+        <Route
+          path="board/:kind"
+          element={(
+            <RequireAuth>
+              <BoardKindPage />
+            </RequireAuth>
+          )}
+        />
         <Route
           path="services"
           element={(

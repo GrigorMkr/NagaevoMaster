@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { ensureAndroidKeystore } from './ensure-android-keystore.mjs';
 import { findJavaHome } from './resolve-java-home.mjs';
 import { syncAndroidAssetLinks } from './sync-android-assetlinks.mjs';
+import { syncAppVersion } from './sync-app-version.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const androidDir = path.join(root, 'android');
@@ -175,3 +176,5 @@ if (code !== 0) {
 if (!copyApk()) {
   process.exit(1);
 }
+
+syncAppVersion({ bumpDate: true });

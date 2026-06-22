@@ -1,0 +1,73 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.sheet {
+  width: min(100%, 420px);
+  max-height: min(70vh, 480px);
+  overflow: auto;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-bg-card);
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem 0.5rem;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem 0 0.75rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.7rem 1.1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.item:hover {
+  background: rgba(23, 98, 74, 0.08);
+}
+
+.empty {
+  margin: 0;
+  padding: 1.5rem 1.1rem 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}

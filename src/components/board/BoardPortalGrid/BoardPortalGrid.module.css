@@ -1,0 +1,172 @@
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+}
+
+.gridCompact {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 640px) {
+  .gridCompact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1rem 1rem 0.85rem;
+  border-radius: var(--radius-xl);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 42%),
+    rgba(8, 31, 24, 0.55);
+  border: 1px solid color-mix(in srgb, var(--board-accent) 35%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 16px 40px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.35s var(--ease-out-expo),
+    border-color var(--transition),
+    box-shadow var(--transition);
+  animation: boardCardIn 0.55s var(--ease-out-expo) both;
+}
+
+@keyframes boardCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--board-accent) 55%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 0 0 1px color-mix(in srgb, var(--board-accent) 20%, transparent),
+    0 20px 48px var(--board-glow);
+  color: inherit;
+}
+
+.cardGlow {
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--board-glow), transparent 68%);
+  pointer-events: none;
+}
+
+.cardInner {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-lg);
+  font-size: 1.35rem;
+  background: color-mix(in srgb, var(--board-accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--board-accent) 30%, transparent);
+}
+
+.text {
+  min-width: 0;
+}
+
+.subtitle {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--board-accent) 85%, white);
+}
+
+.title {
+  margin: 0.12rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.desc {
+  margin: 0.4rem 0 0;
+  font-size: var(--font-size-xs);
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+
+.examples {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--color-text-light);
+  opacity: 0.9;
+}
+
+.arrow {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--board-accent);
+  opacity: 0.85;
+  transition: transform var(--transition);
+}
+
+.card:hover .arrow {
+  transform: translateX(3px);
+}
+
+.addHint {
+  position: relative;
+  margin-top: 0.75rem;
+  padding-top: 0.55rem;
+  border-top: none;
+  font-size: 0.68rem;
+  color: var(--color-text-light);
+}
+
+.addLink {
+  color: var(--board-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gridCompact .card {
+  padding: 0.75rem 0.8rem;
+}
+
+.gridCompact .title {
+  font-size: 1rem;
+}
+
+.gridCompact .desc {
+  display: none;
+}
+
+.gridCompact .addHint {
+  display: none;
+}

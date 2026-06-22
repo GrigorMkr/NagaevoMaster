@@ -50,6 +50,9 @@ function filterMockListings(params: Partial<SearchParams>): Listing[] {
     if (params.category) {
         result = result.filter((l) => l.category === params.category);
     }
+    if (params.kind) {
+        result = result.filter((l) => (l.kind ?? 'service') === params.kind);
+    }
     if (params.subcategory) {
         result = result.filter((l) => l.subcategory === params.subcategory);
     }
@@ -153,6 +156,7 @@ async function fetchListingById(id: string): Promise<Listing | null> {
 }
 
 interface CreateListingPayload {
+    kind?: import('@/types/listing').ListingKind;
     category: string;
     subcategory: string;
     title: string;

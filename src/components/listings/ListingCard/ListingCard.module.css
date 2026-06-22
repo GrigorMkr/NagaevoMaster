@@ -1,19 +1,15 @@
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   transition:
-
     transform 0.35s var(--ease-out-expo),
-
-    box-shadow 0.35s var(--ease-out-expo),
-
-    border-color var(--transition);
-
+    box-shadow 0.35s var(--ease-out-expo);
 }
 
 .cardLink {
@@ -24,67 +20,238 @@
   text-decoration: none;
 }
 
-
-
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-card-hover);
-  border-color: rgba(126, 200, 168, 0.32);
-
 }
 
 .cardLink:hover {
   color: inherit;
 }
 
+/* —— Kind themes —— */
 
+.cardKindService {
+  --lk-accent: #7ec8a8;
+  --lk-accent-2: #2d9a74;
+  --lk-glow: rgba(109, 212, 168, 0.38);
+  --lk-border: rgba(126, 200, 168, 0.05);
+  --lk-top-bar: linear-gradient(90deg, #2d9a74, #7ec8a8 45%, #b8f0d4);
+  --lk-surface: linear-gradient(155deg, rgba(23, 98, 74, 0.22) 0%, rgba(8, 31, 24, 0.62) 52%);
+  --lk-ribbon-bg: linear-gradient(135deg, rgba(45, 154, 116, 0.94), rgba(23, 98, 74, 0.96));
+  --lk-price: #9ef0c8;
+  --lk-media-overlay: linear-gradient(
+      180deg,
+      transparent 35%,
+      rgba(8, 31, 24, 0.82) 100%
+    ),
+    linear-gradient(135deg, rgba(126, 200, 168, 0.18) 0%, transparent 55%);
+  --lk-placeholder: radial-gradient(circle at 30% 30%, rgba(126, 200, 168, 0.2), transparent 65%);
+}
+
+.cardKindSale {
+  --lk-accent: #f0c14b;
+  --lk-accent-2: #d4922a;
+  --lk-glow: rgba(240, 193, 75, 0.42);
+  --lk-border: rgba(240, 193, 75, 0.06);
+  --lk-top-bar: linear-gradient(90deg, #c0782a, #f0c14b 50%, #ffe9a8);
+  --lk-surface: linear-gradient(155deg, rgba(192, 120, 42, 0.18) 0%, rgba(8, 31, 24, 0.62) 52%);
+  --lk-ribbon-bg: linear-gradient(135deg, rgba(224, 160, 48, 0.96), rgba(154, 95, 30, 0.96));
+  --lk-price: #ffe082;
+  --lk-media-overlay: linear-gradient(
+      180deg,
+      transparent 35%,
+      rgba(8, 31, 24, 0.82) 100%
+    ),
+    linear-gradient(135deg, rgba(240, 193, 75, 0.2) 0%, transparent 55%);
+  --lk-placeholder: radial-gradient(circle at 30% 30%, rgba(240, 193, 75, 0.22), transparent 65%);
+}
+
+.cardKindVacancy {
+  --lk-accent: #5eb8ff;
+  --lk-accent-2: #3a8fd9;
+  --lk-glow: rgba(94, 184, 255, 0.4);
+  --lk-border: rgba(94, 184, 255, 0.06);
+  --lk-top-bar: linear-gradient(90deg, #2a7ec4, #5eb8ff 50%, #a8dcff);
+  --lk-surface: linear-gradient(155deg, rgba(42, 126, 196, 0.2) 0%, rgba(8, 31, 24, 0.62) 52%);
+  --lk-ribbon-bg: linear-gradient(135deg, rgba(58, 143, 217, 0.96), rgba(30, 90, 150, 0.96));
+  --lk-price: #9ed4ff;
+  --lk-media-overlay: linear-gradient(
+      180deg,
+      transparent 35%,
+      rgba(8, 31, 24, 0.82) 100%
+    ),
+    linear-gradient(135deg, rgba(94, 184, 255, 0.18) 0%, transparent 55%);
+  --lk-placeholder: radial-gradient(circle at 30% 30%, rgba(94, 184, 255, 0.2), transparent 65%);
+}
+
+.cardKindLost {
+  --lk-accent: #ff9a8b;
+  --lk-accent-2: #e86a58;
+  --lk-glow: rgba(255, 154, 139, 0.42);
+  --lk-border: rgba(255, 154, 139, 0.06);
+  --lk-top-bar: linear-gradient(90deg, #e86a58, #ff9a8b 50%, #ffc4bb);
+  --lk-surface: linear-gradient(155deg, rgba(232, 106, 88, 0.18) 0%, rgba(8, 31, 24, 0.62) 52%);
+  --lk-ribbon-bg: linear-gradient(135deg, rgba(232, 106, 88, 0.96), rgba(180, 60, 48, 0.96));
+  --lk-price: #ffc9bf;
+  --lk-media-overlay: linear-gradient(
+      180deg,
+      transparent 35%,
+      rgba(8, 31, 24, 0.82) 100%
+    ),
+    linear-gradient(135deg, rgba(255, 154, 139, 0.2) 0%, transparent 55%);
+  --lk-placeholder: radial-gradient(circle at 30% 30%, rgba(255, 154, 139, 0.22), transparent 65%);
+}
+
+[class*='cardKind'] {
+  background: var(--lk-surface);
+  box-shadow: var(--shadow-card);
+}
+
+[class*='cardKind']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--lk-top-bar);
+  z-index: 2;
+  pointer-events: none;
+}
+
+[class*='cardKind']::after {
+  content: '';
+  position: absolute;
+  top: -35%;
+  right: -18%;
+  width: 58%;
+  height: 58%;
+  background: radial-gradient(circle, var(--lk-glow) 0%, transparent 68%);
+  opacity: 0.28;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease-out-expo);
+}
+
+[class*='cardKind']:hover {
+  box-shadow:
+    0 14px 42px var(--lk-glow),
+    var(--shadow-card-hover);
+}
+
+[class*='cardKind']:hover::after {
+  opacity: 0.55;
+}
+
+[class*='cardKind'] .price {
+  color: var(--lk-price);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--lk-accent) 35%, transparent);
+}
 
 .media {
   position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 9;
   background: var(--color-bg-warm);
-
 }
 
+.media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--lk-media-overlay);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.35s var(--ease-out-expo);
+}
 
+.card:hover .media::after {
+  opacity: 0.88;
+}
 
 .cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.45s var(--ease-out-expo);
-
 }
-
-
 
 .card:hover .cover {
-  transform: scale(1.04);
-
+  transform: scale(1.05);
 }
 
+.mediaPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lk-placeholder), var(--color-bg-warm);
+}
 
+.placeholderIcon {
+  font-size: 2.75rem;
+  opacity: 0.45;
+  filter: drop-shadow(0 0 16px var(--lk-glow));
+  z-index: 1;
+}
+
+.kindRibbon {
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.3rem 0.62rem 0.3rem 0.42rem;
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--lk-ribbon-bg);
+  border: none;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px var(--lk-glow);
+}
+
+.kindRibbonIcon {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.cardKindLost .kindRibbon {
+  animation: kindRibbonPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes kindRibbonPulse {
+  0%,
+  100% {
+    box-shadow: 0 4px 18px var(--lk-glow);
+  }
+
+  50% {
+    box-shadow:
+      0 4px 24px var(--lk-glow),
+      0 0 0 3px color-mix(in srgb, var(--lk-accent) 22%, transparent);
+  }
+}
 
 .body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   padding: var(--spacing-lg);
-
 }
-
-
 
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--spacing-md);
-
 }
-
-
 
 .title {
   font-family: var(--font-display);
@@ -92,10 +259,7 @@
   font-weight: var(--font-weight-display);
   color: var(--color-text);
   line-height: 1.25;
-
 }
-
-
 
 .verified {
   flex-shrink: 0;
@@ -104,12 +268,9 @@
   font-weight: 600;
   color: var(--color-button-active-text);
   background: var(--color-button-active-bg);
-  border: 2px solid var(--color-button-border);
+  border: none;
   border-radius: var(--radius-full);
-
 }
-
-
 
 .desc {
   font-size: var(--font-size-base);
@@ -119,10 +280,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
 }
-
-
 
 .meta {
   display: flex;
@@ -131,18 +289,11 @@
   gap: var(--spacing-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-light);
-
 }
-
-
 
 .price {
   font-weight: 700;
-  color: var(--color-primary);
-
 }
-
-
 
 .rating {
   display: flex;
@@ -150,8 +301,9 @@
   gap: 0.25rem;
   font-weight: 600;
   color: var(--color-secondary);
-
 }
+
+/* —— Tile variant —— */
 
 .cardTile {
   border: none;
@@ -162,12 +314,23 @@
   border-radius: var(--radius-lg);
 }
 
+.cardTile[class*='cardKind'] {
+  background: var(--lk-surface);
+  border: none;
+  box-shadow:
+    inset 3px 0 0 var(--lk-accent),
+    0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.cardTile[class*='cardKind']::before {
+  display: none;
+}
+
 .cardTile:hover {
   transform: translateY(-2px);
-  background: rgba(23, 98, 74, 0.22);
   box-shadow:
-    inset 0 1px 0 rgba(126, 200, 168, 0.15),
-    0 8px 28px rgba(23, 98, 74, 0.2);
+    inset 0 1px 0 color-mix(in srgb, var(--lk-accent) 25%, transparent),
+    0 8px 28px var(--lk-glow);
 }
 
 .cardLinkTile {
@@ -198,6 +361,28 @@
 
 .cardTile:hover .coverTile {
   transform: scale(1.06);
+}
+
+.kindRibbonTile {
+  position: absolute;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  background: var(--lk-ribbon-bg);
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px var(--lk-glow);
+}
+
+.kindRibbonTile span:last-child {
+  display: none;
 }
 
 .bodyTile {
@@ -231,6 +416,22 @@
   font-size: var(--font-size-xs);
 }
 
+.socialFoot {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--spacing-lg) var(--spacing-md);
+}
+
+.socialFootTile {
+  position: relative;
+  z-index: 2;
+  padding: 0 0.55rem 0.45rem;
+}
+
+.mediaTile .placeholderIcon {
+  font-size: 1.45rem;
+}
+
 @media (min-width: 900px) {
   .mediaTile {
     width: 4.75rem;
@@ -241,4 +442,3 @@
     min-height: 4.75rem;
   }
 }
-

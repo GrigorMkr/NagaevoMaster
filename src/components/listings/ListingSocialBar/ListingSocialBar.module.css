@@ -1,0 +1,91 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.barCompact {
+  gap: 0.25rem 0.35rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.55rem;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-light);
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    box-shadow var(--transition),
+    transform 0.2s var(--ease-out-expo);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btnActiveLike {
+  color: #9ef0c8;
+  background: rgba(126, 200, 168, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(126, 200, 168, 0.18);
+}
+
+.btnActiveDislike {
+  color: #ffc9bf;
+  background: rgba(255, 154, 139, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 154, 139, 0.16);
+}
+
+.icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.count {
+  min-width: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  letter-spacing: 0.02em;
+}
+
+.ownerStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-left: auto;
+  padding: 0.28rem 0.55rem;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-accent-soft);
+  background: rgba(240, 180, 41, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(240, 180, 41, 0.12);
+  border-radius: var(--radius-full);
+}
+
+.ownerLabel {
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.barCompact .ownerStat {
+  margin-left: 0;
+}

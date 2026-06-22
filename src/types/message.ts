@@ -1,4 +1,4 @@
-type MessageType = 'text' | 'file' | 'voice';
+type MessageType = 'text' | 'file' | 'voice' | 'listing';
 
 import type { UserRole } from '@/types/user';
 
@@ -28,6 +28,15 @@ interface ConversationSummary {
   updatedAt: string;
 }
 
+interface ListingMessagePreview {
+  id: string;
+  title: string;
+  kind: string;
+  priceFrom: number;
+  unit: string;
+  image?: string;
+}
+
 interface ChatMessage {
   id: string;
   type: MessageType;
@@ -35,12 +44,17 @@ interface ChatMessage {
   attachmentUrl?: string;
   attachmentName?: string;
   attachmentMime?: string;
+  listingId?: string;
+  listingPreview?: ListingMessagePreview;
   senderId: string;
   senderName: string;
   senderRole?: UserRole;
   senderIsStaff?: boolean;
   createdAt: string;
   readAt?: string;
+  editedAt?: string;
+  isDeleted?: boolean;
+  isForwarded?: boolean;
   isMine: boolean;
 }
 
@@ -56,6 +70,7 @@ interface SendMessagePayload {
   attachmentUrl?: string;
   attachmentName?: string;
   attachmentMime?: string;
+  listingId?: string;
 }
 
 export type {
@@ -66,4 +81,5 @@ export type {
   ChatMessage,
   ConversationDetail,
   SendMessagePayload,
+  ListingMessagePreview,
 }

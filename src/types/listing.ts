@@ -1,6 +1,8 @@
 import type { User } from './user';
 
-type PriceUnit = 'час' | 'день' | 'м²' | 'услуга' | 'шт';
+type PriceUnit = 'час' | 'день' | 'м²' | 'услуга' | 'шт' | 'договор' | 'награда';
+
+type ListingKind = 'service' | 'sale' | 'vacancy' | 'lost';
 
 type ListingStatus = 'pending' | 'published' | 'rejected';
 
@@ -20,6 +22,7 @@ interface ListingAuthor {
 interface Listing {
   id: string;
   userId: string;
+  kind?: ListingKind;
   title: string;
   category: string;
   subcategory: string;
@@ -30,6 +33,9 @@ interface Listing {
   rating: number;
   reviewsCount: number;
   viewsCount?: number;
+  likesCount?: number;
+  dislikesCount?: number;
+  repostsCount?: number;
   images: string[];
   location: ListingLocation;
   phone: string;
@@ -57,6 +63,7 @@ interface ListingWithUser extends Listing {
 
 export type {
   PriceUnit,
+  ListingKind,
   ListingStatus,
   ListingLocation,
   ListingAuthor,

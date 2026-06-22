@@ -1,7 +1,9 @@
 import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { SKELETON_COUNT_NEWS } from '@/constants';
-import { NewsMarquee } from '@/components/news/NewsMarquee/NewsMarquee';
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel/HorizontalCarousel';
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
+import { NewsCard } from '@/components/news/NewsCard/NewsCard';
 import { useNews } from '@/hooks/useNews';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import pageStyles from '@/styles/page.module.css';
@@ -23,26 +25,44 @@ function NewsPage() {
           <Reveal delay={80}>
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Посёлок</h2>
-              <NewsMarquee
-                items={local}
-                direction="left"
-                size="page"
-                loading={loading}
-                skeletonCount={SKELETON_COUNT_NEWS}
-              />
+              {loading ? (
+                <div className={styles.skeletonRow}>
+                  {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, index) => (
+                    <Skeleton key={index} variant="card" className={styles.skeletonCard} />
+                  ))}
+                </div>
+              ) : (
+                <HorizontalCarousel
+                  ariaLabel="Новости посёлка"
+                  slideClassName={styles.newsSlide}
+                >
+                  {local.map((item) => (
+                    <NewsCard key={item.id} item={item} variant="showcaseCompact" />
+                  ))}
+                </HorizontalCarousel>
+              )}
             </section>
           </Reveal>
 
           <Reveal delay={120}>
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Регион · Из СМИ</h2>
-              <NewsMarquee
-                items={external}
-                direction="right"
-                size="page"
-                loading={loading}
-                skeletonCount={SKELETON_COUNT_NEWS}
-              />
+              {loading ? (
+                <div className={styles.skeletonRow}>
+                  {Array.from({ length: SKELETON_COUNT_NEWS }).map((_, index) => (
+                    <Skeleton key={index} variant="card" className={styles.skeletonCard} />
+                  ))}
+                </div>
+              ) : (
+                <HorizontalCarousel
+                  ariaLabel="Новости региона"
+                  slideClassName={styles.newsSlide}
+                >
+                  {external.map((item) => (
+                    <NewsCard key={item.id} item={item} variant="showcaseCompact" />
+                  ))}
+                </HorizontalCarousel>
+              )}
             </section>
           </Reveal>
         </div>

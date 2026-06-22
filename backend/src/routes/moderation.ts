@@ -8,6 +8,7 @@ import { routeParam } from '../utils/params.js';
 import { BAN_POLICY_TEXT } from '../constants/communityRules.js';
 import { assertCleanContent, findContentViolations } from '../services/moderation/contentFilter.js';
 import { getOnlineStats } from '../services/presence.js';
+import { getAdminDashboardStats } from '../services/adminStats.js';
 
 const moderationRouter = Router();
 
@@ -75,6 +76,89 @@ moderationRouter.get('/online-stats', async (req: AuthRequest, res, next) => {
     try {
         assertModerator(req.user!.role);
         res.json(getOnlineStats());
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.get('/online-stats', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        res.json(getOnlineStats());
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.get('/dashboard-stats', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        res.json(await getAdminDashboardStats());
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.get('/users', async (req: AuthRequest, res, next) => {
+    try {
+        assertAdmin(req.user!.role);
+        const query = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+        const users = await prisma.user.findMany({
+            where: query.length >= 2
+                ? {
+                    OR: [
+                        { name: { contains: query, mode: 'insensitive' } },
+                        { email: { contains: query, mode: 'insensitive' } },
+                    ],
+                }
+                : undefined,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                isBanned: true,
+                createdAt: true,
+                phone: true,
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 40,
+        });
+        res.json(users.map((user) => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            login: user.email.split('@')[0] ?? user.email,
+            role: user.role,
+            isBanned: user.isBanned,
+            phone: user.phone ?? undefined,
+            createdAt: user.createdAt.toISOString(),
+        })));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.patch('/users/:userId/role', async (req: AuthRequest, res, next) => {
+    try {
+        assertAdmin(req.user!.role);
+        const userId = routeParam(req.params.userId);
+        const { role } = z.object({
+            role: z.enum(['user', 'master', 'moderator', 'admin']),
+        }).parse(req.body);
+        if (userId === req.user!.id && role !== 'admin') {
+            throw new HttpError(400, 'Нельзя понизить свою роль');
+        }
+        const user = await prisma.user.update({
+            where: { id: userId },
+            data: { role },
+            select: { id: true, role: true },
+        });
+        res.json(user);
     }
     catch (error) {
         next(error);
@@ -174,6 +258,7 @@ const adminEditListingSchema = z.object({
     priceFrom: z.number().positive().optional(),
     unit: z.enum(['час', 'день', 'м²', 'услуга', 'шт']).optional(),
     phone: z.string().min(10).optional(),
+    imageIds: z.array(z.string()).max(10).optional(),
     status: z.enum(['pending', 'published', 'rejected']).optional(),
 });
 
@@ -196,6 +281,7 @@ moderationRouter.patch('/listings/:id', async (req: AuthRequest, res, next) => {
                 priceFrom: data.priceFrom,
                 unit: data.unit,
                 phone: data.phone,
+                images: data.imageIds ? JSON.stringify(data.imageIds) : undefined,
                 status: data.status,
             },
             include: { user: listingUserSelect },
@@ -538,6 +624,113 @@ moderationRouter.delete('/forum/posts/:postId', async (req: AuthRequest, res, ne
             throw new HttpError(404, 'Комментарий не найден');
         }
         await prisma.forumPost.delete({ where: { id: postId } });
+        res.status(204).send();
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+const siteNewsBodySchema = z.object({
+    title: z.string().min(3).max(200),
+    summary: z.string().max(2000).optional(),
+    imageUrl: z.string().min(1).optional().nullable(),
+    sourceUrl: z.string().min(1).optional().nullable(),
+    publishedAt: z.string().datetime().optional(),
+});
+
+const siteNewsPatchSchema = siteNewsBodySchema.partial();
+
+function toSiteNewsResponse(item: {
+    id: string;
+    title: string;
+    summary: string;
+    imageUrl: string | null;
+    sourceUrl: string | null;
+    publishedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+}) {
+    return {
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        imageUrl: item.imageUrl ?? undefined,
+        sourceUrl: item.sourceUrl ?? undefined,
+        publishedAt: item.publishedAt.toISOString(),
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+    };
+}
+
+moderationRouter.get('/site-news', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const items = await prisma.siteNews.findMany({
+            orderBy: { publishedAt: 'desc' },
+        });
+        res.json(items.map(toSiteNewsResponse));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.post('/site-news', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const data = siteNewsBodySchema.parse(req.body);
+        const item = await prisma.siteNews.create({
+            data: {
+                title: data.title,
+                summary: data.summary ?? '',
+                imageUrl: data.imageUrl ?? null,
+                sourceUrl: data.sourceUrl ?? null,
+                publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
+            },
+        });
+        res.status(201).json(toSiteNewsResponse(item));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.patch('/site-news/:id', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const newsId = routeParam(req.params.id);
+        const data = siteNewsPatchSchema.parse(req.body);
+        const existing = await prisma.siteNews.findUnique({ where: { id: newsId } });
+        if (!existing) {
+            throw new HttpError(404, 'Новость не найдена');
+        }
+        const item = await prisma.siteNews.update({
+            where: { id: newsId },
+            data: {
+                title: data.title,
+                summary: data.summary,
+                imageUrl: data.imageUrl === undefined ? undefined : data.imageUrl,
+                sourceUrl: data.sourceUrl === undefined ? undefined : data.sourceUrl,
+                publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
+            },
+        });
+        res.json(toSiteNewsResponse(item));
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.delete('/site-news/:id', async (req: AuthRequest, res, next) => {
+    try {
+        assertModerator(req.user!.role);
+        const newsId = routeParam(req.params.id);
+        const existing = await prisma.siteNews.findUnique({ where: { id: newsId } });
+        if (!existing) {
+            throw new HttpError(404, 'Новость не найдена');
+        }
+        await prisma.siteNews.delete({ where: { id: newsId } });
         res.status(204).send();
     }
     catch (error) {

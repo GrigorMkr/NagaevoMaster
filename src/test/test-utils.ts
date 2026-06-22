@@ -10,6 +10,7 @@ import filtersReducer from '@/features/filters/filtersSlice';
 import forumReducer from '@/features/forum/forumSlice';
 import uiReducer from '@/features/ui/uiSlice';
 import favoritesReducer from '@/features/favorites/favoritesSlice';
+import listingReactionsReducer from '@/features/listingReactions/listingReactionsSlice';
 function createTestStore() {
     return configureStore({
         reducer: {
@@ -19,6 +20,7 @@ function createTestStore() {
             forum: forumReducer,
             ui: uiReducer,
             favorites: favoritesReducer,
+            listingReactions: listingReactionsReducer,
         },
     });
 }

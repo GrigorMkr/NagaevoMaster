@@ -16,7 +16,7 @@ import { ReviewForm } from '@/components/reviews/ReviewForm/ReviewForm'
 import { ReviewList } from '@/components/reviews/ReviewList/ReviewList'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchListingByIdThunk, fetchListingsThunk } from '@/features/listings/listingsThunks'
-import { removeListingFromStore } from '@/features/listings/listingsSlice'
+import { removeListingFromStore, updateListingInStore } from '@/features/listings/listingsSlice'
 import {
   selectCurrentListing,
   selectListingsLoading,
@@ -30,8 +30,11 @@ import type { Listing, Review } from '@/types/listing'
 import { SortBy } from '@/enums/sort'
 import { META_DESCRIPTION_MAX_LENGTH } from '@/constants'
 import { ROUTES, messageWithUserPath, serviceDetailPath } from '@/utils/constants'
-import tileGrid from '@/styles/tileGrid.module.css'
 import { getErrorMessage } from '@/utils/errorMessage'
+import { formatListingPrice } from '@/utils/listingPriceLabel'
+import { ListingSocialBar } from '@/components/listings/ListingSocialBar/ListingSocialBar'
+import { DetailBackdropLayout } from '@/components/layout/DetailBackdropLayout/DetailBackdropLayout'
+import { HorizontalCarousel } from '@/components/ui/HorizontalCarousel/HorizontalCarousel'
 import { Reveal } from '@/components/ui/Reveal/Reveal'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ServiceDetailPage.module.css'
@@ -90,6 +93,10 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
     }
   }, [dispatch, listing.id, navigate])
 
+  const handleEdited = useCallback((updated: Listing) => {
+    dispatch(updateListingInStore(updated))
+  }, [dispatch])
+
   return (
     <>
       <PageMeta
@@ -101,141 +108,160 @@ function ServiceDetailView({ listing, similarListings }: ServiceDetailViewProps)
 
       <div className={pageStyles.page}>
         <div className="container">
-          <Reveal delay={40}>
-            <Link to={ROUTES.SERVICES} className={styles.back}>
-              ← К каталогу услуг
-            </Link>
-          </Reveal>
-
-          <Reveal delay={80}>
-            <article className={styles.card}>
-            <header className={styles.header}>
-              <h1 className="titlePage">{listing.title}</h1>
-              <div className={styles.headerActions}>
-                {isAuthenticated && !isOwner && (
-                  <FavoriteButton listingId={listing.id} variant="inline" />
-                )}
-                {listing.isVerified && <span className={styles.verified}>✓ Проверен</span>}
-              </div>
-            </header>
-
-            {listing.author && (
-              <div className={styles.authorBlock}>
-                <ListingAuthorRow author={listing.author} />
-                {isAuthenticated && !isOwner && listing.author.id && (
-                  <div className={styles.authorActions}>
-                    <AddFriendButton userId={listing.author.id} />
-                    <ButtonLink
-                      to={messageWithUserPath(listing.author.id)}
-                      size="sm"
-                      variant="secondary"
-                    >
-                      Написать
-                    </ButtonLink>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {canModerate && (
-              <ListingModerationActions
-                listingId={listing.id}
-                listingTitle={listing.title}
-                status={listing.status}
-                onDone={handleModerationDone}
-              />
-            )}
-
-            <ListingGallery images={listing.images} title={listing.title} />
-
-            <div className={styles.priceRow}>
-              <span className={styles.price}>
-                от {listing.priceFrom} ₽ / {listing.unit}
-              </span>
-              {!isOwner && (
-                isAuthenticated ? (
-                  <button
-                    type="button"
-                    className={styles.ratingButton}
-                    onClick={handleReviewsToggle}
-                    aria-expanded={showReviews}
-                  >
-                    ★ {listing.rating.toFixed(1)} ({listing.reviewsCount} отзывов)
-                  </button>
-                ) : (
-                  <span className={styles.ratingStatic}>
-                    ★ {listing.rating.toFixed(1)} ({listing.reviewsCount} отзывов)
-                  </span>
-                )
-              )}
-            </div>
-
-            {isOwner && (
-              <p className={styles.ownerNote}>
-                Это ваше объявление — отзывы и рейтинг видны только другим пользователям.
-              </p>
-            )}
-
-            {isAuthenticated && (!isOwner || canModerate) && (showReviews || canModerate) && (
-              <section className={styles.reviews} aria-label="Отзывы клиентов">
-                <h2 className={styles.reviewsTitle}>Отзывы</h2>
-                {reviewsLoading ? (
-                  <p className="textMuted">Загрузка отзывов…</p>
-                ) : (
-                  <ReviewList
-                    reviews={listingReviews}
-                    canModerate={canModerate}
-                    onChanged={reloadReviews}
-                  />
-                )}
-                {currentUser && !isOwner && (
-                  <ReviewForm
-                    listingId={listing.id}
-                    authorName={currentUser.name}
-                    onReviewAdded={handleReviewAdded}
-                  />
-                )}
-              </section>
-            )}
-
-            {!isAuthenticated && !isOwner && (
-              <div className={styles.reviewsGate}>
-                <AuthRequiredPanel title="Войдите, чтобы читать отзывы" />
-              </div>
-            )}
-
-            <p className={styles.desc}>{listing.description}</p>
-            <p className={styles.address}>📍 {listing.location.address}</p>
-
-            <div className={styles.contact}>
-              <p className={styles.phone}>
-                📞{' '}
-                <a href={`tel:${listing.phone.replace(/\s/g, '')}`}>{listing.phone}</a>
-              </p>
-            </div>
-
-            {isAuthenticated && !isOwner && (
-              <div className={styles.actions}>
-                <Button type="button" variant="outline" size="sm" onClick={handleReportClick}>
-                  Пожаловаться
-                </Button>
-              </div>
-            )}
-          </article>
-          </Reveal>
-
-          {similarListings.length > 0 && (
-            <Reveal delay={120}>
-              <section className={styles.similar}>
-                <h2 className="titleSection">Похожие услуги</h2>
-                <div className={tileGrid.grid}>
-                  {similarListings.map((item) => (
-                    <ListingCard key={item.id} listing={item} showFavorite={false} />
-                  ))}
-                </div>
-              </section>
+          <DetailBackdropLayout className={styles.shell}>
+            <Reveal delay={40}>
+              <Link to={ROUTES.SERVICES} className={styles.back} data-detail-surface>
+                ← Каталог
+              </Link>
             </Reveal>
-          )}
+
+            <Reveal delay={60}>
+              <article className={styles.sheet} data-detail-surface>
+                <header className={styles.sheetTop}>
+                  <h1 className={styles.title}>{listing.title}</h1>
+                  <div className={styles.headerActions}>
+                    {isAuthenticated && !isOwner && (
+                      <FavoriteButton listingId={listing.id} variant="inline" />
+                    )}
+                    {listing.isVerified && <span className={styles.verified}>✓ Проверен</span>}
+                  </div>
+                </header>
+
+                {canModerate && (
+                  <ListingModerationActions
+                    listingId={listing.id}
+                    listing={listing}
+                    listingTitle={listing.title}
+                    status={listing.status}
+                    onDone={handleModerationDone}
+                    onEdited={handleEdited}
+                  />
+                )}
+
+                <div className={styles.body}>
+                  <div className={styles.heroGrid}>
+                    <ListingGallery images={listing.images} title={listing.title} variant="compact" />
+
+                    <div>
+                      <div className={styles.metaRow}>
+                        <span className={styles.priceChip}>
+                          {formatListingPrice(listing)}
+                        </span>
+                        {!isOwner && (
+                          isAuthenticated ? (
+                            <button
+                              type="button"
+                              className={styles.ratingButton}
+                              onClick={handleReviewsToggle}
+                              aria-expanded={showReviews}
+                            >
+                              ★ {listing.rating.toFixed(1)} · {listing.reviewsCount}
+                            </button>
+                          ) : (
+                            <span className={styles.ratingStatic}>
+                              ★ {listing.rating.toFixed(1)} · {listing.reviewsCount}
+                            </span>
+                          )
+                        )}
+                      </div>
+
+                      <ListingSocialBar listing={listing} />
+
+                      {listing.author && (
+                        <div className={styles.authorBlock}>
+                          <ListingAuthorRow author={listing.author} compact />
+                          {isAuthenticated && !isOwner && listing.author.id && (
+                            <div className={styles.authorActions}>
+                              <AddFriendButton userId={listing.author.id} />
+                              <ButtonLink
+                                to={messageWithUserPath(listing.author.id)}
+                                size="sm"
+                                variant="secondary"
+                              >
+                                Написать
+                              </ButtonLink>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <p className={styles.desc}>{listing.description}</p>
+
+                      <div className={styles.contacts}>
+                        <span className={styles.contactPill}>
+                          📍 {listing.location.address}
+                        </span>
+                        <a
+                          className={styles.contactPill}
+                          href={`tel:${listing.phone.replace(/\s/g, '')}`}
+                        >
+                          📞 {listing.phone}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {isOwner && (
+                    <p className={styles.ownerNote}>
+                      Это ваше объявление — отзывы видны только другим пользователям.
+                    </p>
+                  )}
+
+                  {isAuthenticated && (!isOwner || canModerate) && (showReviews || canModerate) && (
+                    <section className={styles.reviews} aria-label="Отзывы">
+                      <h2 className={styles.reviewsTitle}>Отзывы</h2>
+                      {reviewsLoading ? (
+                        <p className="textMuted">Загрузка…</p>
+                      ) : (
+                        <ReviewList
+                          reviews={listingReviews}
+                          canModerate={canModerate}
+                          onChanged={reloadReviews}
+                        />
+                      )}
+                      {currentUser && !isOwner && (
+                        <ReviewForm
+                          listingId={listing.id}
+                          authorName={currentUser.name}
+                          onReviewAdded={handleReviewAdded}
+                        />
+                      )}
+                    </section>
+                  )}
+
+                  {!isAuthenticated && !isOwner && (
+                    <div className={styles.reviewsGate}>
+                      <AuthRequiredPanel title="Войдите, чтобы читать отзывы" />
+                    </div>
+                  )}
+
+                  {isAuthenticated && !isOwner && (
+                    <div className={styles.actions}>
+                      <Button type="button" variant="outline" size="sm" onClick={handleReportClick}>
+                        Пожаловаться
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </article>
+            </Reveal>
+
+            {similarListings.length > 0 && (
+              <Reveal delay={100}>
+                <section className={styles.similar} data-detail-surface>
+                  <h2 className={styles.similarTitle}>Похожие</h2>
+                  <HorizontalCarousel
+                    ariaLabel="Похожие объявления"
+                    slideClassName={styles.similarSlide}
+                  >
+                    {similarListings.map((item) => (
+                      <ListingCard key={item.id} listing={item} showFavorite={false} variant="tile" />
+                    ))}
+                  </HorizontalCarousel>
+                </section>
+              </Reveal>
+            )}
+          </DetailBackdropLayout>
         </div>
       </div>
     </>
@@ -262,7 +288,6 @@ function ServiceDetailPage() {
       <div className={pageStyles.page}>
         <div className="container">
           <Skeleton variant="title" />
-          <Skeleton variant="text" />
           <Skeleton variant="card" />
         </div>
       </div>

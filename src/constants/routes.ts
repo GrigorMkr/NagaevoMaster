@@ -8,6 +8,8 @@ const ROUTES = {
     FORUM_CATEGORY: '/forum/:category',
     FORUM_TOPIC: '/forum/topic/:id',
     NEWS: '/news',
+    BOARD: '/board',
+    BOARD_KIND: '/board/:kind',
     ADD_LISTING: '/add-listing',
     SEARCH: '/search',
     PROFILE: '/profile',
@@ -18,6 +20,15 @@ const ROUTES = {
 } as const;
 function serviceDetailPath(id: string): string {
     return `/service/${id}`;
+}
+function boardPath(): string {
+    return '/board';
+}
+function boardKindPath(kind: string): string {
+    return `/board/${kind}`;
+}
+function addListingPath(kind?: string): string {
+    return kind ? `/add-listing?kind=${kind}` : '/add-listing';
 }
 function servicesCategoryPath(category: string): string {
     return `/services/${category}`;
@@ -75,6 +86,9 @@ function searchPath(query?: string, filters?: {
 export {
   ROUTES,
   serviceDetailPath,
+  boardPath,
+  boardKindPath,
+  addListingPath,
   servicesCategoryPath,
   servicesBeautyPath,
   forumCategoryPath,

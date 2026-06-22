@@ -6,7 +6,7 @@ const notificationsRouter = Router();
 
 interface NotificationItem {
     id: string;
-    type: 'forum_reply' | 'listing_published' | 'listing_rejected' | 'moderation_pending';
+    type: 'forum_reply' | 'listing_published' | 'listing_rejected' | 'moderation_pending' | 'friend_request' | 'friend_accepted';
     title: string;
     message: string;
     link: string;
@@ -18,6 +18,53 @@ notificationsRouter.get('/', requireAuth, async (req: AuthRequest, res, next) =>
         const userId = req.user!.id;
         const role = req.user!.role;
         const items: NotificationItem[] = [];
+
+        const incomingFriends = await prisma.friendship.findMany({
+            where: {
+                addresseeId: userId,
+                status: 'pending',
+            },
+            include: {
+                requester: { select: { name: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+        });
+
+        for (const friendship of incomingFriends) {
+            items.push({
+                id: `friend-request-${friendship.id}`,
+                type: 'friend_request',
+                title: 'Заявка в друзья',
+                message: `${friendship.requester.name} хочет добавить вас в друзья`,
+                link: '/profile?section=friends',
+                createdAt: friendship.createdAt.toISOString(),
+            });
+        }
+
+        const recentAccepted = await prisma.friendship.findMany({
+            where: {
+                requesterId: userId,
+                status: 'accepted',
+                updatedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+            },
+            include: {
+                addressee: { select: { name: true } },
+            },
+            orderBy: { updatedAt: 'desc' },
+            take: 5,
+        });
+
+        for (const friendship of recentAccepted) {
+            items.push({
+                id: `friend-accepted-${friendship.id}`,
+                type: 'friend_accepted',
+                title: 'Заявка принята',
+                message: `${friendship.addressee.name} принял(а) вашу заявку в друзья`,
+                link: '/profile?section=friends',
+                createdAt: friendship.updatedAt.toISOString(),
+            });
+        }
 
         const forumReplies = await prisma.forumPost.findMany({
             where: {

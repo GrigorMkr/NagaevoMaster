@@ -27,10 +27,17 @@ model User {
   lastLng           Float?
   lastLocationLabel String?
   lastLocationAt    DateTime?
+  birthYear         Int?
+  homeAddress       String?
+  homeLat           Float?
+  homeLng           Float?
   createdAt     DateTime      @default(now())
   listings      Listing[]
   reviews       Review[]
   favorites     Favorite[]
+  listingReactions ListingReaction[]
+  repostsSent      ListingRepost[] @relation("RepostsSent")
+  repostsReceived  ListingRepost[] @relation("RepostsReceived")
   forumTopics        ForumTopic[]
   forumPosts         ForumPost[]
   reports            Report[]
@@ -85,6 +92,9 @@ model Listing {
   rating       Float      @default(0)
   reviewsCount Int        @default(0)
   viewsCount   Int        @default(0)
+  likesCount   Int        @default(0)
+  dislikesCount Int       @default(0)
+  repostsCount Int        @default(0)
   images       String     @default("[]")
   lat          Float
   lng          Float
@@ -92,11 +102,17 @@ model Listing {
   phone        String
   isVerified   Boolean    @default(false)
   status       String     @default("published")
+  kind         String     @default("service")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   reviews      Review[]
   favorites    Favorite[]
+  reactions    ListingReaction[]
+  reposts      ListingRepost[]
+  shareMessages Message[]
   reports      Report[]
+
+  @@index([kind, status])
 }
 
 model Review {
@@ -119,6 +135,33 @@ model Favorite {
   createdAt DateTime @default(now())
 
   @@id([userId, listingId])
+}
+
+model ListingReaction {
+  userId    String
+  listingId String
+  value     Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, listingId])
+  @@index([listingId])
+}
+
+model ListingRepost {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User     @relation("RepostsSent", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User     @relation("RepostsReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([listingId])
+  @@index([senderId])
 }
 
 model ForumTopic {
@@ -193,6 +236,11 @@ model Message {
   attachmentName String?
   attachmentMime String?
   readAt         DateTime?
+  editedAt       DateTime?
+  deletedAt      DateTime?
+  isForwarded    Boolean      @default(false)
+  listingId      String?
+  listing        Listing?     @relation(fields: [listingId], references: [id], onDelete: SetNull)
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])
@@ -223,4 +271,17 @@ model UserBlock {
 
   @@unique([blockerId, blockedId])
   @@index([blockedId])
+}
+
+model SiteNews {
+  id          String   @id @default(uuid())
+  title       String
+  summary     String   @default("")
+  imageUrl    String?
+  sourceUrl   String?
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([publishedAt])
 }
