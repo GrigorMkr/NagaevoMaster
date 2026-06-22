@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'backend']),
+  globalIgnores(['dist', 'backend', 'android', 'ios', 'node_modules']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -17,6 +17,10 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+    rules: {
+      // Стандартные паттерны загрузки данных (useEffect + setState) — не ложные срабатывания.
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ])

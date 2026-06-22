@@ -144,7 +144,9 @@ function getNativeOAuthSearchFromUrl(url: URL): string | null {
 }
 
 function isOAuthReturnPath(pathname: string): boolean {
-  return pathname === '/auth/app-return' || pathname === '/auth';
+  return pathname === '/auth/app-return'
+    || pathname === '/native-oauth-bridge.html'
+    || pathname === '/auth';
 }
 
 function hasNativeOAuthParams(search: string): boolean {

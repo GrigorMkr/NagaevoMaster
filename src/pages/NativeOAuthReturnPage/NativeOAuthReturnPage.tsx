@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ROUTES } from '@/constants';
 import { buildNativeOAuthReturnUrls } from '@/utils/nativeOAuthReturn';
@@ -12,8 +12,9 @@ function isAndroidBrowser() {
 }
 
 function NativeOAuthReturnPage() {
-  const [manualRequired, setManualRequired] = useState(false);
   const [searchParams] = useSearchParams();
+  const hasOAuthError = Boolean(searchParams.get('oauth_error'));
+  const [autoOpenFailed, setAutoOpenFailed] = useState(hasOAuthError);
   const autoOpenAttemptedRef = useRef(false);
   const returnUrls = useMemo(
     () => buildNativeOAuthReturnUrls(searchParams.toString()),
@@ -22,11 +23,14 @@ function NativeOAuthReturnPage() {
 
   useNativeOAuthCompletion();
 
-  const openApp = () => {
-    window.location.href = returnUrls.customScheme;
+  const openApp = useCallback(() => {
+    if (navigator.userAgent.includes('NagaevoMasterApp')) {
+      return;
+    }
+    window.location.replace(returnUrls.customScheme);
     if (isAndroidBrowser()) {
       window.setTimeout(() => {
-        window.location.href = returnUrls.intentUrl;
+        window.location.replace(returnUrls.intentUrl);
       }, 300);
     }
     window.setTimeout(() => {
@@ -36,27 +40,24 @@ function NativeOAuthReturnPage() {
         // ignore
       }
     }, 1200);
-  };
+  }, [returnUrls]);
 
   useEffect(() => {
-    if (isNativeApp()) return undefined;
-    if (autoOpenAttemptedRef.current) return undefined;
+    if (isNativeApp() || hasOAuthError || autoOpenAttemptedRef.current) return undefined;
+    if (navigator.userAgent.includes('NagaevoMasterApp')) return undefined;
     autoOpenAttemptedRef.current = true;
-
-    if (searchParams.get('oauth_error')) {
-      setManualRequired(true);
-      return undefined;
-    }
 
     openApp();
     const fallbackTimer = window.setTimeout(() => {
-      setManualRequired(true);
+      setAutoOpenFailed(true);
     }, 2200);
 
     return () => {
       window.clearTimeout(fallbackTimer);
     };
-  }, [returnUrls, searchParams]);
+  }, [hasOAuthError, openApp]);
+
+  const manualRequired = autoOpenFailed;
 
   return (
     <>

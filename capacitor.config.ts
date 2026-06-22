@@ -16,10 +16,12 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
     backgroundColor: '#081f18',
+    appendUserAgent: 'NagaevoMasterApp',
   },
   ios: {
     backgroundColor: '#081f18',
     contentInset: 'automatic',
+    appendUserAgent: 'NagaevoMasterApp',
   },
   plugins: {
     PushNotifications: {

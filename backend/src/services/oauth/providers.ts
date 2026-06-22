@@ -20,24 +20,53 @@ function oauthRedirect(path: string) {
   return `${env.SITE_URL.replace(/\/$/, '')}${path}`;
 }
 
-function nativeAppRedirect(query: string) {
+function nativeAppSchemeRedirect(query: string) {
   return `${NATIVE_APP_SCHEME}://auth?${query}`;
 }
 
-function buildAuthSuccessRedirect(token: string, native = false) {
+function shouldUseAndroidCctReturn(
+  platform?: 'android' | 'ios',
+  delivery?: 'webview' | 'cct',
+): boolean {
+  return platform === 'android' && delivery !== 'webview';
+}
+
+function nativeAppReturnRedirect(
+  query: string,
+  platform?: 'android' | 'ios',
+  delivery?: 'webview' | 'cct',
+) {
+  if (shouldUseAndroidCctReturn(platform, delivery)) {
+    return oauthRedirect(`/native-oauth-bridge.html?${query}`);
+  }
+  return oauthRedirect(`/auth/app-return?${query}`);
+}
+
+function buildAuthSuccessRedirect(
+  token: string,
+  native = false,
+  platform?: 'android' | 'ios',
+  delivery?: 'webview' | 'cct',
+) {
   if (native) {
     const handoff = createOAuthHandoff(token);
-    return nativeAppRedirect(`handoff=${encodeURIComponent(handoff)}`);
+    const query = `handoff=${encodeURIComponent(handoff)}`;
+    return nativeAppReturnRedirect(query, platform, delivery);
   }
   const code = createOAuthExchangeCode(token);
   const qs = `oauth=1&code=${encodeURIComponent(code)}`;
   return oauthRedirect(`/auth?${qs}`);
 }
 
-function buildAuthErrorRedirect(message: string, native = false) {
+function buildAuthErrorRedirect(
+  message: string,
+  native = false,
+  platform?: 'android' | 'ios',
+  delivery?: 'webview' | 'cct',
+) {
   const qs = `oauth_error=${encodeURIComponent(message)}`;
   if (native) {
-    return nativeAppRedirect(qs);
+    return nativeAppReturnRedirect(qs, platform, delivery);
   }
   return oauthRedirect(`/auth?${qs}`);
 }

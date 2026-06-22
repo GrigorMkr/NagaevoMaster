@@ -1,11 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "ru.nagaevomaster.app",
       "sha256_cert_fingerprints": [
-        "0a07462f8b4bd8cfb09c6c3a3eeecbb36994cd85bd9ff405f43b842bf5655edfc"
+        "0a07462f8b4bd8cfb09c6ca3eeecbb36994cd85bd9ff405f43b842bf5655edfc"
       ]
     }
   }

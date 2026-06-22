@@ -99,7 +99,7 @@ function resolveAuthTab(tab: string | null): AuthTab {
 function AuthPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isAuthLoading = useAppSelector(selectAuthLoading)
   const returnPath = useMemo(() => {
@@ -128,6 +128,14 @@ function AuthPage() {
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [captchaResetKey, setCaptchaResetKey] = useState(0)
+  const hasOAuthReturn = useMemo(() => {
+    const oauthError = searchParams.get('oauth_error')
+    const handoff = searchParams.get('handoff')
+    const oauthCode = searchParams.get('code')
+    const oauth = searchParams.get('oauth')
+    return Boolean(oauthError || handoff || (oauth === '1' && oauthCode))
+  }, [searchParams])
+  const [isCompletingOAuth, setIsCompletingOAuth] = useState(hasOAuthReturn)
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
@@ -173,24 +181,43 @@ function AuthPage() {
 
   useEffect(() => {
     const oauthError = searchParams.get('oauth_error')
+    const handoff = searchParams.get('handoff')
     const oauthCode = searchParams.get('code')
     const oauth = searchParams.get('oauth')
+
     if (oauthError) {
       toast.error(decodeURIComponent(oauthError))
-      setSearchParams({}, { replace: true })
+      setIsCompletingOAuth(false)
+      navigate(ROUTES.AUTH, { replace: true })
       return
     }
-    if (oauth !== '1' || !oauthCode) return
+
+    if (!handoff && (oauth !== '1' || !oauthCode)) {
+      setIsCompletingOAuth(false)
+      return
+    }
+
+    setIsCompletingOAuth(true)
+    let cancelled = false
+
     void completeOAuthLogin(`?${searchParams.toString()}`).then((result) => {
+      if (cancelled) return
       if (result.status === 'success') {
-        navigate(result.returnPath, { replace: true })
-      } else if (result.status === 'error') {
-        toast.error(result.message)
+        navigate(returnPath, { replace: true })
+        return
       }
-    }).finally(() => {
-      setSearchParams({}, { replace: true })
+      if (result.status === 'error') {
+        toast.error(result.message)
+        navigate(ROUTES.AUTH, { replace: true })
+        return
+      }
+      setIsCompletingOAuth(false)
     })
-  }, [dispatch, navigate, returnPath, searchParams, setSearchParams])
+
+    return () => {
+      cancelled = true
+    }
+  }, [navigate, returnPath, searchParams])
 
   useEffect(() => {
     setActiveTab(resolveAuthTab(searchParams.get('tab')))
@@ -201,6 +228,10 @@ function AuthPage() {
   const vkAuthUrl = `${apiBase}/auth/vk`
   const resolvedVkAppId = oauthStatus?.vkAppId ?? VK_KNOWN_APP_ID
   const oauthEnabled = Boolean(oauthStatus?.google || oauthStatus?.vk || resolvedVkAppId)
+
+  const goAfterAuth = () => {
+    navigate(returnPath, { replace: true })
+  }
 
   const oauthButtons = oauthStatus && oauthEnabled ? (
     <div className={styles.oauthRow}>
@@ -241,12 +272,12 @@ function AuthPage() {
     </>
   ) : null
 
-  const goAfterAuth = () => {
-    navigate(returnPath, { replace: true })
-  }
-
-  if (isAuthLoading) {
-    return <AppLoadingScreen label="Проверяем сессию…" />
+  if (isAuthLoading || isCompletingOAuth) {
+    return (
+      <AppLoadingScreen
+        label={isCompletingOAuth ? 'Завершаем вход…' : 'Проверяем сессию…'}
+      />
+    )
   }
 
   if (isAuthenticated) {

@@ -5,6 +5,8 @@ const TTL_MS = 10 * 60 * 1000;
 interface OAuthPendingSession {
   provider: 'google' | 'vk';
   native: boolean;
+  platform?: 'android' | 'ios';
+  delivery?: 'webview' | 'cct';
   codeVerifier?: string;
   expiresAt: number;
 }
@@ -23,6 +25,8 @@ function pruneExpiredPendingSessions() {
 function createOAuthPendingSession(options: {
   provider: 'google' | 'vk';
   native: boolean;
+  platform?: 'android' | 'ios';
+  delivery?: 'webview' | 'cct';
   codeVerifier?: string;
 }): string {
   pruneExpiredPendingSessions();
@@ -30,6 +34,8 @@ function createOAuthPendingSession(options: {
   pendingSessions.set(state, {
     provider: options.provider,
     native: options.native,
+    platform: options.platform,
+    delivery: options.delivery,
     codeVerifier: options.codeVerifier,
     expiresAt: Date.now() + TTL_MS,
   });

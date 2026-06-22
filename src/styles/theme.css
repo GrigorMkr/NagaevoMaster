@@ -7,7 +7,7 @@
   font-weight: var(--font-weight-ui);
   letter-spacing: var(--letter-badge);
   text-transform: uppercase;
-  color: #ffffff;
+  color: #fff;
   background: var(--badge-green-bg);
   border: 1px solid var(--badge-green-border);
   border-radius: var(--radius-full);

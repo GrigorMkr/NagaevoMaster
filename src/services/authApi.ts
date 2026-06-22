@@ -185,11 +185,11 @@ async function verifyRegistrationCode(
             throw error;
         }
         if (code !== MOCK_VERIFICATION_CODE) {
-            throw new Error('Неверный код подтверждения');
+            throw new Error('Неверный код подтверждения', { cause: error });
         }
         const stored = sessionStorage.getItem(`mock-register:${channel}:${normalizedTarget}`);
         if (!stored) {
-            throw new Error('Сначала запросите код подтверждения');
+            throw new Error('Сначала запросите код подтверждения', { cause: error });
         }
         const data = JSON.parse(stored) as RegisterPayload;
         sessionStorage.removeItem(`mock-register:${channel}:${normalizedTarget}`);
@@ -242,9 +242,9 @@ async function resetPasswordRequest(
             throw error;
         }
         if (code !== MOCK_VERIFICATION_CODE) {
-            throw new Error('Неверный код');
+            throw new Error('Неверный код', { cause: error });
         }
-        throw new Error('Восстановление пароля доступно только через API');
+        throw new Error('Восстановление пароля доступно только через API', { cause: error });
     }
 }
 

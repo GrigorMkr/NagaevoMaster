@@ -1,18 +1,23 @@
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureAndroidKeystore } from './ensure-android-keystore.mjs';
+import { findJavaHome } from './resolve-java-home.mjs';
+import { syncAndroidAssetLinks } from './sync-android-assetlinks.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const androidDir = path.join(root, 'android');
 
-function listMicrosoftJdks() {
-  const base = 'C:\\Program Files\\Microsoft';
-  if (!existsSync(base)) return [];
-  return readdirSync(base, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('jdk-'))
-    .map((entry) => path.join(base, entry.name));
+function ensureLocalProperties(androidSdk, javaHome) {
+  const localProps = path.join(androidDir, 'local.properties');
+  const escapePropertyPath = (value) => value.replace(/\\/g, '\\\\').replace(/:/g, '\\:');
+  const content = [
+    `sdk.dir=${escapePropertyPath(androidSdk)}`,
+    `java.home=${escapePropertyPath(javaHome)}`,
+    '',
+  ].join('\n');
+  writeFileSync(localProps, content, 'utf8');
 }
 
 function findAndroidSdk() {
@@ -30,46 +35,6 @@ function findAndroidSdk() {
     }
   }
   return null;
-}
-
-function ensureLocalProperties(androidSdk) {
-  const localProps = path.join(androidDir, 'local.properties');
-  const content = `sdk.dir=${androidSdk.replace(/\\/g, '\\\\')}\n`;
-  writeFileSync(localProps, content, 'utf8');
-}
-
-const JDK_CANDIDATES = [
-  process.env.JAVA_HOME,
-  process.env.JDK_HOME,
-  `${process.env.ProgramFiles}\\Android\\Android Studio\\jbr`,
-  `${process.env.LOCALAPPDATA}\\Programs\\Android\\Android Studio\\jbr`,
-  'C:\\Program Files\\Android\\Android Studio\\jbr',
-  ...listMicrosoftJdks().sort((a, b) => b.localeCompare(a)),
-  'C:\\Program Files\\Eclipse Adoptium\\jdk-21',
-  'C:\\Program Files\\Eclipse Adoptium\\jdk-17',
-].filter(Boolean);
-
-function readJavaMajorVersion(javaHome) {
-  const javaExe = path.join(javaHome, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
-  const result = spawnSync(javaExe, ['-version'], { encoding: 'utf8' });
-  const output = `${result.stderr ?? ''}${result.stdout ?? ''}`;
-  const match = output.match(/version "(\d+)/);
-  return match ? Number(match[1]) : 0;
-}
-
-function findJavaHome() {
-  let fallback = null;
-
-  for (const candidate of JDK_CANDIDATES) {
-    const javaExe = path.join(candidate, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
-    if (!existsSync(javaExe)) continue;
-
-    const major = readJavaMajorVersion(candidate);
-    if (major >= 21) return candidate;
-    if (!fallback) fallback = candidate;
-  }
-
-  return fallback;
 }
 
 function runCapSync(javaHome) {
@@ -179,10 +144,11 @@ if (!androidSdk) {
 }
 
 console.log(`ANDROID_SDK: ${androidSdk}`);
-ensureLocalProperties(androidSdk);
+ensureLocalProperties(androidSdk, javaHome);
 
 try {
   ensureAndroidKeystore(javaHome);
+  syncAndroidAssetLinks(javaHome);
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);

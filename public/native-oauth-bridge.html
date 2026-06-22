@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>Возврат в приложение</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #081f18;
+        color: #e8f5ef;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      main {
+        width: min(100%, 420px);
+        padding: 28px 24px;
+        border-radius: 16px;
+        background: #0f2d24;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 1.35rem;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0 0 20px;
+        line-height: 1.5;
+        opacity: 0.86;
+      }
+
+      .button {
+        display: inline-block;
+        width: 100%;
+        padding: 14px 18px;
+        border: 0;
+        border-radius: 12px;
+        background: #1f8f66;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .hint {
+        margin-top: 16px;
+        font-size: 0.92rem;
+        opacity: 0.72;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 id="title">Вход выполнен</h1>
+      <p id="status">Нажмите кнопку, чтобы вернуться в приложение.</p>
+      <a id="openBtn" class="button" href="https://nagaevomaster.ru/auth/app-return">Открыть приложение</a>
+      <p class="hint">Если кнопка не сработала, переключитесь в приложение «Нагаево Мастер» вручную.</p>
+    </main>
+    <script>
+      (function () {
+        var search = location.search;
+        var params = new URLSearchParams(search);
+        var handoff = params.get('handoff');
+        var oauthError = params.get('oauth_error');
+        var title = document.getElementById('title');
+        var status = document.getElementById('status');
+        var openBtn = document.getElementById('openBtn');
+
+        if (!handoff && !oauthError) {
+          title.textContent = 'Ошибка';
+          status.textContent = 'Некорректная ссылка возврата.';
+          openBtn.style.display = 'none';
+          return;
+        }
+
+        if (oauthError) {
+          title.textContent = 'Ошибка входа';
+          status.textContent = decodeURIComponent(oauthError);
+        }
+
+        if (navigator.userAgent.indexOf('NagaevoMasterApp') !== -1) {
+          location.replace('/auth/app-return' + search);
+          return;
+        }
+
+        var appReturnUrl = 'https://nagaevomaster.ru/auth/app-return' + search;
+        var scheme = 'ru.nagaevomaster.app://auth' + search;
+        var intentUrl =
+          'intent://auth' + search
+          + '#Intent;scheme=ru.nagaevomaster.app;package=ru.nagaevomaster.app;'
+          + 'S.browser_fallback_url=' + encodeURIComponent(appReturnUrl)
+          + ';end';
+
+        openBtn.href = appReturnUrl;
+
+        location.replace(scheme);
+        if (/Android/i.test(navigator.userAgent)) {
+          setTimeout(function () {
+            location.replace(intentUrl);
+          }, 300);
+        }
+      })();
+    </script>
+  </body>
+</html>

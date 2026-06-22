@@ -77,6 +77,8 @@ const localFiles = walkLocal(distDir)
 const localMap = new Map(localFiles.map((f) => [f.rel, f]))
 const required = [
   'index.html',
+  'early-redirect.js',
+  'native-oauth-bridge.html',
   '.htaccess',
   '404.html',
   'favicon.svg',

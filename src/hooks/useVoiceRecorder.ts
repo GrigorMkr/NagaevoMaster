@@ -65,6 +65,7 @@ function useVoiceRecorder(): UseVoiceRecorderResult {
       if (name === 'NotAllowedError' || name === 'SecurityError') {
         throw new Error(
           'Микрофон недоступен. Разрешите доступ в браузере и обновите страницу после деплоя сайта.',
+          { cause: error },
         );
       }
       throw error;

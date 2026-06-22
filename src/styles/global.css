@@ -43,6 +43,19 @@ html.mobile-chat-open {
   height: 100%;
 }
 
+html.profile-messages-active,
+html.profile-messages-active body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html.profile-messages-active::-webkit-scrollbar,
+html.profile-messages-active body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 body.mobile-chat-open .site-header,
 body.mobile-chat-open .site-footer,
 body.mobile-chat-open .native-tab-bar {
@@ -52,7 +65,7 @@ body.mobile-chat-open .native-tab-bar {
 
 ::selection {
   background: rgba(240, 180, 41, 0.35);
-  color: #ffffff;
+  color: #fff;
 }
 
 #root h1,

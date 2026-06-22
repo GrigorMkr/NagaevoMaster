@@ -8,9 +8,11 @@
 2. В корне проекта:
    ```bash
    npm run build:hosting
-   npx cap sync android
+   npm run android:env      # один раз: найти JDK и Android SDK
+   npm run cap:sync:android
    npm run build:apk
    ```
+   Или одной командой (всё выше, кроме hosting): `npm run build:apk`
 3. APK появится в `public/downloads/nagaevomaster.apk` — его скачивают с страницы `/app`.
 4. Для Google Play: подпишите AAB в Android Studio → Release → Generate Signed Bundle.
 

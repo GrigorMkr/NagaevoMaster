@@ -178,7 +178,7 @@ async function createListing(payload: CreateListingPayload): Promise<Listing> {
     return enrichListing(response.data);
 }
 
-interface UpdateListingPayload extends Partial<CreateListingPayload> {}
+type UpdateListingPayload = Partial<CreateListingPayload>;
 
 async function updateListing(id: string, payload: UpdateListingPayload): Promise<Listing> {
     const response = await api.patch<Listing>(`/listings/${id}`, payload);

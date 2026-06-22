@@ -19,12 +19,12 @@
   border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   line-height: 1.45;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .bubbleMine {
   background: #2a9d6a;
-  border-radius: 1.1rem 1.1rem 0.25rem 1.1rem;
+  border-radius: 1.1rem 1.1rem 0.25rem;
   box-shadow: none;
 }
 

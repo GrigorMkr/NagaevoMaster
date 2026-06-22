@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button/Button';
 import {
@@ -21,7 +21,7 @@ function AddFriendButton({ userId, size = 'sm' }: AddFriendButtonProps) {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
 
-  const reload = () => {
+  const reload = useCallback(() => {
     setLoading(true);
     void fetchFriendRelation(userId)
       .then((data) => {
@@ -33,11 +33,11 @@ function AddFriendButton({ userId, size = 'sm' }: AddFriendButtonProps) {
         setFriendshipId(undefined);
       })
       .finally(() => setLoading(false));
-  };
+  }, [userId]);
 
   useEffect(() => {
     reload();
-  }, [userId]);
+  }, [reload]);
 
   const handleAdd = async () => {
     setActing(true);

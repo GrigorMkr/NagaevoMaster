@@ -3,7 +3,6 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { isNativeAndroid, isNativeApp } from '@/utils/nativeApp';
-import { installNativeNavigation } from '@/utils/nativeNavigation';
 import { useNativeOAuthCompletion } from '@/hooks/useNativeOAuthCompletion';
 
 function NativeAppBootstrap() {
@@ -11,8 +10,6 @@ function NativeAppBootstrap() {
 
   useEffect(() => {
     if (!isNativeApp()) return undefined;
-
-    const teardownNavigation = installNativeNavigation();
 
     const init = async () => {
       try {
@@ -38,10 +35,6 @@ function NativeAppBootstrap() {
     };
 
     void init();
-
-    return () => {
-      teardownNavigation();
-    };
   }, []);
 
   return null;

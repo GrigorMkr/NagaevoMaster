@@ -96,15 +96,15 @@
 .footer .master {
   background: linear-gradient(
     105deg,
-    #ffffff 0%,
+    #fff 0%,
     #fff3c4 12%,
     #fde68a 24%,
     #f0b429 36%,
     #7ec8a8 48%,
-    #ffffff 60%,
+    #fff 60%,
     #fde68a 72%,
     #f0b429 84%,
-    #ffffff 100%
+    #fff 100%
   );
   background-size: 420% 100%;
   -webkit-background-clip: text;

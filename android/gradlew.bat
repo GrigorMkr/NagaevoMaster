@@ -35,6 +35,17 @@ set APP_HOME=%DIRNAME%
 @rem Resolve any "." and ".." in APP_HOME to make it shorter.
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
+@rem NagaevoMaster: auto-detect JDK when JAVA_HOME is unset
+if not defined JAVA_HOME if exist "%APP_HOME%\local.properties" (
+    for /f "usebackq eol=# tokens=1,* delims==" %%A in ("%APP_HOME%\local.properties") do (
+        if /I "%%A"=="java.home" set "JAVA_HOME=%%B"
+    )
+)
+if defined JAVA_HOME set "JAVA_HOME=%JAVA_HOME:\\=\%"
+if not defined JAVA_HOME if exist "%ProgramFiles%\Android\Android Studio\jbr\bin\java.exe" (
+    set "JAVA_HOME=%ProgramFiles%\Android\Android Studio\jbr"
+)
+
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 

@@ -1,7 +1,7 @@
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
-import { isNativeApp } from '@/utils/nativeApp';
+import { isNativeApp, isNativeAndroid } from '@/utils/nativeApp';
 import { SITE_ORIGIN } from '@/utils/apiBase';
 import { writeStoredOAuthReturnPath } from '@/utils/nativeOAuthReturn';
 import {
@@ -14,6 +14,8 @@ import { normalizeOAuthSearch, stashOAuthPending } from '@/utils/oauthPending';
 
 const SITE_HOST = 'nagaevomaster.ru';
 const NATIVE_SCHEME = 'ru.nagaevomaster.app';
+
+const handledDeepLinkKeys = new Set<string>();
 
 function isSameSiteUrl(url: URL): boolean {
   return url.hostname === SITE_HOST || url.hostname === `www.${SITE_HOST}`;
@@ -79,6 +81,17 @@ async function openOAuthUrl(path: string) {
     if (returnPath.startsWith('/') && !returnPath.startsWith('//')) {
       writeStoredOAuthReturnPath(returnPath);
     }
+
+    const isVkOAuth = url.pathname.endsWith('/auth/vk');
+    if (isVkOAuth) {
+      url.searchParams.set('delivery', 'webview');
+      window.location.assign(url.href);
+      return;
+    }
+
+    if (isNativeAndroid()) {
+      url.searchParams.set('platform', 'android');
+    }
     await openExternalInAppBrowser(url.href);
     return;
   }
@@ -125,9 +138,18 @@ function handleAppUrlOpen(incomingUrl: string) {
 
   if (!isInternalAppPath(url)) return;
 
+  const nativeOAuthSearch = getNativeOAuthSearchFromUrl(url);
+  const deepLinkKey = nativeOAuthSearch
+    ?? (isOAuthReturnPath(url.pathname) && url.search ? url.search : null)
+    ?? `${url.pathname}${url.search}${url.hash}`;
+  if (handledDeepLinkKeys.has(deepLinkKey)) return;
+  handledDeepLinkKeys.add(deepLinkKey);
+  window.setTimeout(() => {
+    handledDeepLinkKeys.delete(deepLinkKey);
+  }, 15_000);
+
   void Browser.close().catch(() => undefined);
 
-  const nativeOAuthSearch = getNativeOAuthSearchFromUrl(url);
   if (nativeOAuthSearch && isNativeApp()) {
     void finishNativeOAuthLogin(nativeOAuthSearch).then((handled) => {
       if (!handled) {
@@ -191,6 +213,12 @@ function installNativeNavigation() {
     void App.minimizeApp();
   });
 
+  const resumeListener = App.addListener('appStateChange', ({ isActive }) => {
+    if (!isActive) return;
+    tryCompleteOAuthFromLocation();
+    void Browser.close().catch(() => undefined);
+  });
+
   void App.getLaunchUrl().then((result) => {
     if (result?.url) {
       handleAppUrlOpen(result.url);
@@ -206,6 +234,7 @@ function installNativeNavigation() {
     document.removeEventListener('click', handleDocumentClick, true);
     void appUrlListener.then((handle) => handle.remove());
     void backListener.then((handle) => handle.remove());
+    void resumeListener.then((handle) => handle.remove());
   };
 }
 

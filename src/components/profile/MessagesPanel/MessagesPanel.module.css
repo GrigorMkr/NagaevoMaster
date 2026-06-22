@@ -1,3 +1,16 @@
+.conversationList,
+.messageList {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.conversationList::-webkit-scrollbar,
+.messageList::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .messagesLayout {
   display: grid;
   gap: var(--spacing-md);
@@ -52,12 +65,8 @@
   padding: 0;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.conversationList::-webkit-scrollbar {
-  display: none;
 }
 
 .conversationItem {
@@ -198,8 +207,7 @@
 
 .messageList {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   padding: 0.65rem 0.75rem;
   display: flex;
   flex-direction: column;
@@ -209,12 +217,7 @@
     radial-gradient(circle at top right, rgba(77, 208, 160, 0.05), transparent 45%),
     rgba(5, 20, 16, 0.35);
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
   overscroll-behavior: contain;
-}
-
-.messageList::-webkit-scrollbar {
-  display: none;
 }
 
 @media (min-width: 900px) {
@@ -252,7 +255,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ff5555;
+  background: #f55;
   animation: recPulse 1s ease-in-out infinite;
 }
 
@@ -314,14 +317,14 @@
   outline: none;
   box-shadow: none;
   background: transparent;
-  color: #ffffff;
+  color: #fff;
   caret-color: var(--color-mint);
   font: inherit;
   font-size: 16px;
   line-height: 1.35;
   -webkit-appearance: none;
   appearance: none;
-  -webkit-text-fill-color: #ffffff;
+  -webkit-text-fill-color: #fff;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -451,8 +454,16 @@
 
   .mobileOnlyList .sidebar {
     display: flex;
+    flex-direction: column;
     min-height: min(70dvh, 560px);
+    max-height: min(70dvh, 560px);
     border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .mobileOnlyList .conversationList {
+    flex: 1;
+    min-height: 0;
   }
 }
 

@@ -40,7 +40,7 @@ async function syncAuthToServiceWorker(): Promise<void> {
     return;
   }
 
-  let token: string | null = null;
+  let token: string | null;
   try {
     token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
   } catch {

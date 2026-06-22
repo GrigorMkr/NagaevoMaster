@@ -192,21 +192,40 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
 
   const layoutMode = useMemo(() => (activeId ? 'chat' : 'list'), [activeId]);
   const isMobileChat = layoutMode === 'chat' && Boolean(activeId);
+  const [isMobileViewport, setIsMobileViewport] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 899px)').matches
+  ));
 
   useEffect(() => {
-    if (!isMobileChat) return undefined;
+    const media = window.matchMedia('(max-width: 899px)');
+    const syncViewport = () => {
+      setIsMobileViewport(media.matches);
+    };
+    syncViewport();
+    media.addEventListener('change', syncViewport);
+    return () => {
+      media.removeEventListener('change', syncViewport);
+    };
+  }, []);
+
+  const isMobileChatFullscreen = isMobileChat && isMobileViewport;
+
+  useEffect(() => {
+    if (!isMobileChatFullscreen) return undefined;
     document.documentElement.classList.add('mobile-chat-open');
     document.body.classList.add('mobile-chat-open');
     return () => {
       document.documentElement.classList.remove('mobile-chat-open');
       document.body.classList.remove('mobile-chat-open');
     };
-  }, [isMobileChat]);
+  }, [isMobileChatFullscreen]);
 
   const handleDraftFocus = useCallback(() => {
     unlockMessageSound();
     scrollChatToBottom('auto');
-    window.scrollTo(0, 0);
+    if (window.matchMedia('(max-width: 899px)').matches) {
+      window.scrollTo(0, 0);
+    }
   }, [scrollChatToBottom]);
 
   const submitDraft = useCallback(async () => {
@@ -365,7 +384,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       className={classNames(
         styles.messagesLayout,
         layoutMode === 'chat' ? styles.mobileOnlyChat : styles.mobileOnlyList,
-        isMobileChat && styles.mobileFullscreen,
+        isMobileChatFullscreen && styles.mobileFullscreen,
       )}
     >
       <aside className={styles.sidebar}>

@@ -72,7 +72,9 @@ function RecaptchaWidget({ siteKey, onChange, onReady }: RecaptchaWidgetProps) {
   const onChangeRef = useRef(onChange);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  onChangeRef.current = onChange;
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     let cancelled = false;

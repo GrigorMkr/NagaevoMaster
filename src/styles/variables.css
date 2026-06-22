@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --color-primary: #17624a;
   --color-primary-dark: #0a3d2e;
   --color-primary-light: #2d9a74;
@@ -24,7 +24,7 @@
     #0f3328 100%
   );
 
-  --color-text: #ffffff;
+  --color-text: #fff;
   --color-text-muted: rgba(255, 255, 255, 0.84);
   --color-text-light: rgba(255, 255, 255, 0.62);
   --color-error: #ff8a80;
@@ -34,7 +34,7 @@
   --color-button-active-text: #fff;
   --color-button-active-border: rgba(255, 255, 255, 0.85);
   --color-button-border: rgba(255, 255, 255, 0.72);
-  --color-text-on-dark: #ffffff;
+  --color-text-on-dark: #fff;
   --color-text-on-dark-muted: rgba(255, 255, 255, 0.78);
   --color-text-on-dark-subtle: rgba(255, 255, 255, 0.58);
 

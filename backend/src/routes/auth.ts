@@ -92,6 +92,22 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+function resolveOAuthPlatform(query: Record<string, unknown>): 'android' | 'ios' | undefined {
+  const value = query.platform;
+  if (value === 'android') return 'android';
+  if (value === 'ios') return 'ios';
+  return undefined;
+}
+
+function resolveOAuthDelivery(
+  query: Record<string, unknown>,
+  platform?: 'android' | 'ios',
+): 'webview' | 'cct' | undefined {
+  if (query.delivery === 'webview') return 'webview';
+  if (platform === 'android') return 'cct';
+  return undefined;
+}
+
 function assertUserVerified(user: { emailVerified: boolean; phoneVerified: boolean }) {
   if (!user.emailVerified && !user.phoneVerified) {
     throw new HttpError(403, 'Подтвердите email или телефон для входа');
@@ -227,7 +243,9 @@ authRouter.get('/google', (req, res) => {
     return;
   }
   const native = req.query.native === '1';
-  const state = createOAuthPendingSession({ provider: 'google', native });
+  const platform = resolveOAuthPlatform(req.query);
+  const delivery = resolveOAuthDelivery(req.query, platform);
+  const state = createOAuthPendingSession({ provider: 'google', native, platform, delivery });
   const redirectUri = `${env.SITE_URL.replace(/\/$/, '')}/api/auth/google/callback`;
   const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   url.searchParams.set('client_id', clientId);
@@ -243,35 +261,39 @@ authRouter.get('/google', (req, res) => {
 authRouter.get('/google/callback', async (req, res) => {
   const state = typeof req.query.state === 'string' ? req.query.state : '';
   let isNative = false;
+  let platform: 'android' | 'ios' | undefined;
+  let delivery: 'webview' | 'cct' | undefined;
 
   try {
     const code = typeof req.query.code === 'string' ? req.query.code : '';
     const pending = state ? consumeOAuthPendingSession(state, 'google') : null;
     isNative = pending?.native ?? false;
+    platform = pending?.platform;
+    delivery = pending?.delivery;
     clearGoogleOAuthCookies(res);
     clearOAuthNativeCookie(res);
 
     if (!code) {
-      res.redirect(buildAuthErrorRedirect('Авторизация Google отменена', isNative));
+      res.redirect(buildAuthErrorRedirect('Авторизация Google отменена', isNative, platform, delivery));
       return;
     }
     if (!pending) {
-      res.redirect(buildAuthErrorRedirect('Ошибка безопасности Google OAuth', isNative));
+      res.redirect(buildAuthErrorRedirect('Ошибка безопасности Google OAuth', isNative, platform, delivery));
       return;
     }
 
     const profile = await exchangeGoogleCode(code);
     const user = await findOrCreateOAuthUser(profile);
     if (user.isBanned) {
-      res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative));
+      res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative, platform, delivery));
       return;
     }
-    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative));
+    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative, platform, delivery));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Ошибка Google';
     clearGoogleOAuthCookies(res);
     clearOAuthNativeCookie(res);
-    res.redirect(buildAuthErrorRedirect(message, isNative));
+    res.redirect(buildAuthErrorRedirect(message, isNative, platform, delivery));
   }
 });
 
@@ -282,10 +304,18 @@ authRouter.get('/vk', (req, res) => {
     return;
   }
   const native = req.query.native === '1';
+  const platform = resolveOAuthPlatform(req.query);
+  const delivery = resolveOAuthDelivery(req.query, platform);
   const redirectUri = `${env.SITE_URL.replace(/\/$/, '')}/api/auth/vk/callback`;
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
-  const state = createOAuthPendingSession({ provider: 'vk', native, codeVerifier });
+  const state = createOAuthPendingSession({
+    provider: 'vk',
+    native,
+    platform,
+    delivery,
+    codeVerifier,
+  });
 
   const url = new URL('https://id.vk.ru/authorize');
   url.searchParams.set('client_id', clientId);
@@ -301,27 +331,31 @@ authRouter.get('/vk', (req, res) => {
 authRouter.get('/vk/callback', async (req, res) => {
   const state = typeof req.query.state === 'string' ? req.query.state : '';
   let isNative = false;
+  let platform: 'android' | 'ios' | undefined;
+  let delivery: 'webview' | 'cct' | undefined;
 
   try {
     const code = typeof req.query.code === 'string' ? req.query.code : '';
     const deviceId = typeof req.query.device_id === 'string' ? req.query.device_id : '';
     const pending = state ? consumeOAuthPendingSession(state, 'vk') : null;
     isNative = pending?.native ?? false;
+    platform = pending?.platform;
+    delivery = pending?.delivery;
     clearVkOAuthCookies(res);
     clearOAuthNativeCookie(res);
 
     if (!code) {
-      res.redirect(buildAuthErrorRedirect('Авторизация ВКонтакте отменена', isNative));
+      res.redirect(buildAuthErrorRedirect('Авторизация ВКонтакте отменена', isNative, platform, delivery));
       return;
     }
 
     if (!pending?.codeVerifier) {
-      res.redirect(buildAuthErrorRedirect('Сессия VK истекла. Нажмите «ВКонтакте» ещё раз', isNative));
+      res.redirect(buildAuthErrorRedirect('Сессия VK истекла. Нажмите «ВКонтакте» ещё раз', isNative, platform, delivery));
       return;
     }
 
     if (!deviceId) {
-      res.redirect(buildAuthErrorRedirect('Ошибка VK ID. Повторите вход через ВКонтакте', isNative));
+      res.redirect(buildAuthErrorRedirect('Ошибка VK ID. Повторите вход через ВКонтакте', isNative, platform, delivery));
       return;
     }
 
@@ -333,15 +367,15 @@ authRouter.get('/vk/callback', async (req, res) => {
 
     const user = await findOrCreateOAuthUser(profile);
     if (user.isBanned) {
-      res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative));
+      res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative, platform, delivery));
       return;
     }
-    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative));
+    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative, platform, delivery));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Ошибка VK';
     clearVkOAuthCookies(res);
     clearOAuthNativeCookie(res);
-    res.redirect(buildAuthErrorRedirect(message, isNative));
+    res.redirect(buildAuthErrorRedirect(message, isNative, platform, delivery));
   }
 });
 
@@ -377,9 +411,6 @@ const vkCompleteSchema = z.object({
 
 authRouter.post('/vk/complete', authLimiter, async (req, res, next) => {
   try {
-    if (env.NODE_ENV === 'production' && !env.ALLOW_VK_CLIENT_COMPLETE) {
-      throw new HttpError(403, 'Этот способ входа отключён');
-    }
     const parsed = vkCompleteSchema.safeParse(req.body);
     if (!parsed.success) {
       throw new HttpError(400, 'Некорректный токен VK');

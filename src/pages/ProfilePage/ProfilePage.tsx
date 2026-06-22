@@ -96,6 +96,15 @@ function ProfilePage() {
   }, [chatId, section, setSearchParams, withUserId])
 
   useEffect(() => {
+    const isMessagesView = section === 'messages' || Boolean(chatId) || Boolean(withUserId)
+    if (!isMessagesView) return undefined
+    document.documentElement.classList.add('profile-messages-active')
+    return () => {
+      document.documentElement.classList.remove('profile-messages-active')
+    }
+  }, [chatId, section, withUserId])
+
+  useEffect(() => {
     if (!isAuthenticated) {
       setUnreadMessages(0);
       return;
