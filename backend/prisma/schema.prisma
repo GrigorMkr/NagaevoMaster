@@ -43,6 +43,8 @@ model User {
   reports            Report[]
   conversationsLow   Conversation[] @relation("ConversationLow")
   conversationsHigh  Conversation[] @relation("ConversationHigh")
+  conversationMemberships ConversationMember[]
+  groupReportsSent      GroupReport[] @relation("GroupReporter")
   sentMessages       Message[]
   friendRequestsSent     Friendship[] @relation("FriendshipRequester")
   friendRequestsReceived Friendship[] @relation("FriendshipAddressee")
@@ -211,17 +213,52 @@ model Report {
 
 model Conversation {
   id                String    @id @default(uuid())
+  type              String    @default("dm")
+  name              String?
+  avatarUrl         String?
+  createdById       String?
   participantLowId  String
   participantHighId String
   participantLow    User      @relation("ConversationLow", fields: [participantLowId], references: [id], onDelete: Cascade)
   participantHigh   User      @relation("ConversationHigh", fields: [participantHighId], references: [id], onDelete: Cascade)
+  members           ConversationMember[]
+  groupReports      GroupReport[]
   messages          Message[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  @@unique([participantLowId, participantHighId])
+  @@unique([participantLowId, participantHighId, type])
   @@index([participantLowId])
   @@index([participantHighId])
+  @@index([type])
+}
+
+model ConversationMember {
+  conversationId String
+  userId         String
+  role           String   @default("member")
+  joinedAt       DateTime @default(now())
+  leftAt         DateTime?
+  lastReadAt     DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId, leftAt])
+}
+
+model GroupReport {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User         @relation("GroupReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reason         String?
+  status         String       @default("pending")
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([status])
 }
 
 model Message {

@@ -4,7 +4,7 @@
 
 .hero {
   position: relative;
-  padding: var(--spacing-xl) 0 var(--spacing-lg);
+  padding: var(--spacing-xl) 0 var(--spacing-md);
   color: var(--color-text);
   background: transparent;
   overflow: hidden;
@@ -22,59 +22,105 @@
   margin-inline: auto;
   aspect-ratio: 1;
   flex-shrink: 0;
-  cursor: grab;
-  touch-action: none;
+  cursor: pointer;
+  touch-action: manipulation;
   z-index: 1;
   perspective: 920px;
   animation: fadeInUp 0.8s 0.28s var(--ease-out-expo) both;
+  --stamp-smoke-core: 77, 208, 160;
+  --stamp-smoke-mid: 45, 154, 116;
+  --stamp-smoke-glow: 126, 200, 168;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
 }
 
-.heroStampWrap:hover .heroStampAura {
+.heroStampWrap:focus-visible .heroStampIcon {
+  box-shadow:
+    0 0 0 2px rgba(126, 200, 168, 0.65),
+    0 0 28px rgba(var(--stamp-smoke-core), 0.35);
+}
+
+.heroStampSmokeBack,
+.heroStampSmokeCore,
+.heroStampSmokeFront {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.68;
+  transition:
+    opacity 0.55s var(--ease-out-expo),
+    filter 0.45s var(--ease-out-expo);
+}
+
+.heroStampSmokeBack {
+  inset: -4%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(var(--stamp-smoke-mid), 0.38) 0%, transparent 68%);
+  filter: blur(34px);
+}
+
+.heroStampSmokeCore {
+  inset: 6%;
+  background:
+    radial-gradient(circle at 34% 38%, rgba(var(--stamp-smoke-core), 0.62) 0%, transparent 52%),
+    radial-gradient(circle at 66% 64%, rgba(var(--stamp-smoke-mid), 0.48) 0%, transparent 56%),
+    radial-gradient(circle, rgba(var(--stamp-smoke-glow), 0.32) 0%, transparent 70%);
+  filter: blur(20px);
+  animation: stamp-smoke-drift 8s ease-in-out infinite;
+}
+
+.heroStampSmokeFront {
+  inset: 14%;
+  background:
+    radial-gradient(circle at 48% 52%, rgba(var(--stamp-smoke-core), 0.42) 0%, transparent 58%);
+  filter: blur(12px);
+  animation: stamp-smoke-drift 6s ease-in-out infinite reverse;
+}
+
+.heroStampWrapHovered .heroStampSmokeBack,
+.heroStampWrapHovered .heroStampSmokeCore,
+.heroStampWrapHovered .heroStampSmokeFront {
   opacity: 1;
-  transform: scale(1.06);
+}
+
+.heroStampWrapTinted .heroStampSmokeCore {
+  filter: blur(22px) saturate(1.28);
+}
+
+.heroStampWrapTinted .heroStampSmokeBack {
+  filter: blur(36px) saturate(1.2);
 }
 
 .heroStampWrap:hover .heroStampRing {
   animation-duration: 18s;
-  border-color: rgba(126, 200, 168, 0.42);
+  border-color: rgba(var(--stamp-smoke-glow), 0.55);
 }
 
 .heroStampWrap:hover .heroStampRingSecondary {
   animation-duration: 24s;
-  border-color: rgba(240, 180, 41, 0.48);
+  border-color: rgba(var(--stamp-smoke-core), 0.42);
 }
 
-.heroStampAura {
-  position: absolute;
-  inset: 12%;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 32%, rgba(240, 180, 41, 0.34) 0%, transparent 42%),
-    radial-gradient(circle at 62% 68%, rgba(23, 98, 74, 0.28) 0%, transparent 48%),
-    radial-gradient(circle, rgba(126, 200, 168, 0.14) 0%, transparent 68%);
-  filter: blur(10px);
-  opacity: 0.72;
-  pointer-events: none;
-  z-index: 0;
-  transition: opacity 0.45s var(--ease-out-expo), transform 0.45s var(--ease-out-expo);
-  animation: stamp-aura-pulse 5s ease-in-out infinite;
-}
-
-@keyframes stamp-aura-pulse {
+@keyframes stamp-smoke-drift {
   0%,
   100% {
-    opacity: 0.62;
-    transform: scale(0.96);
+    transform: scale(0.94) translate(0, 0);
   }
 
-  50% {
-    opacity: 0.92;
-    transform: scale(1.04);
+  33% {
+    transform: scale(1.04) translate(2%, -1.5%);
+  }
+
+  66% {
+    transform: scale(0.98) translate(-1.5%, 2%);
   }
 }
 
 .heroStampWrap:active {
-  cursor: grabbing;
+  cursor: pointer;
 }
 
 .heroStampInner {
@@ -104,18 +150,25 @@
   aspect-ratio: 1;
   display: block;
   border-radius: 50%;
+  background: transparent;
+  filter:
+    drop-shadow(0 8px 18px rgba(8, 31, 24, 0.32))
+    drop-shadow(0 0 14px rgba(var(--stamp-smoke-core), 0.28));
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.12),
-    0 0 32px rgba(240, 180, 41, 0.22),
-    0 28px 64px rgba(23, 98, 74, 0.32),
-    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
-    0 4px 0 rgba(255, 255, 255, 0.35) inset;
-  filter: saturate(1.08) drop-shadow(0 8px 18px rgba(8, 31, 24, 0.35));
-  transition: filter 0.35s var(--ease-out-expo);
+    0 0 0 1px rgba(var(--stamp-smoke-glow), 0.32),
+    0 0 28px rgba(var(--stamp-smoke-core), 0.24);
+  transition:
+    filter 0.45s var(--ease-out-expo),
+    box-shadow 0.45s var(--ease-out-expo);
 }
 
-.heroStampWrap:hover .heroStampIcon {
-  filter: saturate(1.14) drop-shadow(0 12px 24px rgba(240, 180, 41, 0.28));
+.heroStampWrapHovered .heroStampIcon {
+  filter:
+    drop-shadow(0 10px 22px rgba(8, 31, 24, 0.28))
+    drop-shadow(0 0 18px rgba(var(--stamp-smoke-core), 0.45));
+  box-shadow:
+    0 0 0 1px rgba(var(--stamp-smoke-glow), 0.45),
+    0 0 36px rgba(var(--stamp-smoke-core), 0.38);
 }
 
 .heroStampShine {
@@ -133,7 +186,7 @@
   background: linear-gradient(
     115deg,
     transparent 38%,
-    rgba(255, 255, 255, 0.42) 50%,
+    rgba(126, 200, 168, 0.22) 50%,
     transparent 62%
   );
   transform: translateX(-130%) rotate(8deg);
@@ -354,7 +407,8 @@
   .heroStampRingTertiary,
   .heroStampOrbit,
   .heroStampOrbitSecondary,
-  .heroStampAura,
+  .heroStampSmokeCore,
+  .heroStampSmokeFront,
   .heroStampShine::after {
     animation: none;
   }
@@ -404,7 +458,7 @@
 .heroSearch {
   position: relative;
   z-index: 2;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 0;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;

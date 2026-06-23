@@ -10,52 +10,53 @@
   pointer-events: none;
 }
 
-.siteSurface__photo {
+.siteSurface__img {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.siteSurface__imgMobile {
+  display: block;
+  opacity: 1;
+}
+
+.siteSurface__imgDesktop {
+  display: none;
   opacity: 0;
-  transform: scale(1);
-  animation-duration: 36s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  transition: opacity 2.8s ease-in-out;
+  filter: contrast(1.04) saturate(1.06);
 }
 
-.siteSurface__photo1 {
-  background-image: var(--landscape-church);
-  background-position: center 30%;
-  animation-name: landscape-show-1;
+.siteSurface__imgDesktopActive {
+  opacity: 1;
 }
 
-.siteSurface__photo2 {
-  background-image: var(--landscape-river);
-  animation-name: landscape-show-2;
+@media (min-width: 769px) {
+  .siteSurface__imgMobile {
+    display: none;
+  }
+
+  .siteSurface__imgDesktop {
+    display: block;
+  }
 }
 
-.siteSurface__photo3 {
-  background-image: var(--landscape-aerial);
-  background-position: center top;
-  animation-name: landscape-show-3;
+html.native-app .siteSurface__imgMobile,
+html.low-power .siteSurface__imgMobile {
+  display: block;
+  opacity: 1;
 }
 
-.siteSurface__photo4 {
-  background-image: var(--landscape-street);
-  background-position: center 40%;
-  animation-name: landscape-show-4;
-}
-
-.siteSurface__photo5 {
-  background-image: var(--landscape-mosque);
-  background-position: center 35%;
-  animation-name: landscape-show-5;
-}
-
-.siteSurface__photo6 {
-  background-image: var(--landscape-houses);
-  background-position: center top;
-  animation-name: landscape-show-6;
+html.native-app .siteSurface__imgDesktop,
+html.low-power .siteSurface__imgDesktop {
+  display: none !important;
+  opacity: 0;
 }
 
 .siteSurface__veil {
@@ -74,6 +75,36 @@
       transparent 50%,
       rgba(240, 180, 41, 0.1) 100%
     );
+}
+
+@media (min-width: 769px) {
+  .siteSurface__veil {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(8, 31, 24, 0.34) 0%,
+        rgba(8, 31, 24, 0.44) 45%,
+        rgba(8, 31, 24, 0.54) 100%
+      ),
+      linear-gradient(
+        135deg,
+        rgba(23, 98, 74, 0.12) 0%,
+        transparent 52%,
+        rgba(240, 180, 41, 0.06) 100%
+      );
+  }
+
+  .siteSurface__wash {
+    opacity: 0.55;
+  }
+
+  .siteSurface__grid {
+    opacity: 0.08;
+  }
+
+  .siteSurface__sparkles {
+    opacity: 0.12;
+  }
 }
 
 .siteSurface__wash {
@@ -197,126 +228,24 @@
   );
 }
 
-@keyframes landscape-show-1 {
-  0%,
-  14% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  17%,
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes landscape-show-2 {
-  0%,
-  14% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  17%,
-  31% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  33%,
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes landscape-show-3 {
-  0%,
-  31% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  33%,
-  47% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  50%,
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes landscape-show-4 {
-  0%,
-  47% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  50%,
-  64% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  67%,
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes landscape-show-5 {
-  0%,
-  64% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  67%,
-  81% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  83%,
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
-@keyframes landscape-show-6 {
-  0%,
-  81% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  83%,
-  97% {
-    opacity: 1;
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-}
-
 @keyframes blob-drift {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
   }
+
   50% {
     transform: translate(2%, 2%) scale(1.03);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .siteSurface__photo {
-    animation: none;
-    opacity: 0;
+  .siteSurface__imgDesktop {
+    transition: none;
   }
 
-  .siteSurface__photo1 {
-    opacity: 0.85;
+  .siteSurface__imgDesktop:not(.siteSurface__imgDesktopActive) {
+    display: none;
   }
 
   .siteSurface__blob,

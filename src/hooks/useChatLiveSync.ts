@@ -45,6 +45,16 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]): ChatMes
   return incoming;
 }
 
+function conversationDisplayName(item: ConversationSummary): string {
+  if (item.type === 'group' && item.group) return item.group.name;
+  return item.otherUser?.name ?? 'Чат';
+}
+
+function conversationAvatarUrl(item: ConversationSummary): string | undefined {
+  if (item.type === 'group' && item.group) return item.group.avatarUrl;
+  return item.otherUser?.avatarUrl;
+}
+
 function formatPreview(message: ChatMessage): string {
   if (message.body) return message.body;
   if (message.type === 'voice') return '🎤 Голосовое';
@@ -147,14 +157,16 @@ function useChatLiveSync({
             && shouldNotifyMessage(bumpedMessageId, bumpedSenderId, userId)
           ) {
             const preview = bumped.lastMessage?.body ?? 'Новое сообщение';
+            const displayName = conversationDisplayName(bumped);
+            const avatarUrl = conversationAvatarUrl(bumped);
             if (tabHidden) {
-              notifyIncomingMessage(bumped.otherUser.name, preview, bumpedMessageId);
+              notifyIncomingMessage(displayName, preview, bumpedMessageId);
             } else {
               fireNotice(
                 {
-                  senderName: bumped.otherUser.name,
+                  senderName: displayName,
                   preview,
-                  avatarUrl: bumped.otherUser.avatarUrl,
+                  avatarUrl,
                   conversationId: bumped.id,
                 },
                 soundsOn,
@@ -184,7 +196,11 @@ function useChatLiveSync({
           if (isNewFromOther && hadMessages && lastIncoming) {
             if (shouldNotifyMessage(lastIncoming.id, lastIncoming.senderId, userId)) {
               const preview = formatPreview(lastIncoming);
-              const senderName = notifyNameRef.current ?? detail.otherUser.name;
+              const isGroup = detail.type === 'group';
+              const senderName = isGroup
+                ? `${notifyNameRef.current ?? detail.group?.name ?? 'Группа'}: ${lastIncoming.senderName}`
+                : (notifyNameRef.current ?? detail.otherUser?.name ?? 'Чат');
+              const avatarUrl = isGroup ? detail.group?.avatarUrl : detail.otherUser?.avatarUrl;
               if (tabHidden) {
                 notifyIncomingMessage(senderName, preview, lastIncoming.id);
               } else {
@@ -192,7 +208,7 @@ function useChatLiveSync({
                   {
                     senderName,
                     preview,
-                    avatarUrl: detail.otherUser.avatarUrl,
+                    avatarUrl,
                     conversationId: activeConversationId,
                   },
                   soundsOn,

@@ -1,13 +1,20 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import classNames from 'classnames';
-import { EMOJI_CATEGORIES } from './emojiData';
+import { AnimatedEmoji } from '@/components/ui/AnimatedEmoji/AnimatedEmoji';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
+import {
+  REACTION_CATEGORIES,
+  REACTION_BY_ID,
+  reactionToken,
+  type ReactionIcon,
+} from '@/data/reactionIcons';
 import styles from './EmojiPicker.module.css';
 
-type EmojiCategoryId = (typeof EMOJI_CATEGORIES)[number]['id'];
+type ReactionCategoryId = (typeof REACTION_CATEGORIES)[number]['id'] | 'recent';
 
 interface EmojiPickerProps {
-  onPick: (emoji: string) => void;
+  onPick: (token: string) => void;
   disabled?: boolean;
 }
 
@@ -18,6 +25,25 @@ interface PanelPosition {
 
 const PANEL_WIDTH = 296;
 const PANEL_HEIGHT = 280;
+const RECENT_KEY = 'nagaevo-recent-reactions';
+const MAX_RECENT = 24;
+
+function loadRecentReactionIds(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is string => typeof item === 'string' && REACTION_BY_ID.has(item));
+  } catch {
+    return [];
+  }
+}
+
+function rememberRecentReaction(id: string) {
+  const next = [id, ...loadRecentReactionIds().filter((item) => item !== id)].slice(0, MAX_RECENT);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+}
 
 function computePanelPosition(trigger: DOMRect): PanelPosition {
   const margin = 8;
@@ -37,10 +63,39 @@ function computePanelPosition(trigger: DOMRect): PanelPosition {
   return { top, left };
 }
 
+function ReactionButton({
+  reaction,
+  index,
+  onPick,
+}: {
+  reaction: ReactionIcon;
+  index: number;
+  onPick: (reaction: ReactionIcon) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={styles.reactionBtn}
+      style={{ animationDelay: `${index * 12}ms` }}
+      aria-label={reaction.emoji}
+      onClick={() => onPick(reaction)}
+    >
+      <AnimatedEmoji
+        emoji={reaction.emoji}
+        animation={reaction.animation}
+        size="md"
+      />
+    </button>
+  );
+}
+
 function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
   const [open, setOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<EmojiCategoryId>(EMOJI_CATEGORIES[0].id);
-  const [burstEmoji, setBurstEmoji] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<ReactionCategoryId>(
+    REACTION_CATEGORIES[0]?.id ?? 'smile',
+  );
+  const [recentIds, setRecentIds] = useState<string[]>(() => loadRecentReactionIds());
+  const [burstReaction, setBurstReaction] = useState<ReactionIcon | null>(null);
   const [panelPosition, setPanelPosition] = useState<PanelPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
@@ -56,6 +111,11 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
       setPanelPosition(null);
       return undefined;
     }
+    const recent = loadRecentReactionIds();
+    setRecentIds(recent);
+    if (activeCategory === 'recent' && recent.length === 0) {
+      setActiveCategory(REACTION_CATEGORIES[0]?.id ?? 'smile');
+    }
     updatePanelPosition();
     window.addEventListener('resize', updatePanelPosition);
     window.addEventListener('scroll', updatePanelPosition, true);
@@ -63,7 +123,7 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
       window.removeEventListener('resize', updatePanelPosition);
       window.removeEventListener('scroll', updatePanelPosition, true);
     };
-  }, [open]);
+  }, [open, activeCategory]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -78,14 +138,21 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open, panelId]);
 
-  const handlePick = (emoji: string) => {
-    setBurstEmoji(emoji);
-    window.setTimeout(() => setBurstEmoji(null), 420);
-    onPick(emoji);
+  const handlePick = (reaction: ReactionIcon) => {
+    setBurstReaction(reaction);
+    window.setTimeout(() => setBurstReaction(null), 420);
+    rememberRecentReaction(reaction.id);
+    setRecentIds(loadRecentReactionIds());
+    onPick(reactionToken(reaction.id));
   };
 
-  const category = EMOJI_CATEGORIES.find((item) => item.id === activeCategory)
-    ?? EMOJI_CATEGORIES[0];
+  const category = activeCategory === 'recent'
+    ? null
+    : REACTION_CATEGORIES.find((item) => item.id === activeCategory) ?? REACTION_CATEGORIES[0];
+
+  const visibleReactions = activeCategory === 'recent'
+    ? recentIds.map((id) => REACTION_BY_ID.get(id)).filter((item): item is ReactionIcon => Boolean(item))
+    : category?.items ?? [];
 
   const panel = open && panelPosition
     ? createPortal(
@@ -94,10 +161,19 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
         className={styles.panel}
         style={{ top: panelPosition.top, left: panelPosition.left }}
         role="listbox"
-        aria-label="Выбор эмодзи"
+        aria-label="Выбор реакций"
       >
         <div className={styles.tabs} role="tablist">
-          {EMOJI_CATEGORIES.map((item) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeCategory === 'recent'}
+            className={classNames(styles.tab, activeCategory === 'recent' && styles.tabActive)}
+            onClick={() => setActiveCategory('recent')}
+          >
+            <ToolbarIcon name="clock" accent="#9ec8d8" />
+          </button>
+          {REACTION_CATEGORIES.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -106,22 +182,23 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
               className={classNames(styles.tab, activeCategory === item.id && styles.tabActive)}
               onClick={() => setActiveCategory(item.id)}
             >
-              {item.label}
+              <AnimatedEmoji emoji={item.tabEmoji} animation="none" size="sm" />
             </button>
           ))}
         </div>
         <div className={styles.grid}>
-          {category.emojis.map((emoji, index) => (
-            <button
-              key={emoji}
-              type="button"
-              className={styles.emoji}
-              style={{ animationDelay: `${index * 12}ms` }}
-              onClick={() => handlePick(emoji)}
-            >
-              {emoji}
-            </button>
-          ))}
+          {visibleReactions.length === 0 ? (
+            <p className={styles.emptyRecent}>Недавние реакции появятся здесь</p>
+          ) : (
+            visibleReactions.map((reaction, index) => (
+              <ReactionButton
+                key={`${activeCategory}-${reaction.id}`}
+                reaction={reaction}
+                index={index}
+                onPick={handlePick}
+              />
+            ))
+          )}
         </div>
       </div>,
       document.body,
@@ -134,11 +211,20 @@ function EmojiPicker({ onPick, disabled }: EmojiPickerProps) {
         type="button"
         className={classNames(styles.trigger, open && styles.triggerOpen)}
         disabled={disabled}
-        aria-label="Эмодзи"
+        aria-label="Реакции"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        {burstEmoji ?? '😊'}
+        {burstReaction ? (
+          <AnimatedEmoji
+            emoji={burstReaction.emoji}
+            animation={burstReaction.animation ?? 'bounce'}
+            size="sm"
+            className={styles.triggerBurst}
+          />
+        ) : (
+          <AnimatedEmoji emoji="😊" animation="bob" size="sm" />
+        )}
       </button>
       {panel}
     </div>

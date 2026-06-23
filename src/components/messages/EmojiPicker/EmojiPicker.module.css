@@ -12,9 +12,24 @@
   border-radius: var(--radius-full);
   background: transparent;
   cursor: pointer;
-  font-size: 1.15rem;
   transition: background var(--transition), transform var(--transition);
   flex-shrink: 0;
+}
+
+.triggerBurst {
+  animation: reaction-burst 0.42s var(--ease-out-expo) both;
+}
+
+@keyframes reaction-burst {
+  from {
+    opacity: 0.6;
+    transform: scale(0.75);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.12);
+  }
 }
 
 .trigger:hover:not(:disabled) {
@@ -80,10 +95,12 @@
   flex-shrink: 0;
   width: 2rem;
   height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.05);
-  font-size: 1rem;
   cursor: pointer;
   transition: transform var(--transition), background var(--transition);
 }
@@ -99,8 +116,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 0.15rem;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.2rem;
   max-height: min(11rem, calc(100dvh - 9rem));
   overflow-y: auto;
   scrollbar-width: none;
@@ -110,22 +127,22 @@
   display: none;
 }
 
-.emoji {
+.reactionBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   aspect-ratio: 1;
+  padding: 0;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
   cursor: pointer;
-  font-size: 1.2rem;
-  animation: emoji-in 0.28s var(--ease-out-expo) both;
+  animation: reaction-in 0.28s var(--ease-out-expo) both;
   transition: transform 0.15s var(--ease-out-expo), background var(--transition);
 }
 
-@keyframes emoji-in {
+@keyframes reaction-in {
   from {
     opacity: 0;
     transform: scale(0.4) translateY(4px);
@@ -136,18 +153,20 @@
   }
 }
 
-.emoji:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: scale(1.22);
+.reactionBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.08);
 }
 
-.emoji:active {
+.reactionBtn:active {
   transform: scale(0.92);
-  animation: emoji-bounce 0.35s ease;
 }
 
-@keyframes emoji-bounce {
-  0% { transform: scale(0.92); }
-  45% { transform: scale(1.28); }
-  100% { transform: scale(1); }
+.emptyRecent {
+  grid-column: 1 / -1;
+  margin: 0.75rem 0.35rem;
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
 }

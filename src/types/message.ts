@@ -2,6 +2,8 @@ type MessageType = 'text' | 'file' | 'voice' | 'listing';
 
 import type { UserRole } from '@/types/user';
 
+type ConversationType = 'dm' | 'group';
+
 interface MessageParticipant {
   id: string;
   name: string;
@@ -20,9 +22,31 @@ interface MessagePreview {
   isRead: boolean;
 }
 
+interface GroupPreview {
+  name: string;
+  avatarUrl?: string;
+  memberCount: number;
+}
+
+interface GroupMember {
+  userId: string;
+  role: 'owner' | 'admin' | 'member';
+  joinedAt: string;
+  user: MessageParticipant;
+}
+
+interface GroupDetail extends GroupPreview {
+  id: string;
+  createdById?: string;
+  myRole: string;
+  members: GroupMember[];
+}
+
 interface ConversationSummary {
   id: string;
-  otherUser: MessageParticipant;
+  type: ConversationType;
+  otherUser?: MessageParticipant;
+  group?: GroupPreview;
   lastMessage?: MessagePreview;
   unreadCount: number;
   updatedAt: string;
@@ -60,7 +84,9 @@ interface ChatMessage {
 
 interface ConversationDetail {
   id: string;
-  otherUser: MessageParticipant;
+  type: ConversationType;
+  otherUser?: MessageParticipant;
+  group?: GroupDetail;
   messages: ChatMessage[];
 }
 
@@ -75,8 +101,12 @@ interface SendMessagePayload {
 
 export type {
   MessageType,
+  ConversationType,
   MessageParticipant,
   MessagePreview,
+  GroupPreview,
+  GroupMember,
+  GroupDetail,
   ConversationSummary,
   ChatMessage,
   ConversationDetail,

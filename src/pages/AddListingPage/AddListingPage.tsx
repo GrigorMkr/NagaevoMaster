@@ -11,6 +11,8 @@ import { ListingTermsAgreement } from '@/components/listings/ListingTermsAgreeme
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { RichIcon } from '@/components/ui/RichIcon';
+import type { AppIconName } from '@/types/icon';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getBoardKindConfig } from '@/data/boardKinds';
 import { getCategoryCover } from '@/data/mock/listingImages';
@@ -115,7 +117,7 @@ function AddListingPage() {
   const boardConfig = getBoardKindConfig(listingKind);
   const categoryOptions = boardConfig
     ? boardConfig.categories.map((cat) => ({ slug: cat.slug, name: cat.name, icon: cat.icon }))
-    : SERVICE_CATEGORIES.map((cat) => ({ slug: cat.slug, name: cat.name, icon: cat.icon }));
+    : SERVICE_CATEGORIES.map((cat) => ({ slug: cat.slug, name: cat.name }));
   const unitOptions = boardConfig ? BOARD_PRICE_UNITS : UNITS;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAuthLoading = useAppSelector(selectAuthLoading);
@@ -271,13 +273,21 @@ function AddListingPage() {
                         subcategory: boardConfig ? cat.slug : '',
                       })}
                     >
-                      <span className={styles.categoryThumb}>
-                        {boardConfig ? (
-                          <span className={styles.categoryEmoji}>{cat.icon}</span>
-                        ) : (
+                      {'icon' in cat && boardConfig ? (
+                        <span className={styles.categoryThumb}>
+                          <RichIcon
+                            name={cat.icon as AppIconName}
+                            variant="glass"
+                            size="lg"
+                            accent={boardConfig.accent}
+                            className={styles.categoryBoardIcon}
+                          />
+                        </span>
+                      ) : !boardConfig ? (
+                        <span className={styles.categoryThumb}>
                           <ListingPhoto className={styles.categoryThumbImage} src={getCategoryCover(cat.slug)} alt="" loading="lazy" />
-                        )}
-                      </span>
+                        </span>
+                      ) : null}
                       <span className={styles.categoryName}>{cat.name}</span>
                     </button>
                   ))}

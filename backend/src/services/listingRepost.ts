@@ -17,6 +17,7 @@ async function findConversationForUsers(userIdA: string, userIdB: string) {
   if (userIdA === userIdB) {
     return prisma.conversation.findFirst({
       where: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -25,7 +26,7 @@ async function findConversationForUsers(userIdA: string, userIdB: string) {
   const { participantLowId, participantHighId } = orderedParticipants(userIdA, userIdB);
   return prisma.conversation.findUnique({
     where: {
-      participantLowId_participantHighId: { participantLowId, participantHighId },
+      participantLowId_participantHighId_type: { participantLowId, participantHighId, type: 'dm' },
     },
   });
 }
@@ -82,6 +83,7 @@ async function getOrCreateConversationForUsers(
   if (userIdA === userIdB) {
     const existingSelf = await tx.conversation.findFirst({
       where: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -91,6 +93,7 @@ async function getOrCreateConversationForUsers(
     }
     return tx.conversation.create({
       data: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -115,7 +118,7 @@ async function getOrCreateConversationForUsers(
 
   const { participantLowId, participantHighId } = orderedParticipants(userIdA, userIdB);
   return tx.conversation.create({
-    data: { participantLowId, participantHighId },
+    data: { type: 'dm', participantLowId, participantHighId },
   });
 }
 

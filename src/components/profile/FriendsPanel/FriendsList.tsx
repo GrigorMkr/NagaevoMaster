@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { useAppSelector } from '@/app/hooks';
 import { selectCanModerate } from '@/features/user/userSelectors';
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import {
   acceptFriendRequest,
   fetchFriendsOverview,
@@ -68,7 +69,7 @@ function FriendUserRow({
         aria-haspopup="menu"
         aria-label="Действия"
       >
-        ⋯
+        <ToolbarIcon name="menu" accent="currentColor" motion="none" />
       </button>
       {menu}
     </li>

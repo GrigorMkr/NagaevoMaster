@@ -1,9 +1,13 @@
 import { memo, useId, useState } from 'react';
 import classNames from 'classnames';
+import type { AppIconName } from '@/types/icon';
+import { RichIcon } from '@/components/ui/RichIcon';
 import styles from './ProfileExpandableSection.module.css';
 
 interface ProfileExpandableSectionProps {
   title: string;
+  icon?: AppIconName;
+  iconAccent?: string;
   count?: number;
   loading?: boolean;
   defaultOpen?: boolean;
@@ -14,6 +18,8 @@ interface ProfileExpandableSectionProps {
 
 const ProfileExpandableSection = memo(function ProfileExpandableSection({
   title,
+  icon,
+  iconAccent = '#7ec8a8',
   count,
   loading = false,
   defaultOpen = false,
@@ -44,11 +50,30 @@ const ProfileExpandableSection = memo(function ProfileExpandableSection({
         aria-controls={`${panelId}-body`}
         onClick={handleToggle}
       >
-        <h2 id={panelId} className={styles.title}>{title}</h2>
+        <span className={styles.titleWrap}>
+          {icon && (
+            <RichIcon
+              name={icon}
+              variant="glass"
+              size="sm"
+              accent={iconAccent}
+              motion="float"
+              className={styles.titleIcon}
+            />
+          )}
+          <h2 id={panelId} className={styles.title}>{title}</h2>
+        </span>
         <span className={classNames(styles.count, (count ?? 0) === 0 && !loading && styles.countMuted)}>
           {countLabel}
         </span>
-        <span className={styles.chevron} aria-hidden>▸</span>
+        <RichIcon
+          name="chevronRight"
+          variant="inline"
+          size="sm"
+          accent="#7ec8a8"
+          motion="pulse"
+          className={styles.chevron}
+        />
       </button>
 
       {open && (

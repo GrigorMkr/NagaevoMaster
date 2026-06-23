@@ -15,6 +15,7 @@ import { fetchListingsThunk } from '@/features/listings/listingsThunks';
 import { selectListingsItems, selectListingsLoading } from '@/features/listings/listingsSelectors';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { RichIcon } from '@/components/ui/RichIcon';
 import { SERVICE_CATEGORIES } from '@/data/categories';
 import { getCategoryCover } from '@/data/mock/listingImages';
 import { SortBy, SERVICE_SORT_OPTIONS } from '@/enums/sort';
@@ -67,7 +68,16 @@ function ServicesPage() {
 
           <Reveal delay={100}>
             <div className={`${styles.categoryGrid} motion-stagger`}>
-              {SERVICE_CATEGORIES.map((cat) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name} cover={getCategoryCover(cat.slug)}/>))}
+              {SERVICE_CATEGORIES.map((cat) => (
+                <CategoryCard
+                  key={cat.slug}
+                  to={servicesCategoryPath(cat.slug)}
+                  icon={cat.icon}
+                  name={cat.name}
+                  categorySlug={cat.slug}
+                  cover={getCategoryCover(cat.slug)}
+                />
+              ))}
             </div>
           </Reveal>
 
@@ -91,7 +101,7 @@ function ServicesPage() {
 
           {!isLoading && items.length === 0 && (<Reveal delay={120}>
               <div className={pageStyles.empty}>
-              <span className={pageStyles.emptyIcon}>🔍</span>
+              <RichIcon name="search" variant="gem" size="xl" className={pageStyles.emptyIcon} />
               <p className={pageStyles.emptyTitle}>Каталог скоро наполнится</p>
               <p className={pageStyles.emptyHint}>
                 <Link to={ROUTES.ADD_LISTING}>Добавьте объявление</Link> или подключите backend API

@@ -24,6 +24,7 @@ import { resolveUploadUrl } from '@/utils/mediaUrl'
 
 import { fetchUnreadMessageCount } from '@/services/messagesApi'
 import { useAuthLogout } from '@/hooks/useAuthLogout'
+import { useMobileLayout } from '@/hooks/useMobileLayout'
 import { isNativeApp } from '@/utils/nativeApp'
 
 import styles from './Header.module.css'
@@ -41,6 +42,7 @@ const Header = memo(function Header() {
   const currentUser = useAppSelector(selectCurrentUser)
 
   const nativeApp = isNativeApp()
+  const mobileLayout = useMobileLayout()
 
   const hasNotifications = useAppSelector((state) => state.ui.hasForumNotifications)
 
@@ -106,7 +108,7 @@ const Header = memo(function Header() {
 
         <Link to={ROUTES.HOME} className={styles.logoLink} onClick={closeMenu}>
 
-          <Logo />
+          <Logo variant={nativeApp || mobileLayout ? 'stamp' : 'default'} />
 
         </Link>
 

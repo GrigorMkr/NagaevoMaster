@@ -47,10 +47,9 @@
 }
 
 .emptyIcon {
-  display: block;
-  font-size: 3.5rem;
-  margin-bottom: var(--spacing-lg);
-  opacity: 0.55;
+  display: inline-flex;
+  margin: 0 auto var(--spacing-lg);
+  opacity: 0.9;
 }
 
 .emptyTitle {

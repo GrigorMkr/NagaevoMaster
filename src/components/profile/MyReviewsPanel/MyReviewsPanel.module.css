@@ -33,9 +33,10 @@
 }
 
 .stars {
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  flex-shrink: 0;
 }
 
 .text {

@@ -29,6 +29,9 @@
 }
 
 .thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 72px;
   height: 54px;
   border-radius: var(--radius-md);
@@ -36,20 +39,14 @@
   background: rgba(8, 31, 24, 0.5);
 }
 
+.thumbIcon {
+  flex-shrink: 0;
+}
+
 .thumbImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.thumbPlaceholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  font-size: 1.25rem;
-  opacity: 0.35;
 }
 
 .body {

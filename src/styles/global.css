@@ -5,7 +5,7 @@
 @import './motion.css';
 @import './site-background.css';
 @import './surfaces.css';
-@import './borderless.css';
+@import './performance-mobile.css';
 
 *,
 *::before,

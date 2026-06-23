@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { SCROLL_ROTATION_FACTOR } from '@/constants';
+import { usePerformanceProfile } from '@/hooks/usePerformanceProfile';
+import { prefersReducedMotion } from '@/utils/performanceProfile';
 
 const ROTATION_SMOOTHING = 0.14;
 const PARALLAX_SMOOTHING = 0.12;
@@ -13,13 +15,7 @@ interface ScrollTilt {
 }
 
 function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(() => {
-    if (typeof window.matchMedia !== 'function') {
-      return false;
-    }
-
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
+  const [reduced, setReduced] = useState(() => prefersReducedMotion());
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') {
@@ -42,6 +38,7 @@ function useScrollRotation(
   tilt: ScrollTilt,
 ) {
   const reducedMotion = usePrefersReducedMotion();
+  const { lowPower } = usePerformanceProfile();
   const targetRotation = useRef(0);
   const smoothRotation = useRef(0);
   const smoothParallax = useRef(0);
@@ -53,7 +50,11 @@ function useScrollRotation(
   }, [tilt]);
 
   useEffect(() => {
-    if (reducedMotion) {
+    if (reducedMotion || lowPower) {
+      const element = innerRef.current;
+      if (element) {
+        element.style.transform = '';
+      }
       return undefined;
     }
 
@@ -97,9 +98,9 @@ function useScrollRotation(
       window.cancelAnimationFrame(frameId);
       window.removeEventListener('scroll', onScroll);
     };
-  }, [innerRef, reducedMotion]);
+  }, [innerRef, lowPower, reducedMotion]);
 
-  return { reducedMotion };
+  return { reducedMotion, lowPower };
 }
 
 export {

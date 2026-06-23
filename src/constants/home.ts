@@ -24,7 +24,8 @@ const HOME_FEATURES = [
         text: 'Обсуждения, советы и взаимопомощь — живое сообщество Нагаево.',
     },
 ] as const;
-const HERO_SUBTITLE = 'Специалисты, техника и услуги рядом с домом — форум для жителей и дачников';
+const HERO_SUBTITLE =
+  'Портал посёлка: мастера, общение, покупка и продажа — всё бесплатно, без VPN и подписок';
 const FORUM_TOPICS_PREVIEW_COUNT = 5;
 const NEWS_PREVIEW_COUNT = 3;
 

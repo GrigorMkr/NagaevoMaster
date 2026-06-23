@@ -13,6 +13,7 @@ import { selectListingsItems, selectListingsLoading } from '@/features/listings/
 import { getBoardKindConfig } from '@/data/boardKinds';
 import type { BoardCategory } from '@/data/boardKinds';
 import type { ListingKind } from '@/types/listing';
+import { RichIcon } from '@/components/ui/RichIcon';
 import { SortBy, SERVICE_SORT_OPTIONS } from '@/enums/sort';
 import { addListingPath, boardPath, ROUTES } from '@/constants';
 import tileGrid from '@/styles/tileGrid.module.css';
@@ -76,9 +77,19 @@ function BoardKindPage() {
               style={{
                 '--board-accent': config.accent,
                 '--board-glow': config.glow,
+                '--board-cover': `url(${config.coverImage})`,
+                '--board-cover-pos': config.coverPosition,
               } as CSSProperties}
             >
-              <span className={styles.heroIcon} aria-hidden>{config.icon}</span>
+              <div className={styles.heroCover} aria-hidden />
+              <div className={styles.heroScrim} aria-hidden />
+              <RichIcon
+                name={config.icon}
+                variant="gem"
+                size="lg"
+                accent={config.accent}
+                className={styles.heroIcon}
+              />
               <div>
                 <p className={styles.heroBadge}>{config.subtitle}</p>
                 <h1 className={styles.heroTitle}>{config.title}</h1>
@@ -110,7 +121,8 @@ function BoardKindPage() {
                   className={category === cat.slug ? styles.chipActive : styles.chip}
                   onClick={() => setCategory(cat.slug)}
                 >
-                  {cat.icon} {cat.name}
+                  <RichIcon name={cat.icon} variant="glass" size="sm" accent={config.accent} />
+                  {cat.name}
                 </button>
               ))}
             </div>

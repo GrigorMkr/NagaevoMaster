@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { MAX_RATING } from '@/constants';
 import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
+import { RichIcon } from '@/components/ui/RichIcon';
 import { fetchMyReviews } from '@/services/usersApi';
 import type { UserReviewItem } from '@/services/usersApi';
 import { serviceDetailPath } from '@/constants';
@@ -21,7 +22,7 @@ function MyReviewsPanel() {
   }, []);
 
   return (
-    <ProfileExpandableSection title="Мои отзывы" count={items.length} loading={loading}>
+    <ProfileExpandableSection title="Мои отзывы" icon="star" iconAccent="#e8b84a" count={items.length} loading={loading}>
       {items.length === 0 ? (
         <p className={styles.empty}>Вы ещё не оставляли отзывов</p>
       ) : (
@@ -33,7 +34,16 @@ function MyReviewsPanel() {
                   {review.listingTitle}
                 </Link>
                 <span className={styles.stars} aria-label={`Оценка ${review.rating} из ${MAX_RATING}`}>
-                  {'★'.repeat(review.rating)}
+                  {Array.from({ length: review.rating }, (_, index) => (
+                    <RichIcon
+                      key={index}
+                      name="star"
+                      variant="inline"
+                      size="sm"
+                      accent="#e8b84a"
+                      motion="none"
+                    />
+                  ))}
                 </span>
               </div>
               <p className={styles.text}>{review.text}</p>

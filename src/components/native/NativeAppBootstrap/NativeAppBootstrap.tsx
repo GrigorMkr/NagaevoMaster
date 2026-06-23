@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { isNativeAndroid, isNativeApp } from '@/utils/nativeApp';
+import { onBootSplashDismissed } from '@/utils/bootSplash';
 import { useNativeOAuthCompletion } from '@/hooks/useNativeOAuthCompletion';
 
 function NativeAppBootstrap() {
@@ -10,6 +11,24 @@ function NativeAppBootstrap() {
 
   useEffect(() => {
     if (!isNativeApp()) return undefined;
+
+    const hideNativeSplash = async () => {
+      try {
+        if (Capacitor.isPluginAvailable('SplashScreen')) {
+          await SplashScreen.hide();
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    onBootSplashDismissed(() => {
+      void hideNativeSplash();
+    });
+
+    const fallbackTimer = window.setTimeout(() => {
+      void hideNativeSplash();
+    }, 4000);
 
     const init = async () => {
       try {
@@ -23,18 +42,13 @@ function NativeAppBootstrap() {
       } catch {
         // ignore on web preview
       }
-
-      try {
-        if (Capacitor.isPluginAvailable('SplashScreen')) {
-          await SplashScreen.hide();
-        }
-      } catch {
-        // ignore
-      }
-
     };
 
     void init();
+
+    return () => {
+      window.clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return null;

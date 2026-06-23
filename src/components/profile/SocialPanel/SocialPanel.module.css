@@ -6,6 +6,9 @@
 
 .tab,
 .tabActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.4rem 0.85rem;
   font-size: var(--font-size-sm);
   font-weight: 600;

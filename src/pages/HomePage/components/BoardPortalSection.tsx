@@ -11,7 +11,6 @@ const BoardPortalSection = memo(function BoardPortalSection() {
       <SectionHead
         badge="Соседи"
         title="Доска объявлений"
-        description="Продажа, работа и потеряшки — всё в одном месте."
       />
       <BoardPortalGrid compact />
       <p className={styles.boardMore}>

@@ -1,0 +1,3 @@
+export {
+  ToolbarIcon,
+} from './ToolbarIcon';

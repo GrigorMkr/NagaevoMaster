@@ -7,6 +7,7 @@ import { serviceDetailPath } from '@/utils/constants';
 import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { AvatarLightbox } from './AvatarLightbox';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import styles from './FriendProfileSheet.module.css';
 
 interface FriendProfileSheetProps {
@@ -120,7 +121,9 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Показать на карте →
+                    <ToolbarIcon name="mapPin" accent="var(--color-mint)" motion="pulse" />
+                    Показать на карте
+                    <ToolbarIcon name="chevronRight" accent="var(--color-mint)" motion="none" />
                   </a>
                 </section>
               )}

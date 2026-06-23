@@ -39,20 +39,60 @@
   text-align: left;
 }
 
-.categoryIcon {
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  font-size: 2rem;
-  line-height: 1;
-  transition: transform 0.35s var(--ease-out-expo);
+.categoryIcon,
+.categoryIconOverlay {
+  flex-shrink: 0;
 }
 
 .categoryThumb {
-  display: block;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--color-bg-warm);
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
+}
+
+.categoryThumbIconOnly {
+  background: rgba(8, 31, 24, 0.35);
+}
+
+.categoryThumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    145deg,
+    rgba(6, 22, 17, 0.15) 0%,
+    rgba(6, 22, 17, 0.55) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.categoryThumb:has(.categoryThumbImage)::after {
+  opacity: 0.42;
+}
+
+.categoryCard:hover .categoryThumb:has(.categoryThumbImage)::after {
+  opacity: 0.72;
+}
+
+.categoryIconOverlay {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.categoryCard:hover .categoryIconOverlay {
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 .categoryCardTile .categoryThumb {
@@ -84,11 +124,12 @@
 }
 
 .categoryCard:hover .categoryIcon {
-  animation: icon-bounce 0.55s var(--ease-out-expo);
+  transform: scale(1.06);
 }
 
-.categoryCardRow .categoryIcon {
-  font-size: 1.5rem;
+.categoryCardRow .categoryIcon,
+.categoryCardRow .categoryIconOverlay {
+  --icon-size: 1.2rem;
 }
 
 .categoryName {

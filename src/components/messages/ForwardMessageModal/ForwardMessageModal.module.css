@@ -71,3 +71,8 @@
   text-align: center;
   color: var(--color-text-muted);
 }
+
+.groupHint {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}

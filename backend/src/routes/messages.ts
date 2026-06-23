@@ -6,22 +6,30 @@ import { HttpError } from '../middleware/errorHandler.js';
 import { routeParam } from '../utils/params.js';
 import { assertCleanContent } from '../services/moderation/contentFilter.js';
 import { assertUsersNotBlocked } from '../routes/blocks.js';
-import { env } from '../config/env.js';
 import { sendMessagePush } from '../services/push/webPush.js';
 import { recordListingRepost } from '../services/listingRepost.js';
+import {
+  assertActiveMember,
+  canAccessConversation,
+  countGroupUnread,
+  getActiveMember,
+  getGroupMembers,
+  isGroupConversation,
+  mapGroupInfo,
+  notifyGroupMembers,
+  participantSelect,
+  toParticipant,
+} from '../services/groupConversation.js';
+import {
+  MESSAGE_TYPES,
+  type MessageType,
+  assertOwnedUpload,
+  formatMessagePreview,
+  toMessageResponse,
+  isStaffRole,
+} from './messagesShared.js';
 
 const messagesRouter = Router();
-
-const MESSAGE_TYPES = ['text', 'file', 'voice', 'listing'] as const;
-type MessageType = (typeof MESSAGE_TYPES)[number];
-
-const participantSelect = {
-  id: true,
-  name: true,
-  email: true,
-  avatarUrl: true,
-  role: true,
-} as const;
 
 const listingMessageSelect = {
   id: true,
@@ -55,145 +63,15 @@ function otherParticipantId(
     : conversation.participantLowId;
 }
 
-function isStaffRole(role: string) {
-  return role === 'admin' || role === 'moderator';
-}
-
-function toParticipant(user: {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  role: string;
-}) {
-  return {
-    id: user.id,
-    name: user.name,
-    login: user.email.split('@')[0] ?? user.email,
-    avatarUrl: user.avatarUrl ?? undefined,
-    role: user.role,
-    isStaff: isStaffRole(user.role),
-  };
-}
-
-function isSelfConversation(conversation: { participantLowId: string; participantHighId: string }) {
-  return conversation.participantLowId === conversation.participantHighId;
-}
-
-function formatMessagePreview(message: {
-  type: string;
-  body: string;
-  attachmentName: string | null;
-  attachmentMime: string | null;
-  deletedAt?: Date | null;
-}) {
-  if (message.deletedAt) {
-    return 'Сообщение удалено';
-  }
-  if (message.type === 'listing') {
-    return 'Объявление';
-  }
-  if (message.type === 'voice') {
-    return 'Голосовое сообщение';
-  }
-  if (message.type === 'file') {
-    if (message.attachmentMime?.startsWith('image/')) {
-      return 'Фото';
-    }
-    return message.attachmentName || 'Файл';
-  }
-  return message.body;
-}
-
-function assertOwnedUpload(url: string) {
-  const prefix = env.PUBLIC_UPLOAD_URL.endsWith('/')
-    ? env.PUBLIC_UPLOAD_URL
-    : `${env.PUBLIC_UPLOAD_URL}/`;
-  if (!url.startsWith(prefix)) {
-    throw new HttpError(400, 'Некорректная ссылка на вложение');
-  }
-}
-
-function toMessageResponse(
-  message: {
-    id: string;
-    type: string;
-    body: string;
-    attachmentUrl: string | null;
-    attachmentName: string | null;
-    attachmentMime: string | null;
-    senderId: string;
-    sender: { name: string; role: string };
-    createdAt: Date;
-    readAt: Date | null;
-    editedAt?: Date | null;
-    deletedAt?: Date | null;
-    isForwarded?: boolean;
-    listingId?: string | null;
-    listing?: {
-      id: string;
-      title: string;
-      kind: string;
-      priceFrom: number;
-      unit: string;
-      images: string;
-      status: string;
-    } | null;
-  },
-  currentUserId: string,
-) {
-  const isDeleted = message.deletedAt != null;
-  let listingPreview: {
-    id: string;
-    title: string;
-    kind: string;
-    priceFrom: number;
-    unit: string;
-    image?: string;
-  } | undefined;
-  if (!isDeleted && message.type === 'listing' && message.listing && message.listing.status === 'published') {
-    let images: string[] = [];
-    try {
-      const parsed = JSON.parse(message.listing.images) as unknown;
-      images = Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
-    } catch {
-      images = [];
-    }
-    listingPreview = {
-      id: message.listing.id,
-      title: message.listing.title,
-      kind: message.listing.kind,
-      priceFrom: message.listing.priceFrom,
-      unit: message.listing.unit,
-      image: images[0],
-    };
-  }
-  return {
-    id: message.id,
-    type: message.type as MessageType,
-    body: isDeleted ? '' : message.body,
-    attachmentUrl: isDeleted ? undefined : (message.attachmentUrl ?? undefined),
-    attachmentName: isDeleted ? undefined : (message.attachmentName ?? undefined),
-    attachmentMime: isDeleted ? undefined : (message.attachmentMime ?? undefined),
-    listingId: isDeleted ? undefined : (message.listingId ?? undefined),
-    listingPreview,
-    senderId: message.senderId,
-    senderName: message.sender.name,
-    senderRole: message.sender.role,
-    senderIsStaff: isStaffRole(message.sender.role),
-    createdAt: message.createdAt.toISOString(),
-    readAt: message.readAt?.toISOString(),
-    editedAt: message.editedAt?.toISOString(),
-    isDeleted,
-    isForwarded: Boolean(message.isForwarded),
-    isMine: message.senderId === currentUserId,
-  };
+function isSelfConversation(conversation: { participantLowId: string; participantHighId: string; type?: string }) {
+  return conversation.type !== 'group' && conversation.participantLowId === conversation.participantHighId;
 }
 
 async function findConversationForUsers(userIdA: string, userIdB: string) {
   if (userIdA === userIdB) {
     return prisma.conversation.findFirst({
       where: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -202,47 +80,9 @@ async function findConversationForUsers(userIdA: string, userIdB: string) {
   const { participantLowId, participantHighId } = orderedParticipants(userIdA, userIdB);
   return prisma.conversation.findUnique({
     where: {
-      participantLowId_participantHighId: { participantLowId, participantHighId },
+      participantLowId_participantHighId_type: { participantLowId, participantHighId, type: 'dm' },
     },
   });
-}
-
-async function findAcceptedFriendship(userIdA: string, userIdB: string) {
-  return prisma.friendship.findFirst({
-    where: {
-      status: 'accepted',
-      OR: [
-        { requesterId: userIdA, addresseeId: userIdB },
-        { requesterId: userIdB, addresseeId: userIdA },
-      ],
-    },
-  });
-}
-
-async function assertCanStartConversation(
-  senderId: string,
-  targetId: string,
-  senderRole: string,
-) {
-  if (isStaffRole(senderRole)) {
-    return;
-  }
-  const friendship = await findAcceptedFriendship(senderId, targetId);
-  if (friendship) {
-    return;
-  }
-  const existing = await findConversationForUsers(senderId, targetId);
-  if (existing) {
-    return;
-  }
-  const publishedListing = await prisma.listing.findFirst({
-    where: { userId: targetId, status: 'published' },
-    select: { id: true },
-  });
-  if (publishedListing) {
-    return;
-  }
-  throw new HttpError(403, 'Добавьте пользователя в друзья, чтобы начать переписку');
 }
 
 async function getOrCreateConversation(
@@ -253,6 +93,7 @@ async function getOrCreateConversation(
   if (userIdA === userIdB) {
     const existingSelf = await prisma.conversation.findFirst({
       where: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -262,6 +103,7 @@ async function getOrCreateConversation(
     }
     return prisma.conversation.create({
       data: {
+        type: 'dm',
         participantLowId: userIdA,
         participantHighId: userIdA,
       },
@@ -281,17 +123,18 @@ async function getOrCreateConversation(
     return existing;
   }
 
-  await assertCanStartConversation(userIdA, userIdB, senderRole);
-
   const { participantLowId, participantHighId } = orderedParticipants(userIdA, userIdB);
   return prisma.conversation.create({
-    data: { participantLowId, participantHighId },
+    data: { type: 'dm', participantLowId, participantHighId },
   });
 }
 
 async function mapConversationSummary(
   conversation: {
     id: string;
+    type: string;
+    name: string | null;
+    avatarUrl: string | null;
     participantLowId: string;
     participantHighId: string;
     updatedAt: Date;
@@ -311,6 +154,37 @@ async function mapConversationSummary(
   },
   currentUserId: string,
 ) {
+  const lastMessage = conversation.messages[0];
+  const lastMessagePreview = lastMessage
+    ? {
+        id: lastMessage.id,
+        type: lastMessage.type as MessageType,
+        body: formatMessagePreview(lastMessage),
+        senderId: lastMessage.senderId,
+        createdAt: lastMessage.createdAt.toISOString(),
+        isRead: lastMessage.readAt != null,
+      }
+    : undefined;
+
+  if (isGroupConversation(conversation)) {
+    const member = await getActiveMember(conversation.id, currentUserId);
+    if (!member) return null;
+    const members = await getGroupMembers(conversation.id);
+    const unreadCount = await countGroupUnread(conversation.id, currentUserId);
+    return {
+      id: conversation.id,
+      type: 'group' as const,
+      group: {
+        name: conversation.name ?? 'Сообщество',
+        avatarUrl: conversation.avatarUrl ?? undefined,
+        memberCount: members.length,
+      },
+      lastMessage: lastMessagePreview,
+      unreadCount,
+      updatedAt: conversation.updatedAt.toISOString(),
+    };
+  }
+
   const otherId = otherParticipantId(conversation, currentUserId);
   const isSelf = isSelfConversation(conversation);
   const otherUser = isSelf
@@ -324,7 +198,6 @@ async function mapConversationSummary(
           ? conversation.participantLow
           : conversation.participantHigh,
       );
-  const lastMessage = conversation.messages[0];
   const unreadCount = await prisma.message.count({
     where: {
       conversationId: conversation.id,
@@ -335,17 +208,9 @@ async function mapConversationSummary(
 
   return {
     id: conversation.id,
+    type: 'dm' as const,
     otherUser,
-    lastMessage: lastMessage
-      ? {
-          id: lastMessage.id,
-          type: lastMessage.type as MessageType,
-          body: formatMessagePreview(lastMessage),
-          senderId: lastMessage.senderId,
-          createdAt: lastMessage.createdAt.toISOString(),
-          isRead: lastMessage.readAt != null,
-        }
-      : undefined,
+    lastMessage: lastMessagePreview,
     unreadCount,
     updatedAt: conversation.updatedAt.toISOString(),
   };
@@ -354,24 +219,43 @@ async function mapConversationSummary(
 messagesRouter.get('/conversations', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const conversations = await prisma.conversation.findMany({
-      where: {
-        OR: [{ participantLowId: userId }, { participantHighId: userId }],
-      },
-      include: {
-        participantLow: { select: participantSelect },
-        participantHigh: { select: participantSelect },
-        messages: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
+    const [dmConversations, groupMemberships] = await Promise.all([
+      prisma.conversation.findMany({
+        where: {
+          type: 'dm',
+          OR: [{ participantLowId: userId }, { participantHighId: userId }],
         },
-      },
-      orderBy: { updatedAt: 'desc' },
-    });
+        include: {
+          participantLow: { select: participantSelect },
+          participantHigh: { select: participantSelect },
+          messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+        },
+      }),
+      prisma.conversationMember.findMany({
+        where: { userId, leftAt: null, conversation: { type: 'group' } },
+        include: {
+          conversation: {
+            include: {
+              participantLow: { select: participantSelect },
+              participantHigh: { select: participantSelect },
+              messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+            },
+          },
+        },
+      }),
+    ]);
 
-    const items = await Promise.all(
-      conversations.map((conversation) => mapConversationSummary(conversation, userId)),
-    );
+    const allConversations = [
+      ...dmConversations,
+      ...groupMemberships.map((m) => m.conversation),
+    ].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+
+    const items = (
+      await Promise.all(
+        allConversations.map((conversation) => mapConversationSummary(conversation, userId)),
+      )
+    ).filter((item): item is NonNullable<typeof item> => item != null);
+
     res.json(items);
   } catch (error) {
     next(error);
@@ -381,16 +265,25 @@ messagesRouter.get('/conversations', requireAuth, async (req: AuthRequest, res, 
 messagesRouter.get('/unread-count', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const userId = req.user!.id;
-    const count = await prisma.message.count({
+    const dmCount = await prisma.message.count({
       where: {
         readAt: null,
         senderId: { not: userId },
         conversation: {
+          type: 'dm',
           OR: [{ participantLowId: userId }, { participantHighId: userId }],
         },
       },
     });
-    res.json({ count });
+    const memberships = await prisma.conversationMember.findMany({
+      where: { userId, leftAt: null },
+      select: { conversationId: true, lastReadAt: true },
+    });
+    const groupCounts = await Promise.all(
+      memberships.map((m) => countGroupUnread(m.conversationId, userId)),
+    );
+    const groupCount = groupCounts.reduce((sum, n) => sum + n, 0);
+    res.json({ count: dmCount + groupCount });
   } catch (error) {
     next(error);
   }
@@ -439,23 +332,9 @@ messagesRouter.get('/conversations/:id', requireAuth, async (req: AuthRequest, r
         participantHigh: { select: participantSelect },
       },
     });
-    if (!conversation || !isParticipant(conversation, userId)) {
+    if (!conversation || !(await canAccessConversation(conversation, userId))) {
       throw new HttpError(404, 'Переписка не найдена');
     }
-
-    const isSelf = isSelfConversation(conversation);
-    const otherId = otherParticipantId(conversation, userId);
-    const otherUser = isSelf
-      ? {
-          ...toParticipant(conversation.participantLow),
-          name: 'Себе',
-          login: 'self',
-        }
-      : toParticipant(
-          conversation.participantLowId === otherId
-            ? conversation.participantLow
-            : conversation.participantHigh,
-        );
 
     const messages = await prisma.message.findMany({
       where: { conversationId },
@@ -476,8 +355,33 @@ messagesRouter.get('/conversations/:id', requireAuth, async (req: AuthRequest, r
       },
     });
 
+    if (isGroupConversation(conversation)) {
+      res.json({
+        id: conversation.id,
+        type: 'group',
+        group: await mapGroupInfo(conversation, userId),
+        messages: messages.map((message) => toMessageResponse(message, userId)),
+      });
+      return;
+    }
+
+    const isSelf = isSelfConversation(conversation);
+    const otherId = otherParticipantId(conversation, userId);
+    const otherUser = isSelf
+      ? {
+          ...toParticipant(conversation.participantLow),
+          name: 'Себе',
+          login: 'self',
+        }
+      : toParticipant(
+          conversation.participantLowId === otherId
+            ? conversation.participantLow
+            : conversation.participantHigh,
+        );
+
     res.json({
       id: conversation.id,
+      type: 'dm',
       otherUser,
       messages: messages.map((message) => toMessageResponse(message, userId)),
     });
@@ -533,7 +437,7 @@ messagesRouter.post('/conversations/:id/messages', requireAuth, async (req: Auth
     }
 
     const conversation = await prisma.conversation.findUnique({ where: { id: conversationId } });
-    if (!conversation || !isParticipant(conversation, userId)) {
+    if (!conversation || !(await canAccessConversation(conversation, userId))) {
       throw new HttpError(404, 'Переписка не найдена');
     }
 
@@ -571,15 +475,26 @@ messagesRouter.post('/conversations/:id/messages', requireAuth, async (req: Auth
       return created;
     });
 
-    const recipientId = otherParticipantId(conversation, userId);
-    if (!isSelfConversation(conversation)) {
-      void sendMessagePush({
-        recipientUserId: recipientId,
-        senderName: message.sender.name,
-        preview: formatMessagePreview(message),
+    if (isGroupConversation(conversation)) {
+      void notifyGroupMembers({
         conversationId,
+        senderId: userId,
+        senderName: message.sender.name,
+        groupName: conversation.name ?? 'Сообщество',
+        preview: formatMessagePreview(message),
         messageId: message.id,
-      }).catch(() => undefined);
+      });
+    } else {
+      const recipientId = otherParticipantId(conversation, userId);
+      if (!isSelfConversation(conversation)) {
+        void sendMessagePush({
+          recipientUserId: recipientId,
+          senderName: message.sender.name,
+          preview: formatMessagePreview(message),
+          conversationId,
+          messageId: message.id,
+        }).catch(() => undefined);
+      }
     }
 
     res.status(201).json(toMessageResponse(message, userId));
@@ -593,8 +508,17 @@ messagesRouter.patch('/conversations/:id/read', requireAuth, async (req: AuthReq
     const conversationId = routeParam(req.params.id);
     const userId = req.user!.id;
     const conversation = await prisma.conversation.findUnique({ where: { id: conversationId } });
-    if (!conversation || !isParticipant(conversation, userId)) {
+    if (!conversation || !(await canAccessConversation(conversation, userId))) {
       throw new HttpError(404, 'Переписка не найдена');
+    }
+
+    if (isGroupConversation(conversation)) {
+      await prisma.conversationMember.update({
+        where: { conversationId_userId: { conversationId, userId } },
+        data: { lastReadAt: new Date() },
+      });
+      res.json({ marked: 0 });
+      return;
     }
 
     const result = await prisma.message.updateMany({
@@ -620,7 +544,7 @@ async function getMessageForParticipant(messageId: string, userId: string) {
       sender: { select: participantSelect },
     },
   });
-  if (!message || !isParticipant(message.conversation, userId)) {
+  if (!message || !(await canAccessConversation(message.conversation, userId))) {
     throw new HttpError(404, 'Сообщение не найдено');
   }
   return message;
@@ -708,12 +632,14 @@ messagesRouter.post('/items/:messageId/forward', requireAuth, async (req: AuthRe
     }
 
     const targetConversation = await prisma.conversation.findUnique({ where: { id: conversationId } });
-    if (!targetConversation || !isParticipant(targetConversation, userId)) {
+    if (!targetConversation || !(await canAccessConversation(targetConversation, userId))) {
       throw new HttpError(404, 'Переписка не найдена');
     }
 
-    const recipientId = otherParticipantId(targetConversation, userId);
-    await assertUsersNotBlocked(userId, recipientId);
+    if (!isGroupConversation(targetConversation)) {
+      const recipientId = otherParticipantId(targetConversation, userId);
+      await assertUsersNotBlocked(userId, recipientId);
+    }
 
     if (source.type === 'listing') {
       if (!source.listingId) {
@@ -746,7 +672,8 @@ messagesRouter.post('/items/:messageId/forward', requireAuth, async (req: AuthRe
         },
       });
 
-      if (source.type === 'listing' && source.listingId) {
+      if (source.type === 'listing' && source.listingId && !isGroupConversation(targetConversation)) {
+        const recipientId = otherParticipantId(targetConversation, userId);
         await recordListingRepost(tx, {
           listingId: source.listingId,
           senderId: userId,
@@ -761,13 +688,25 @@ messagesRouter.post('/items/:messageId/forward', requireAuth, async (req: AuthRe
       return created;
     });
 
-    void sendMessagePush({
-      recipientUserId: recipientId,
-      senderName: forwarded.sender.name,
-      preview: formatMessagePreview(forwarded),
-      conversationId,
-      messageId: forwarded.id,
-    }).catch(() => undefined);
+    if (isGroupConversation(targetConversation)) {
+      void notifyGroupMembers({
+        conversationId,
+        senderId: userId,
+        senderName: forwarded.sender.name,
+        groupName: targetConversation.name ?? 'Сообщество',
+        preview: formatMessagePreview(forwarded),
+        messageId: forwarded.id,
+      });
+    } else {
+      const recipientId = otherParticipantId(targetConversation, userId);
+      void sendMessagePush({
+        recipientUserId: recipientId,
+        senderName: forwarded.sender.name,
+        preview: formatMessagePreview(forwarded),
+        conversationId,
+        messageId: forwarded.id,
+      }).catch(() => undefined);
+    }
 
     res.status(201).json(toMessageResponse(forwarded, userId));
   } catch (error) {

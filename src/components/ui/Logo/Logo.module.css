@@ -136,6 +136,32 @@
   text-align: center;
 }
 
+.stamp .logomark {
+  box-shadow:
+    0 0 0 1px rgba(126, 200, 168, 0.34),
+    0 0 20px rgba(77, 208, 160, 0.24);
+  background: transparent;
+  transform: none;
+  animation: none;
+}
+
+.stamp .logomark svg {
+  filter: drop-shadow(0 3px 10px rgba(8, 31, 24, 0.28));
+}
+
+.stamp:hover .logomark {
+  animation: none;
+  transform: none;
+  box-shadow:
+    0 0 0 1px rgba(126, 200, 168, 0.45),
+    0 0 26px rgba(77, 208, 160, 0.32);
+}
+
+.stamp .name,
+.stamp .master {
+  animation: logo-wordmark-flow 5.5s linear infinite;
+}
+
 .hero .logomark {
   transform: rotate(-3deg);
   animation:
@@ -211,7 +237,7 @@
     display: none;
   }
 
-  .logo:not(.footer):not(.hero) .logomark {
+  .logo:not(.footer):not(.hero):not(.stamp) .logomark {
     animation: stamp-idle 7s ease-in-out infinite;
     -webkit-animation: stamp-idle 7s ease-in-out infinite;
   }

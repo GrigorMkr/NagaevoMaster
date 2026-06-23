@@ -42,11 +42,10 @@
   font-size: var(--font-size-sm);
 }
 
-.profileLogout {
-  margin-top: var(--spacing-md);
-}
-
 .unreadPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full);
   background: rgba(77, 208, 160, 0.2);
@@ -101,6 +100,9 @@
 }
 
 .messagesHeroTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--font-size-xl);

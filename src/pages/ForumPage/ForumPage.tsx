@@ -42,6 +42,7 @@ function ForumPage() {
                   to={forumCategoryPath(cat.slug)}
                   icon={cat.icon}
                   name={cat.name}
+                  categorySlug={cat.slug}
                   cover={getForumCategoryCover(cat.slug)}
                   variant="tile"
                 />

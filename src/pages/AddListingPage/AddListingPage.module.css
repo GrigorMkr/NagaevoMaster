@@ -78,7 +78,9 @@
 }
 
 .categoryThumb {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
@@ -93,6 +95,10 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.categoryBoardIcon {
+  margin: auto;
 }
 
 .categoryName {

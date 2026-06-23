@@ -29,9 +29,9 @@ import { resolveUploadUrl } from '@/utils/mediaUrl'
 import { ROUTES, editListingPath } from '@/utils/constants'
 import { getErrorMessage } from '@/utils/errorMessage'
 import { showMessageLightning } from '@/utils/messageLightningToast'
-import { useAuthLogout } from '@/hooks/useAuthLogout'
 import { PushSetupGate } from '@/components/push/PushSetupGate/PushSetupGate'
 import { Reveal } from '@/components/ui/Reveal/Reveal'
+import { RichIcon } from '@/components/ui/RichIcon'
 import pageStyles from '@/styles/page.module.css'
 import styles from './ProfilePage.module.css'
 
@@ -49,7 +49,6 @@ function ProfilePage() {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [flashUnread, setFlashUnread] = useState(false)
   const prevUnreadRef = useRef(0)
-  const handleLogout = useAuthLogout()
 
   const handleUnreadChange = useCallback((count: number) => {
     if (count > prevUnreadRef.current && prevUnreadRef.current > 0) {
@@ -165,19 +164,11 @@ function ProfilePage() {
               <p className={styles.profileBadge}>Профиль</p>
               <h1 className={styles.profileName}>{currentUser.name}</h1>
               <p className={styles.profileGreeting}>Сообщения и объявления в одном месте</p>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className={styles.profileLogout}
-                onClick={handleLogout}
-              >
-                Выйти из аккаунта
-              </Button>
             </div>
             {unreadMessages > 0 && (
               <span className={`${styles.unreadPill} ${flashUnread ? styles.unreadPillFlash : ''}`}>
-                ⚡ {unreadMessages} новых
+                <RichIcon name="zap" variant="inline" size="sm" accent="#e8b84a" motion="pulse" />
+                {unreadMessages} новых
               </span>
             )}
           </header>
@@ -185,7 +176,10 @@ function ProfilePage() {
           <Reveal delay={40}>
             <section className={styles.messagesHero} aria-label="Переписка">
               <div className={styles.messagesHeroHeader}>
-                <h2 className={styles.messagesHeroTitle}>💬 Переписка</h2>
+                <h2 className={styles.messagesHeroTitle}>
+                  <RichIcon name="messages" variant="glass" size="sm" accent="#5eb8ff" />
+                  Переписка
+                </h2>
               </div>
               <PushSetupGate />
               <SocialPanel
@@ -199,7 +193,7 @@ function ProfilePage() {
           </Reveal>
 
           <Reveal delay={100}>
-            <ProfileExpandableSection title="Настройки профиля">
+            <ProfileExpandableSection title="Настройки профиля" icon="users" iconAccent="#7ec8a8">
               <ProfileSettingsForm user={currentUser} />
             </ProfileExpandableSection>
 
@@ -207,6 +201,8 @@ function ProfilePage() {
 
             <ProfileExpandableSection
               title="Мои объявления"
+              icon="clipboard"
+              iconAccent="#e8b84a"
               count={myListings.length}
               loading={listingsLoading}
             >

@@ -1,22 +1,36 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 import type { ChatMessage } from '@/types/message';
 import { serviceDetailPath } from '@/constants';
+import { formatMessageSentAt } from '@/utils/formatMessageTime';
+import { getReactionOnlySize, isReactionOnlyMessage, type ReactionOnlySize } from '@/utils/messageReactions';
+import { MessageRichText } from '@/components/messages/MessageRichText/MessageRichText';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { VoiceMessagePlayer } from '@/components/messages/VoiceMessagePlayer/VoiceMessagePlayer';
 import { StaffBadge } from '@/components/ui/StaffBadge/StaffBadge';
 import { ImageLightbox } from '@/components/ui/ImageLightbox/ImageLightbox';
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import styles from './MessageBubble.module.css';
 
 interface MessageBubbleProps {
   message: ChatMessage;
+  showSenderName?: boolean;
+  highlighted?: boolean;
   onEdit?: (messageId: string, body: string) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;
   onForward?: (message: ChatMessage) => void;
 }
 
-function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubbleProps) {
+const REACTION_ONLY_SIZE_CLASS: Record<ReactionOnlySize, string> = {
+  one: 'reactionOnlyOne',
+  two: 'reactionOnlyTwo',
+  three: 'reactionOnlyThree',
+  many: 'reactionOnlyMany',
+};
+
+function MessageBubble({ message, showSenderName, highlighted, onEdit, onDelete, onForward }: MessageBubbleProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(message.body);
@@ -28,12 +42,22 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
     ? resolveUploadUrl(message.attachmentUrl)
     : undefined;
   const isImage = message.type === 'file' && message.attachmentMime?.startsWith('image/');
+  const isVideo = message.type === 'file' && message.attachmentMime?.startsWith('video/');
   const canEdit = message.isMine && message.type === 'text' && !message.isDeleted && Boolean(onEdit);
   const canDelete = message.isMine && !message.isDeleted && Boolean(onDelete);
   const canForward = !message.isDeleted && Boolean(onForward)
     && (message.type !== 'listing' || Boolean(message.listingPreview || message.listingId));
   const showOwnMenu = message.isMine && (canEdit || canDelete || canForward);
   const showForwardOnly = !message.isMine && canForward;
+
+  const reactionOnly = useMemo(
+    () => Boolean(message.body && message.type === 'text' && isReactionOnlyMessage(message.body)),
+    [message.body, message.type],
+  );
+  const reactionOnlySize = useMemo(
+    () => (reactionOnly && message.body ? getReactionOnlySize(message.body) : null),
+    [reactionOnly, message.body],
+  );
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -73,9 +97,22 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
   };
 
   return (
-    <div className={message.isMine ? styles.mineWrap : styles.otherWrap}>
+    <div
+      id={`msg-${message.id}`}
+      className={classNames(
+        message.isMine ? styles.mineWrap : styles.otherWrap,
+        highlighted && styles.highlighted,
+      )}
+    >
+      {showSenderName && !message.isMine && !message.isDeleted && (
+        <p className={styles.senderName}>{message.senderName}</p>
+      )}
       <div
-        className={`${message.isMine ? styles.bubbleMine : styles.bubbleOther} ${message.isDeleted ? styles.bubbleDeleted : ''}`}
+        className={classNames(
+          message.isMine ? styles.bubbleMine : styles.bubbleOther,
+          message.isDeleted && styles.bubbleDeleted,
+          reactionOnly && styles.bubbleEmojiOnly,
+        )}
       >
         {showOwnMenu && (
           <div className={styles.actions} ref={menuRef}>
@@ -85,7 +122,7 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
               aria-label="Действия с сообщением"
               onClick={() => setMenuOpen((open) => !open)}
             >
-              ⋮
+              <ToolbarIcon name="menu" accent="currentColor" motion="none" />
             </button>
             {menuOpen && (
               <div className={styles.menu} role="menu">
@@ -131,7 +168,7 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
               aria-label="Переслать сообщение"
               onClick={() => onForward?.(message)}
             >
-              ↪
+              <ToolbarIcon name="forward" accent="#7ec8a8" motion="pulse" />
             </button>
           </div>
         )}
@@ -167,9 +204,14 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
               </button>
             )}
 
-            {message.type === 'file' && attachmentUrl && !isImage && (
+            {isVideo && attachmentUrl && (
+              <video className={styles.video} src={attachmentUrl} controls preload="metadata" />
+            )}
+
+            {message.type === 'file' && attachmentUrl && !isImage && !isVideo && (
               <a className={styles.fileLink} href={attachmentUrl} target="_blank" rel="noreferrer" download>
-                📎 {message.attachmentName ?? 'Скачать файл'}
+                <ToolbarIcon name="paperclip" accent="var(--color-mint)" motion="float" />
+                <span>{message.attachmentName ?? 'Скачать файл'}</span>
               </a>
             )}
 
@@ -203,7 +245,8 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
                     className={styles.listingRepostBtn}
                     onClick={() => onForward?.(message)}
                   >
-                    ↪ Переслать
+                    <ToolbarIcon name="forward" accent="currentColor" motion="pulse" />
+                    Переслать
                   </button>
                 )}
               </div>
@@ -229,14 +272,33 @@ function MessageBubble({ message, onEdit, onDelete, onForward }: MessageBubblePr
                 </div>
               </form>
             ) : (
-              message.body && <div className={styles.text}>{message.body}</div>
+              message.body && (
+                <div
+                  className={classNames(
+                    styles.text,
+                    reactionOnly && styles.textEmojiOnly,
+                    reactionOnlySize && styles[REACTION_ONLY_SIZE_CLASS[reactionOnlySize]],
+                  )}
+                >
+                  <MessageRichText
+                    text={message.body}
+                    reactionOnly={reactionOnly}
+                    reactionOnlySize={reactionOnlySize}
+                  />
+                </div>
+              )
             )}
           </>
         )}
 
-        {!message.isDeleted && (message.editedAt || message.createdAt) && (
+        {message.createdAt && (
           <footer className={styles.meta}>
-            {message.editedAt && <span>изменено</span>}
+            <time dateTime={message.createdAt} className={styles.sentAt}>
+              {formatMessageSentAt(message.createdAt)}
+            </time>
+            {!message.isDeleted && message.editedAt && (
+              <span className={styles.editedMark}>изменено</span>
+            )}
           </footer>
         )}
       </div>

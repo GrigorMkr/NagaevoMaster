@@ -25,9 +25,15 @@ import {
 } from '@/services/messagesApi';
 import { blockUser, fetchBlockStatus, unblockUser } from '@/services/blocksApi';
 import { uploadMessageAttachment } from '@/services/uploadsApi';
-import type { ChatMessage, ConversationSummary } from '@/types/message';
+import type { ChatMessage, ConversationSummary, GroupDetail } from '@/types/message';
 import { ForwardMessageModal } from '@/components/messages/ForwardMessageModal/ForwardMessageModal';
+import { CreateGroupModal } from '@/components/messages/CreateGroupModal/CreateGroupModal';
+import { GroupInfoSheet } from '@/components/messages/GroupInfoSheet/GroupInfoSheet';
+import { GroupAvatar } from '@/components/messages/GroupAvatar/GroupAvatar';
+import { useAppSelector } from '@/app/hooks';
+import { selectCurrentUser } from '@/features/user/userSelectors';
 import { EmojiPicker } from '@/components/messages/EmojiPicker/EmojiPicker';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import { PushEnableBanner } from '@/components/push/PushEnableBanner/PushEnableBanner';
 import { useChatLiveSync, mergeMessages } from '@/hooks/useChatLiveSync';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
@@ -37,6 +43,7 @@ import { StaffBadge } from '@/components/ui/StaffBadge/StaffBadge';
 import { ensurePushNotifications } from '@/services/pushApi';
 import { unlockMessageSound } from '@/utils/messageSound';
 import { registerOutgoingMessage } from '@/utils/outgoingMessages';
+import { useUserLoginSearch, normalizeLoginQuery } from '@/hooks/useUserLoginSearch';
 import { canAttemptPushSubscribe } from '@/utils/pushEnvironment';
 import styles from './MessagesPanel.module.css';
 
@@ -59,6 +66,14 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
   const [blockedByMe, setBlockedByMe] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   const [forwardTarget, setForwardTarget] = useState<ChatMessage | null>(null);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showGroupInfo, setShowGroupInfo] = useState(false);
+  const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
+  const [loginQuery, setLoginQuery] = useState('');
+  const [startingChatUserId, setStartingChatUserId] = useState<string | null>(null);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const normalizedLoginQuery = normalizeLoginQuery(loginQuery);
+  const { results: loginResults, loading: loginSearching } = useUserLoginSearch(loginQuery);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,12 +120,27 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     try {
       const detail = await fetchConversation(id);
       setMessages(detail.messages);
-      setActiveConversation({
-        id: detail.id,
-        otherUser: detail.otherUser,
-        unreadCount: 0,
-        updatedAt: detail.messages.at(-1)?.createdAt ?? new Date().toISOString(),
-      });
+      if (detail.type === 'group' && detail.group) {
+        setActiveConversation({
+          id: detail.id,
+          type: 'group',
+          group: {
+            name: detail.group.name,
+            avatarUrl: detail.group.avatarUrl,
+            memberCount: detail.group.memberCount,
+          },
+          unreadCount: 0,
+          updatedAt: detail.messages.at(-1)?.createdAt ?? new Date().toISOString(),
+        });
+      } else if (detail.otherUser) {
+        setActiveConversation({
+          id: detail.id,
+          type: 'dm',
+          otherUser: detail.otherUser,
+          unreadCount: 0,
+          updatedAt: detail.messages.at(-1)?.createdAt ?? new Date().toISOString(),
+        });
+      }
       await markConversationRead(id);
       void loadConversations();
     } catch (error) {
@@ -267,7 +297,13 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     setActiveConversation((current) => {
       if (!current) return current;
       const updated = items.find((item) => item.id === current.id);
-      return updated ? { ...current, ...updated, otherUser: current.otherUser } : current;
+      if (!updated) return current;
+      return {
+        ...current,
+        ...updated,
+        otherUser: current.otherUser ?? updated.otherUser,
+        group: current.group ?? updated.group,
+      };
     });
   }, []);
 
@@ -278,13 +314,29 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     onMessages: handleLiveMessages,
     onConversations: handleLiveConversations,
     onUnreadChange,
-    notifySenderName: activeConversation?.otherUser.name,
+    notifySenderName: activeConversation?.type === 'group'
+      ? activeConversation.group?.name
+      : activeConversation?.otherUser?.name,
   });
 
-  const insertEmoji = (emoji: string) => {
-    setDraft((current) => `${current}${emoji}`);
-    draftRef.current?.focus();
-  };
+  const insertReaction = useCallback((token: string) => {
+    const el = draftRef.current;
+    if (!el) {
+      setDraft((current) => `${current}${token}`);
+      return;
+    }
+
+    const start = el.selectionStart ?? draft.length;
+    const end = el.selectionEnd ?? draft.length;
+    const next = `${draft.slice(0, start)}${token}${draft.slice(end)}`;
+    const cursor = start + token.length;
+
+    setDraft(next);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(cursor, cursor);
+    });
+  }, [draft]);
 
   const layoutMode = useMemo(() => (activeId ? 'chat' : 'list'), [activeId]);
   const isMobileChat = layoutMode === 'chat' && Boolean(activeId);
@@ -430,8 +482,15 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     void submitDraft();
   };
 
-  const otherUser = activeConversation?.otherUser;
+  const isGroupChat = activeConversation?.type === 'group';
+  const otherUser = activeConversation?.type === 'dm' ? activeConversation.otherUser : undefined;
   const otherUserId = otherUser?.id;
+  const chatTitle = isGroupChat
+    ? activeConversation?.group?.name ?? 'Сообщество'
+    : otherUser?.name ?? '';
+  const chatSubtitle = isGroupChat
+    ? `${activeConversation?.group?.memberCount ?? 0} участников`
+    : otherUser ? `@${otherUser.login}` : '';
 
   useEffect(() => {
     if (!otherUserId) {
@@ -499,11 +558,55 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     }
   };
 
+  useEffect(() => {
+    if (!highlightMessageId) return undefined;
+    const timer = window.setTimeout(() => setHighlightMessageId(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [highlightMessageId]);
+
   const otherAvatar = otherUser
     ? resolveAuthorAvatar(otherUser.name, otherUser.login, otherUser.avatarUrl)
     : undefined;
 
   const canSend = Boolean(draft.trim()) && !sending && !uploading && !isRecording;
+
+  const handleCloseGroupInfo = useCallback(() => {
+    setShowGroupInfo(false);
+  }, []);
+
+  const handleGroupLeft = useCallback(() => {
+    setShowGroupInfo(false);
+    onChatChange(null);
+    void loadConversations();
+  }, [loadConversations, onChatChange]);
+
+  const handleGroupUpdated = useCallback((group: GroupDetail) => {
+    setActiveConversation((cur) => (
+      cur ? {
+        ...cur,
+        group: {
+          name: group.name,
+          avatarUrl: group.avatarUrl,
+          memberCount: group.memberCount,
+        },
+      } : cur
+    ));
+    void loadConversations();
+  }, [loadConversations]);
+
+  const handleStartChatByLogin = async (userId: string) => {
+    if (userId === currentUser?.id || startingChatUserId) return;
+    setStartingChatUserId(userId);
+    try {
+      const conversation = await startConversation(userId);
+      setLoginQuery('');
+      onChatChange(conversation.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось начать переписку'));
+    } finally {
+      setStartingChatUserId(null);
+    }
+  };
 
   return (
     <div
@@ -517,21 +620,69 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
         <PushEnableBanner compact />
         <div className={styles.sidebarHeader}>
           <h3 className={styles.sidebarTitle}>Чаты</h3>
+          <button
+            type="button"
+            className={styles.createGroupBtn}
+            onClick={() => setShowCreateGroup(true)}
+            title="Создать сообщество"
+            aria-label="Создать сообщество"
+          >
+            <ToolbarIcon name="plus" accent="#e8b84a" motion="pulse" />
+          </button>
+        </div>
+        <div className={styles.loginSearchWrap}>
+          <input
+            className={styles.loginSearch}
+            value={loginQuery}
+            onChange={(e) => setLoginQuery(e.target.value)}
+            placeholder="Написать по @логину"
+            aria-label="Найти пользователя по логину"
+          />
+          {normalizedLoginQuery.length >= 2 && (
+            <ul className={styles.loginResults}>
+              {loginSearching ? (
+                <li className={styles.loginResultEmpty}>Поиск…</li>
+              ) : loginResults.length === 0 ? (
+                <li className={styles.loginResultEmpty}>Никого не найдено</li>
+              ) : (
+                loginResults
+                  .filter((user) => user.id !== currentUser?.id)
+                  .map((user) => (
+                    <li key={user.id}>
+                      <button
+                        type="button"
+                        className={styles.loginResultBtn}
+                        disabled={startingChatUserId === user.id}
+                        onClick={() => void handleStartChatByLogin(user.id)}
+                      >
+                        <UserAvatar
+                          name={user.name}
+                          src={resolveAuthorAvatar(user.name, user.login, user.avatarUrl)}
+                          size="sm"
+                        />
+                        <span className={styles.loginResultMeta}>
+                          <span>{user.name}</span>
+                          <span className={styles.loginResultLogin}>@{user.login}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))
+              )}
+            </ul>
+          )}
         </div>
         {loadingList ? (
           <p className={styles.emptySidebar}>Загрузка…</p>
         ) : conversations.length === 0 ? (
           <p className={styles.emptySidebar}>
-            Переписок пока нет. Напишите мастеру со страницы объявления или другу из списка друзей.
+            Переписок пока нет. Найдите человека по @логину выше или откройте чат со страницы объявления.
           </p>
         ) : (
           <ul className={styles.conversationList}>
             {conversations.map((item) => {
-              const avatar = resolveAuthorAvatar(
-                item.otherUser.name,
-                item.otherUser.login,
-                item.otherUser.avatarUrl,
-              );
+              const isGroup = item.type === 'group' && item.group;
+              const title = isGroup ? item.group!.name : item.otherUser!.name;
+              const preview = item.lastMessage?.body ?? (isGroup ? 'Сообщество' : 'Начните диалог');
               return (
                 <li key={item.id}>
                   <button
@@ -539,20 +690,34 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                     className={classNames(
                       styles.conversationItem,
                       activeId === item.id && styles.conversationItemActive,
+                      isGroup && styles.conversationItemGroup,
                     )}
                     onClick={() => onChatChange(item.id)}
                   >
-                    <UserAvatar name={item.otherUser.name} src={avatar} size="sm" />
+                    {isGroup ? (
+                      <GroupAvatar name={item.group!.name} avatarUrl={item.group!.avatarUrl} size="sm" />
+                    ) : (
+                      <UserAvatar
+                        name={item.otherUser!.name}
+                        src={resolveAuthorAvatar(
+                          item.otherUser!.name,
+                          item.otherUser!.login,
+                          item.otherUser!.avatarUrl,
+                        )}
+                        size="sm"
+                      />
+                    )}
                     <div className={styles.conversationBody}>
                       <p className={styles.conversationName}>
-                        <span className={styles.conversationNameText}>{item.otherUser.name}</span>
-                        {item.otherUser.isStaff && item.otherUser.role && (
-                          <StaffBadge role={item.otherUser.role} compact />
+                        <span className={styles.conversationNameText}>{title}</span>
+                        {isGroup && (
+                          <span className={styles.groupBadge}>{item.group!.memberCount}</span>
+                        )}
+                        {!isGroup && item.otherUser!.isStaff && item.otherUser!.role && (
+                          <StaffBadge role={item.otherUser!.role} compact />
                         )}
                       </p>
-                      <p className={styles.conversationPreview}>
-                        {item.lastMessage?.body ?? 'Начните диалог'}
-                      </p>
+                      <p className={styles.conversationPreview}>{preview}</p>
                     </div>
                     {item.unreadCount > 0 && (
                       <span className={styles.unreadBadge}>{item.unreadCount}</span>
@@ -566,9 +731,9 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       </aside>
 
       <section className={styles.chatPanel}>
-        {!activeId || !otherUser ? (
+        {!activeId || !activeConversation ? (
           <div className={styles.chatPlaceholder}>
-            Выберите диалог или откройте переписку со страницы объявления
+            Выберите диалог, создайте сообщество или откройте переписку со страницы объявления
           </div>
         ) : (
           <>
@@ -579,29 +744,52 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                 onClick={() => onChatChange(null)}
                 aria-label="Назад к списку"
               >
-                ←
+                <ToolbarIcon name="chevronLeft" accent="#7ec8a8" />
               </button>
-              <UserAvatar name={otherUser.name} src={otherAvatar} size="sm" />
-              <div className={styles.chatHeaderInfo}>
-                <div className={styles.chatTitleRow}>
-                  <h4 className={styles.chatTitle}>{otherUser.name}</h4>
-                  {otherUser.isStaff && otherUser.role && (
-                    <StaffBadge role={otherUser.role} />
-                  )}
-                </div>
-                <p className={styles.chatLogin}>@{otherUser.login}</p>
-              </div>
+              {isGroupChat ? (
+                <GroupAvatar
+                  name={activeConversation.group?.name ?? 'G'}
+                  avatarUrl={activeConversation.group?.avatarUrl}
+                  size="sm"
+                />
+              ) : (
+                <UserAvatar name={otherUser!.name} src={otherAvatar} size="sm" />
+              )}
               <button
                 type="button"
-                className={styles.headerAction}
-                disabled={blockLoading}
-                onClick={handleBlockToggle}
+                className={styles.chatHeaderInfo}
+                onClick={() => isGroupChat && setShowGroupInfo(true)}
               >
-                {blockedByMe ? 'Разблок.' : 'Блок'}
+                <div className={styles.chatTitleRow}>
+                  <h4 className={styles.chatTitle}>{chatTitle}</h4>
+                  {!isGroupChat && otherUser!.isStaff && otherUser!.role && (
+                    <StaffBadge role={otherUser!.role} />
+                  )}
+                </div>
+                <p className={styles.chatLogin}>{chatSubtitle}</p>
               </button>
+              {isGroupChat ? (
+                <button
+                  type="button"
+                  className={styles.headerAction}
+                  onClick={() => setShowGroupInfo(true)}
+                  aria-label="Информация о группе"
+                >
+                  <ToolbarIcon name="menu" accent="#7ec8a8" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.headerAction}
+                  disabled={blockLoading}
+                  onClick={handleBlockToggle}
+                >
+                  {blockedByMe ? 'Разблок.' : 'Блок'}
+                </button>
+              )}
             </header>
 
-            {blockedByMe ? (
+            {!isGroupChat && blockedByMe ? (
               <p className={styles.blockedNotice}>Пользователь заблокирован — разблокируйте, чтобы писать</p>
             ) : (
             <>
@@ -616,6 +804,8 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                   <MessageBubble
                     key={message.id}
                     message={message}
+                    showSenderName={isGroupChat}
+                    highlighted={highlightMessageId === message.id}
                     onEdit={handleEditMessage}
                     onDelete={handleDeleteMessage}
                     onForward={setForwardTarget}
@@ -631,9 +821,10 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                 className={styles.jumpToLatest}
                 onClick={() => scrollChatToBottom(true)}
               >
-                ↓
-                {' '}
-                {newBelowCount === 1 ? 'Новое сообщение' : `Новых: ${newBelowCount}`}
+                <ToolbarIcon name="chevronDown" accent="#0a1f18" motion="float" />
+                <span>
+                  {newBelowCount === 1 ? 'Новое сообщение' : `Новых: ${newBelowCount}`}
+                </span>
               </button>
             )}
             </div>
@@ -653,7 +844,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                 ref={fileInputRef}
                 type="file"
                 className={styles.hiddenInput}
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,audio/*"
+                accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,audio/*"
                 onChange={handleFileChange}
               />
 
@@ -665,10 +856,10 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                   onClick={() => fileInputRef.current?.click()}
                   aria-label="Прикрепить файл"
                 >
-                  📎
+                  <ToolbarIcon name="paperclip" accent="#5eb8ff" motion="float" />
                 </button>
 
-                <EmojiPicker onPick={insertEmoji} disabled={uploading || isRecording} />
+                <EmojiPicker onPick={insertReaction} disabled={uploading || isRecording} />
                 <textarea
                   ref={draftRef}
                   className={styles.composeInput}
@@ -690,7 +881,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                     className={styles.sendBtn}
                     aria-label="Отправить"
                   >
-                    ↑
+                    <ToolbarIcon name="send" accent="#04140f" motion="pulse" />
                   </button>
                 ) : (
                   <button
@@ -700,7 +891,11 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                     onClick={handleVoiceToggle}
                     aria-label="Голосовое сообщение"
                   >
-                    {isRecording ? '■' : '🎤'}
+                    {isRecording ? (
+                      <ToolbarIcon name="stop" accent="#ff8a80" motion="pulse" />
+                    ) : (
+                      <ToolbarIcon name="mic" accent="#7ec8a8" motion="float" />
+                    )}
                   </button>
                 )}
               </div>
@@ -717,6 +912,32 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
           excludeConversationId={activeId ?? undefined}
           onSelect={(id) => void handleForwardSelect(id)}
           onClose={() => setForwardTarget(null)}
+        />
+      )}
+
+      {showCreateGroup && (
+        <CreateGroupModal
+          onCreated={(groupId) => {
+            setShowCreateGroup(false);
+            void loadConversations();
+            onChatChange(groupId);
+          }}
+          onClose={() => setShowCreateGroup(false)}
+        />
+      )}
+
+      {showGroupInfo && activeId && currentUser && (
+        <GroupInfoSheet
+          groupId={activeId}
+          currentUserId={currentUser.id}
+          onClose={handleCloseGroupInfo}
+          onLeft={handleGroupLeft}
+          onUpdated={handleGroupUpdated}
+          onJumpToMessage={(msg) => {
+            setHighlightMessageId(msg.id);
+            const el = document.getElementById(`msg-${msg.id}`);
+            el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }}
         />
       )}
     </div>

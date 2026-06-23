@@ -158,9 +158,80 @@ async function sendFriendPush(payload: FriendPushPayload) {
   }));
 }
 
+interface GroupInvitePushPayload {
+  recipientUserId: string;
+  inviterName: string;
+  groupName: string;
+  conversationId: string;
+}
+
+async function sendGroupInvitePush(payload: GroupInvitePushPayload) {
+  const subscriptions = await prisma.pushSubscription.findMany({
+    where: { userId: payload.recipientUserId },
+    orderBy: { updatedAt: 'desc' },
+  });
+  if (subscriptions.length === 0) return;
+
+  const messageId = `group-invite-${payload.conversationId}-${payload.recipientUserId}-${Date.now()}`;
+  const body = {
+    title: 'Приглашение в сообщество',
+    body: `${payload.inviterName} добавил(а) вас в «${payload.groupName}»`,
+    senderName: payload.inviterName,
+    messageId,
+    url: `/profile?section=messages&chat=${payload.conversationId}`,
+    tag: messageId,
+    icon: '/apple-touch-icon.png',
+    kind: 'group_invite',
+  };
+
+  const pushPayload = JSON.stringify(body);
+
+  await Promise.all(subscriptions.map(async (sub) => {
+    if (isFcmEndpoint(sub.endpoint)) {
+      await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `key=${env.FCM_SERVER_KEY}`,
+        },
+        body: JSON.stringify({
+          to: extractFcmToken(sub.endpoint),
+          priority: 'high',
+          notification: {
+            title: body.title,
+            body: body.body,
+            sound: 'default',
+          },
+          data: { url: body.url, messageId },
+        }),
+      }).catch(() => undefined);
+      return;
+    }
+
+    if (!ensureWebPush()) return;
+
+    try {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        pushPayload,
+        { TTL: 60 * 60 * 24, urgency: 'high', topic: messageId },
+      );
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode;
+      if (status === 404 || status === 410) {
+        await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => undefined);
+      }
+    }
+  }));
+}
+
 export {
   ensureWebPush,
   isPushConfigured,
   sendMessagePush,
   sendFriendPush,
+  sendGroupInvitePush,
 };

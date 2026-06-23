@@ -9,6 +9,7 @@ import {
 } from 'react';
 import classNames from 'classnames';
 import styles from './HorizontalCarousel.module.css';
+import { isLowPowerDevice } from '@/utils/performanceProfile';
 
 /** Единая скорость автопрокрутки для всех каруселей (px/с). */
 const CAROUSEL_AUTO_SCROLL_SPEED = 22;
@@ -28,6 +29,12 @@ interface HorizontalCarouselProps {
   showDots?: boolean;
   enterFromLeft?: boolean;
   minLoopItems?: number;
+  /** Дублировать слайды для бесшовной прокрутки. По умолчанию true. */
+  loop?: boolean;
+  /** Растягивать карусель на всю ширину с отрицательными отступами. */
+  bleed?: boolean;
+  /** Градиентное затухание по краям. */
+  fadeEdges?: boolean;
 }
 
 function buildLoopItems<T>(items: T[], minCount: number): T[] {
@@ -50,23 +57,34 @@ function HorizontalCarousel({
   showDots = false,
   enterFromLeft = true,
   minLoopItems = 6,
+  loop = true,
+  bleed,
+  fadeEdges,
 }: HorizontalCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
+  const offscreenRef = useRef(false);
   const pauseTimerRef = useRef<number | null>(null);
+  const scrollDirectionRef = useRef(1);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
   const [activePage, setActivePage] = useState(0);
   const [pageCount, setPageCount] = useState(1);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const lowPower = isLowPowerDevice();
+  const effectiveAutoScroll = autoScroll && !reduceMotion;
+  const scrollSpeed = lowPower ? autoScrollSpeedPxPerSec * 0.55 : autoScrollSpeedPxPerSec;
+  const useBleed = bleed ?? effectiveAutoScroll;
+  const useFadeEdges = fadeEdges ?? effectiveAutoScroll;
 
   const items = Children.toArray(children);
+  const loopEnabled = loop && effectiveAutoScroll && !lowPower;
   const loopItems = useMemo(
-    () => (autoScroll ? buildLoopItems(items, minLoopItems) : items),
-    [autoScroll, items, minLoopItems],
+    () => (loopEnabled ? buildLoopItems(items, minLoopItems) : items),
+    [loopEnabled, items, minLoopItems],
   );
-  const displayItems = autoScroll ? loopItems : items;
-  const arrowsVisible = showArrows ?? autoScroll;
+  const displayItems = loopEnabled ? loopItems : items;
+  const arrowsVisible = showArrows ?? effectiveAutoScroll;
 
   const pauseAuto = useCallback((ms = MANUAL_PAUSE_MS) => {
     pausedRef.current = true;
@@ -81,7 +99,7 @@ function HorizontalCarousel({
 
   const normalizeLoopScroll = useCallback(() => {
     const track = trackRef.current;
-    if (!track || !autoScroll) return;
+    if (!track || !effectiveAutoScroll || !loopEnabled) return;
 
     const loopWidth = track.scrollWidth / 2;
     if (loopWidth <= 0) return;
@@ -89,7 +107,7 @@ function HorizontalCarousel({
     if (track.scrollLeft >= loopWidth) {
       track.scrollLeft -= loopWidth;
     }
-  }, [autoScroll]);
+  }, [effectiveAutoScroll, loopEnabled]);
 
   const updateScrollState = useCallback(() => {
     const track = trackRef.current;
@@ -98,7 +116,7 @@ function HorizontalCarousel({
     const { scrollLeft, scrollWidth, clientWidth } = track;
     const maxScroll = Math.max(0, scrollWidth - clientWidth);
 
-    if (autoScroll) {
+    if (effectiveAutoScroll) {
       setCanPrev(true);
       setCanNext(true);
       return;
@@ -112,7 +130,7 @@ function HorizontalCarousel({
     setActivePage(
       maxScroll <= 0 ? 0 : Math.min(pages - 1, Math.round((scrollLeft / maxScroll) * (pages - 1))),
     );
-  }, [autoScroll]);
+  }, [effectiveAutoScroll]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -124,12 +142,27 @@ function HorizontalCarousel({
 
   useEffect(() => {
     const track = trackRef.current;
+    if (!track || !effectiveAutoScroll) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        offscreenRef.current = !entry?.isIntersecting;
+      },
+      { root: null, threshold: 0.08, rootMargin: '48px' },
+    );
+
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [effectiveAutoScroll, displayItems.length]);
+
+  useEffect(() => {
+    const track = trackRef.current;
     if (!track) return undefined;
 
     updateScrollState();
 
     const onScroll = () => {
-      if (autoScroll) {
+      if (effectiveAutoScroll && loopEnabled) {
         normalizeLoopScroll();
       }
       updateScrollState();
@@ -143,22 +176,36 @@ function HorizontalCarousel({
       track.removeEventListener('scroll', onScroll);
       observer.disconnect();
     };
-  }, [autoScroll, children, normalizeLoopScroll, updateScrollState]);
+  }, [children, effectiveAutoScroll, loopEnabled, normalizeLoopScroll, updateScrollState]);
 
   useEffect(() => {
-    if (!autoScroll || reduceMotion) return undefined;
+    if (!effectiveAutoScroll || reduceMotion) return undefined;
 
     const track = trackRef.current;
     if (!track) return undefined;
 
     let raf = 0;
     let last = performance.now();
+    scrollDirectionRef.current = 1;
 
     const tick = (now: number) => {
-      if (!pausedRef.current && !document.hidden) {
+      if (!pausedRef.current && !offscreenRef.current && !document.hidden) {
         const dt = Math.min((now - last) / 1000, 0.05);
-        track.scrollLeft += autoScrollSpeedPxPerSec * dt;
-        normalizeLoopScroll();
+        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+
+        if (maxScroll > 0) {
+          track.scrollLeft += scrollDirectionRef.current * scrollSpeed * dt;
+
+          if (loopEnabled) {
+            normalizeLoopScroll();
+          } else if (track.scrollLeft >= maxScroll) {
+            track.scrollLeft = maxScroll;
+            scrollDirectionRef.current = -1;
+          } else if (track.scrollLeft <= 0) {
+            track.scrollLeft = 0;
+            scrollDirectionRef.current = 1;
+          }
+        }
       }
       last = now;
       raf = requestAnimationFrame(tick);
@@ -166,7 +213,14 @@ function HorizontalCarousel({
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [autoScroll, autoScrollSpeedPxPerSec, displayItems.length, normalizeLoopScroll, reduceMotion]);
+  }, [
+    effectiveAutoScroll,
+    scrollSpeed,
+    displayItems.length,
+    loopEnabled,
+    normalizeLoopScroll,
+    reduceMotion,
+  ]);
 
   useEffect(() => () => {
     if (pauseTimerRef.current !== null) {
@@ -178,11 +232,13 @@ function HorizontalCarousel({
     const track = trackRef.current;
     if (!track) return;
 
-    if (autoScroll) {
+    if (effectiveAutoScroll && loopEnabled) {
       const loopWidth = track.scrollWidth / 2;
       if (direction < 0 && track.scrollLeft < track.clientWidth * 0.2 && loopWidth > 0) {
         track.scrollLeft += loopWidth;
       }
+      pauseAuto();
+    } else if (effectiveAutoScroll) {
       pauseAuto();
     }
 
@@ -191,7 +247,7 @@ function HorizontalCarousel({
 
   const goToPage = (index: number) => {
     const track = trackRef.current;
-    if (!track || autoScroll) return;
+    if (!track || effectiveAutoScroll) return;
     const maxScroll = track.scrollWidth - track.clientWidth;
     if (maxScroll <= 0) return;
     const pages = pageCount;
@@ -200,7 +256,7 @@ function HorizontalCarousel({
   };
 
   const handlePointerDown = () => {
-    if (autoScroll) {
+    if (effectiveAutoScroll) {
       pauseAuto();
     }
   };
@@ -211,9 +267,9 @@ function HorizontalCarousel({
 
   return (
     <div
-      className={classNames(styles.shell, autoScroll && styles.shellAuto, className)}
-      onMouseEnter={autoScroll ? () => { pausedRef.current = true; } : undefined}
-      onMouseLeave={autoScroll ? () => { pausedRef.current = false; } : undefined}
+      className={classNames(styles.shell, useBleed && styles.shellAuto, className)}
+      onMouseEnter={effectiveAutoScroll ? () => { pausedRef.current = true; } : undefined}
+      onMouseLeave={effectiveAutoScroll ? () => { pausedRef.current = false; } : undefined}
     >
       {arrowsVisible && (
         <div className={styles.controls}>
@@ -238,29 +294,30 @@ function HorizontalCarousel({
         </div>
       )}
 
-      <div className={autoScroll ? styles.viewportAuto : undefined}>
+      <div className={classNames(useFadeEdges && styles.viewportAuto, !loopEnabled && styles.viewportPadded)}>
         <div
           ref={trackRef}
           className={classNames(
             styles.track,
-            autoScroll && styles.trackLoop,
-            reduceMotion && autoScroll && styles.trackLoopStatic,
+            loopEnabled && styles.trackLoop,
+            !loopEnabled && effectiveAutoScroll && styles.trackScroll,
+            reduceMotion && loopEnabled && styles.trackLoopStatic,
           )}
           role="region"
           aria-label={ariaLabel}
           tabIndex={0}
           onPointerDown={handlePointerDown}
-          onWheel={autoScroll ? () => pauseAuto() : undefined}
+          onWheel={effectiveAutoScroll ? () => pauseAuto() : undefined}
         >
           {displayItems.map((child, index) => (
             <div
               key={index}
               className={classNames(
                 styles.slide,
-                !autoScroll && enterFromLeft && styles.slideEnter,
+                !effectiveAutoScroll && enterFromLeft && styles.slideEnter,
                 slideClassName,
               )}
-              style={!autoScroll && enterFromLeft ? { animationDelay: `${Math.min(index, 8) * 0.05}s` } : undefined}
+              style={!effectiveAutoScroll && enterFromLeft ? { animationDelay: `${Math.min(index, 8) * 0.05}s` } : undefined}
             >
               {child}
             </div>
@@ -268,7 +325,7 @@ function HorizontalCarousel({
         </div>
       </div>
 
-      {showDots && !autoScroll && pageCount > 1 && (
+      {showDots && !effectiveAutoScroll && pageCount > 1 && (
         <div className={styles.dots} role="tablist" aria-label="Страницы карусели">
           {Array.from({ length: pageCount }).map((_, index) => (
             <button

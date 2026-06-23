@@ -1,0 +1,176 @@
+.wrap {
+  --icon-accent: var(--color-mint);
+  --icon-accent-2: var(--color-accent);
+  --icon-size: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--icon-accent);
+}
+
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--icon-accent) 45%, transparent));
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.gem {
+  position: relative;
+  width: calc(var(--icon-size) * 2.05);
+  height: calc(var(--icon-size) * 2.05);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--icon-accent) 22%, transparent) 0%,
+      rgba(8, 31, 24, 0.55) 55%,
+      rgba(4, 18, 14, 0.72) 100%
+    );
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 38%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 10px 28px color-mix(in srgb, var(--icon-accent) 28%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.gem::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 28% 22%,
+    color-mix(in srgb, white 18%, transparent),
+    transparent 52%
+  );
+  pointer-events: none;
+}
+
+.glass {
+  position: relative;
+  width: calc(var(--icon-size) * 1.85);
+  height: calc(var(--icon-size) * 1.85);
+  border-radius: var(--radius-md);
+  background: rgba(8, 31, 24, 0.5);
+  border: 1px solid color-mix(in srgb, var(--icon-accent) 32%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.inline .icon {
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--icon-accent) 55%, transparent));
+}
+
+.ribbon .icon {
+  --icon-size: 0.82rem;
+  filter: none;
+  stroke: white;
+}
+
+.sm {
+  --icon-size: 1rem;
+}
+
+.md {
+  --icon-size: 1.35rem;
+}
+
+.lg {
+  --icon-size: 1.65rem;
+}
+
+.xl {
+  --icon-size: 2.25rem;
+}
+
+.motionFloat {
+  animation: rich-icon-float 4.5s ease-in-out infinite;
+}
+
+.motionFloat .icon {
+  animation: rich-icon-breathe 3.2s ease-in-out infinite;
+}
+
+.motionPulse {
+  animation: rich-icon-pulse 2.8s ease-in-out infinite;
+}
+
+.motionSpin {
+  animation: rich-icon-spin 10s linear infinite;
+}
+
+@keyframes rich-icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes rich-icon-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--icon-accent) 45%, transparent));
+  }
+
+  50% {
+    transform: scale(1.06);
+    filter: drop-shadow(0 4px 14px color-mix(in srgb, var(--icon-accent) 62%, transparent));
+  }
+}
+
+@keyframes rich-icon-pulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--icon-accent) 18%, transparent);
+  }
+
+  50% {
+    box-shadow:
+      0 8px 26px color-mix(in srgb, var(--icon-accent) 34%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--icon-accent) 16%, transparent);
+  }
+}
+
+@keyframes rich-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:global(.card:hover) .motionFloat,
+:global([data-ui='card']:hover) .motionFloat,
+:global(.categoryCard:hover) .motionFloat {
+  animation-duration: 2.8s;
+}
+
+:global(.card:hover) .motionFloat .icon,
+:global([data-ui='card']:hover) .motionFloat .icon,
+:global(.categoryCard:hover) .motionFloat .icon {
+  transform: scale(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motionFloat,
+  .motionPulse,
+  .motionSpin,
+  .motionFloat .icon {
+    animation: none;
+  }
+}

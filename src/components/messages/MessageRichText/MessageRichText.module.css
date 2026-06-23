@@ -1,0 +1,32 @@
+.root {
+  white-space: pre-wrap;
+}
+
+.text {
+  font-family: var(--font-body), sans-serif;
+}
+
+.reactionOnly {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.reaction {
+  vertical-align: middle;
+}
+
+.reactionOnly .reaction {
+  margin: 0.05rem;
+}
+
+.size_one .reaction {
+  margin: 0.1rem;
+}
+
+.size_two .reaction {
+  margin: 0.08rem;
+}

@@ -15,6 +15,7 @@ import {
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { formatListingPrice } from '@/utils/listingPriceLabel';
 import { getListingKindTheme, resolveListingKind } from '@/utils/listingKindTheme';
+import { RichIcon } from '@/components/ui/RichIcon';
 import { ListingSocialBar } from '@/components/listings/ListingSocialBar/ListingSocialBar';
 import styles from './ListingCard.module.css';
 
@@ -63,7 +64,15 @@ const ListingCard = memo(function ListingCard({
 
   const kindRibbon = (
     <span className={isTile ? styles.kindRibbonTile : styles.kindRibbon} aria-hidden>
-      <span className={styles.kindRibbonIcon}>{theme.icon}</span>
+      <RichIcon
+        name={theme.icon}
+        variant="glass"
+        size="sm"
+        accent={theme.accent}
+        accent2={theme.accent2}
+        motion="pulse"
+        className={styles.kindRibbonIcon}
+      />
       <span>{theme.shortLabel}</span>
     </span>
   );
@@ -89,9 +98,15 @@ const ListingCard = memo(function ListingCard({
       )}
     >
       {kindRibbon}
-      <span className={styles.placeholderIcon} aria-hidden>
-        {theme.icon}
-      </span>
+      <RichIcon
+        name={theme.icon}
+        variant="gem"
+        size="xl"
+        accent={theme.accent}
+        accent2={theme.accent2}
+        motion="float"
+        className={styles.placeholderIcon}
+      />
     </div>
   );
 

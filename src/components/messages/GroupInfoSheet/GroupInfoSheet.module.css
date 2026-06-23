@@ -1,0 +1,402 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  background: rgba(2, 10, 8, 0.65);
+  backdrop-filter: blur(6px);
+}
+
+.sheet {
+  position: relative;
+  width: min(100%, 24rem);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0c2a21 0%, #061510 100%);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 10rem;
+  background: radial-gradient(ellipse at 50% 0%, rgba(45, 180, 130, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.tab {
+  flex: 1;
+  padding: 0.45rem 0.35rem;
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabActive {
+  background: rgba(45, 180, 130, 0.25);
+  color: #e8fff5;
+}
+
+.loading {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  text-align: center;
+}
+
+.infoTab {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.avatarBlock {
+  margin-bottom: 1rem;
+}
+
+.avatarEditable {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.groupName {
+  margin: 0 0 0.35rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.meta {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.editBtn {
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(120, 220, 180, 0.9);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.editForm {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.nameEdit {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  text-align: center;
+}
+
+.editActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.editActions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.actionPrimary,
+.actionDanger,
+.actionMuted {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionPrimary {
+  background: linear-gradient(135deg, #2ecc96, #1a8f68);
+  color: #042a1e;
+}
+
+.actionDanger {
+  background: rgba(220, 70, 70, 0.15);
+  color: #ff8a8a;
+}
+
+.actionMuted {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.memberList {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.memberRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.65rem 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.memberRow:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.memberInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.memberName {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.roleBadge {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(45, 180, 130, 0.35), rgba(26, 120, 90, 0.25));
+  color: #b8f5dc;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.removeBtn {
+  padding: 0.35rem 0.55rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(220, 70, 70, 0.12);
+  color: #ff9a9a;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.searchTab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0.75rem;
+}
+
+.searchBar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.searchInput {
+  padding: 0.7rem 0.85rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+}
+
+.searchBtn {
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(45, 180, 130, 0.3);
+  color: #e8fff5;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.searchResults {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.searchHit {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.75rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.searchHit:hover {
+  background: rgba(23, 98, 74, 0.2);
+}
+
+.searchAuthor {
+  font-size: 0.75rem;
+  color: rgba(120, 220, 180, 0.85);
+  font-weight: 600;
+}
+
+.searchBody {
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.searchTime {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.searchEmpty {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+.subOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s ease;
+}
+
+.subOverlayHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.subSheet {
+  width: 100%;
+  max-height: 70%;
+  padding: 1rem;
+  border-radius: 1rem 1rem 0 0;
+  background: #0a221b;
+  overflow-y: auto;
+}
+
+.subSheet h4 {
+  margin: 0 0 0.75rem;
+}
+
+.pickList {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.pickRow {
+  width: 100%;
+  padding: 0.65rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pickRowOn {
+  background: rgba(45, 180, 130, 0.2);
+}
+
+.reportInput {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  color: inherit;
+  resize: vertical;
+}

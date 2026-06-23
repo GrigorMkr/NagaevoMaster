@@ -54,7 +54,7 @@ function NotificationsPanel() {
   };
 
   return (
-    <ProfileExpandableSection title="Уведомления" count={unreadCount || items.length} loading={loading}>
+    <ProfileExpandableSection title="Уведомления" icon="bell" iconAccent="#e8b84a" count={unreadCount || items.length} loading={loading}>
       {items.length === 0 ? (
         <p className={styles.empty}>Новых уведомлений нет</p>
       ) : (

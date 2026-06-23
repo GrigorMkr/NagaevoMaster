@@ -99,7 +99,8 @@ friendsRouter.get('/', requireAuth, async (req: AuthRequest, res, next) => {
 
 friendsRouter.get('/search', requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const query = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    const rawQuery = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    const query = rawQuery.replace(/^@+/, '').trim();
     if (query.length < 2) {
       res.json([]);
       return;

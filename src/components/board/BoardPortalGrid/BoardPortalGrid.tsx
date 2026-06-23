@@ -3,6 +3,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { BOARD_KINDS } from '@/data/boardKinds';
 import { boardKindPath } from '@/constants';
+import { RichIcon } from '@/components/ui/RichIcon';
 import styles from './BoardPortalGrid.module.css';
 
 interface BoardPortalGridProps {
@@ -20,12 +21,22 @@ const BoardPortalGrid = memo(function BoardPortalGrid({ compact = false }: Board
           style={{
             '--board-accent': item.accent,
             '--board-glow': item.glow,
+            '--board-cover': `url(${item.coverImage})`,
+            '--board-cover-pos': item.coverPosition,
             animationDelay: `${index * 0.06}s`,
           } as CSSProperties}
         >
+          <div className={styles.cardCover} aria-hidden />
+          <div className={styles.cardScrim} aria-hidden />
           <div className={styles.cardGlow} aria-hidden />
           <div className={styles.cardInner}>
-            <span className={styles.icon} aria-hidden>{item.icon}</span>
+            <RichIcon
+              name={item.icon}
+              variant="gem"
+              size="md"
+              accent={item.accent}
+              className={styles.icon}
+            />
             <div className={styles.text}>
               <span className={styles.subtitle}>{item.subtitle}</span>
               <h3 className={styles.title}>{item.title}</h3>

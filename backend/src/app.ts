@@ -27,6 +27,7 @@ import { friendsRouter } from './routes/friends.js';
 import { newsRouter } from './routes/news.js';
 import { pushRouter } from './routes/push.js';
 import { listingSocialRouter } from './routes/listingSocial.js';
+import { groupsRouter } from './routes/groups.js';
 
 function createApp() {
   const app = express();
@@ -56,6 +57,7 @@ function createApp() {
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/moderation', moderationRouter);
   app.use('/api/messages', messagesRouter);
+  app.use('/api/groups', groupsRouter);
   app.use('/api/presence', presenceRouter);
   app.use('/api/blocks', blocksRouter);
   app.use('/api/friends', friendsRouter);

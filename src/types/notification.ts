@@ -4,7 +4,8 @@ type NotificationType =
   | 'listing_rejected'
   | 'moderation_pending'
   | 'friend_request'
-  | 'friend_accepted';
+  | 'friend_accepted'
+  | 'group_invite';
 
 interface NotificationItem {
     id: string;

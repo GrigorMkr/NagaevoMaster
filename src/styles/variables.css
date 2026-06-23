@@ -90,6 +90,7 @@
 
   --font-display: 'Loos Wide', 'Loos Normal', system-ui, sans-serif;
   --font-body: 'Loos Normal', 'Manrope', system-ui, sans-serif;
+  --font-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', emoji;
   --font-ui: 'Manrope', 'Loos Normal', system-ui, sans-serif;
   --font-weight-display: 500;
   --font-weight-body: 500;

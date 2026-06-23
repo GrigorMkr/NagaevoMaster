@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { HERO_SUBTITLE, searchPath } from '@/constants';
 import { savePendingSearchQuery } from '@/constants/user-location';
-import { HeroStamp } from './HeroStamp';
+import { HeroCapabilityShowcase } from './HeroCapabilityShowcase';
 import styles from '../HomePage.module.css';
 
 const HeroSection = memo(function HeroSection() {
@@ -48,9 +48,9 @@ const HeroSection = memo(function HeroSection() {
               </Button>
             </div>
           </form>
-
-          <HeroStamp />
         </div>
+
+        <HeroCapabilityShowcase />
       </div>
     </section>
   );

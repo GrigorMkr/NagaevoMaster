@@ -10,7 +10,9 @@ import { GlobalChatSync } from '@/components/messages/GlobalChatSync/GlobalChatS
 import { PresenceBootstrap } from '@/components/user/PresenceBootstrap';
 import { LocationPromptBootstrap } from '@/components/location/LocationPromptBootstrap/LocationPromptBootstrap';
 import { CanonicalHostRedirect } from '@/components/layout/CanonicalHostRedirect/CanonicalHostRedirect';
+import { PerformanceBootstrap } from '@/components/performance/PerformanceBootstrap';
 import { NativeAppBootstrap } from '@/components/native/NativeAppBootstrap/NativeAppBootstrap';
+import { BootSplashDismiss } from '@/components/boot/BootSplashDismiss';
 import { TOAST_DURATION_MS } from '@/constants';
 import { store } from './store';
 function AppProviders({ children }: {
@@ -20,6 +22,8 @@ function AppProviders({ children }: {
       <HelmetProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <CanonicalHostRedirect />
+          <BootSplashDismiss />
+          <PerformanceBootstrap />
           <NativeAppBootstrap />
           <AccountLocationBootstrap />
           <AuthBootstrap />

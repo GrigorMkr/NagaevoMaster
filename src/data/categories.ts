@@ -1,3 +1,5 @@
+import type { AppIconName } from '@/types/icon';
+
 interface Subcategory {
     id: string;
     slug: string;
@@ -7,7 +9,7 @@ interface ServiceCategory {
     id: string;
     slug: string;
     name: string;
-    icon: string;
+    icon: AppIconName;
     description: string;
     subcategories: Subcategory[];
 }
@@ -16,7 +18,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'construction',
         slug: 'construction',
         name: 'Строительство и ремонт',
-        icon: '🏗️',
+        icon: 'hammer',
         description: 'Строители, отделка, сантехника, электрика, кровля и фасады',
         subcategories: [
             { id: 'builders', slug: 'builders', name: 'Строители' },
@@ -39,7 +41,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'machinery',
         slug: 'machinery',
         name: 'Спецтехника и оборудование',
-        icon: '🚜',
+        icon: 'tractor',
         description: 'Экскаваторы, тракторы, краны, ассенизаторы и дорожная техника',
         subcategories: [
             { id: 'earthmoving', slug: 'earthmoving', name: 'Землеройная техника' },
@@ -56,7 +58,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'utility',
         slug: 'utility',
         name: 'Коммунальные и бытовые услуги',
-        icon: '🧹',
+        icon: 'brush',
         description: 'Ассенизаторы, вывоз мусора, уборка, септики, водоснабжение',
         subcategories: [
             { id: 'septic-service', slug: 'septic-service', name: 'Ассенизаторы' },
@@ -75,7 +77,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'staff',
         slug: 'staff',
         name: 'Домашний персонал и услуги',
-        icon: '🏠',
+        icon: 'home',
         description: 'Уборка, сиделки, няни, садовники, повары и разнорабочие',
         subcategories: [
             { id: 'cleaners', slug: 'cleaners', name: 'Уборщицы' },
@@ -91,7 +93,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'logistics',
         slug: 'logistics',
         name: 'Грузоперевозки и логистика',
-        icon: '🚚',
+        icon: 'truck',
         description: 'Переезды, доставка стройматериалов и эвакуаторы',
         subcategories: [
             { id: 'apartment-move', slug: 'apartment-move', name: 'Квартирные переезды' },
@@ -106,7 +108,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'farming',
         slug: 'farming',
         name: 'Фермерские и сельхозуслуги',
-        icon: '🌾',
+        icon: 'wheat',
         description: 'Вспашка, культивация, покос, заготовка сена',
         subcategories: [
             { id: 'plowing', slug: 'plowing', name: 'Вспашка огорода' },
@@ -123,7 +125,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'pro',
         slug: 'pro',
         name: 'Профессиональные услуги',
-        icon: '💼',
+        icon: 'briefcase',
         description: 'Юристы, бухгалтеры, фотографы, риэлторы и репетиторы',
         subcategories: [
             { id: 'lawyers', slug: 'lawyers', name: 'Юристы' },
@@ -141,7 +143,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'sales',
         slug: 'sales',
         name: 'Торговля и продукция',
-        icon: '🛒',
+        icon: 'shopping',
         description: 'Пиломатериалы, бетон, саженцы, продукция с хозяйства',
         subcategories: [
             { id: 'lumber', slug: 'lumber', name: 'Пиломатериалы' },
@@ -156,7 +158,7 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         id: 'beauty',
         slug: 'beauty',
         name: 'Красота и здоровье',
-        icon: '💇',
+        icon: 'scissors',
         description: 'Парикмахеры, барберы, маникюр, косметология, массаж',
         subcategories: [
             { id: 'hairdresser', slug: 'hairdresser', name: 'Парикмахерские услуги' },
@@ -174,17 +176,17 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
         ],
     },
 ];
-const FORUM_CATEGORIES = [
-    { slug: 'construction', name: 'Строительство', icon: '🏗️' },
-    { slug: 'plumbing', name: 'Сантехника и отопление', icon: '🔧' },
-    { slug: 'electric', name: 'Электрика', icon: '⚡' },
-    { slug: 'machinery', name: 'Спецтехника', icon: '🚜' },
-    { slug: 'septic', name: 'Ассенизаторы', icon: '🚛' },
-    { slug: 'cleaning', name: 'Уборка и вывоз мусора', icon: '🧹' },
-    { slug: 'beauty', name: 'Красота и здоровье', icon: '💇' },
-    { slug: 'general', name: 'Общие вопросы', icon: '💬' },
-    { slug: 'other', name: 'Другие', icon: '📋' },
-] as const;
+const FORUM_CATEGORIES: ReadonlyArray<{ slug: string; name: string; icon: AppIconName }> = [
+    { slug: 'construction', name: 'Строительство', icon: 'hammer' },
+    { slug: 'plumbing', name: 'Сантехника и отопление', icon: 'wrench' },
+    { slug: 'electric', name: 'Электрика', icon: 'zap' },
+    { slug: 'machinery', name: 'Спецтехника', icon: 'tractor' },
+    { slug: 'septic', name: 'Ассенизаторы', icon: 'truck' },
+    { slug: 'cleaning', name: 'Уборка и вывоз мусора', icon: 'brush' },
+    { slug: 'beauty', name: 'Красота и здоровье', icon: 'scissors' },
+    { slug: 'general', name: 'Общие вопросы', icon: 'messages' },
+    { slug: 'other', name: 'Другие', icon: 'clipboard' },
+];
 function getCategoryBySlug(slug: string): ServiceCategory | undefined {
     return SERVICE_CATEGORIES.find((c) => c.slug === slug);
 }

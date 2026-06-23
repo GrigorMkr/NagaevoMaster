@@ -2,6 +2,7 @@ import { PageMeta } from '@/components/ui/PageMeta/PageMeta';
 import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
 import { BoardPortalGrid } from '@/components/board/BoardPortalGrid/BoardPortalGrid';
+import { BoardNewListingsStrip } from '@/components/board/BoardNewListingsStrip/BoardNewListingsStrip';
 import pageStyles from '@/styles/page.module.css';
 import styles from './BoardHubPage.module.css';
 
@@ -19,7 +20,6 @@ function BoardHubPage() {
             <PageHeader
               badge="Объявления"
               title="Доска"
-              subtitle="Три раздела для соседей: продать, найти работу или вернуть потерянное."
             />
           </Reveal>
           <Reveal delay={80}>
@@ -28,12 +28,7 @@ function BoardHubPage() {
             </div>
           </Reveal>
           <Reveal delay={120}>
-            <p className={styles.note}>
-              Услуги мастеров — в разделе
-              {' '}
-              <a href="/services">Услуги</a>
-              . Все объявления проходят модерацию.
-            </p>
+            <BoardNewListingsStrip />
           </Reveal>
         </div>
       </div>

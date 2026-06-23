@@ -9,7 +9,18 @@ const CategoriesSection = memo(function CategoriesSection() {
     return (<div className={styles.contentBlock}>
       <SectionHead badge="Каталог" title="Все категории"/>
       <div className={styles.categoryGrid}>
-        {SERVICE_CATEGORIES.map((cat, i) => (<CategoryCard key={cat.slug} to={servicesCategoryPath(cat.slug)} icon={cat.icon} name={cat.name} cover={getCategoryCover(cat.slug)} variant="tile" style={{ animationDelay: `${i * 0.04}s` }}/>))}
+        {SERVICE_CATEGORIES.map((cat, i) => (
+          <CategoryCard
+            key={cat.slug}
+            to={servicesCategoryPath(cat.slug)}
+            icon={cat.icon}
+            name={cat.name}
+            categorySlug={cat.slug}
+            cover={getCategoryCover(cat.slug)}
+            variant="tile"
+            style={{ animationDelay: `${i * 0.04}s` }}
+          />
+        ))}
       </div>
     </div>);
 });

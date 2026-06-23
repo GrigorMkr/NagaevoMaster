@@ -1,0 +1,208 @@
+html.boot-splash-active #boot-splash,
+html.native-app #boot-splash {
+  display: flex;
+}
+
+#boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 38%, rgba(45, 154, 116, 0.14) 0%, transparent 52%),
+    radial-gradient(circle at 18% 72%, rgba(240, 180, 41, 0.08) 0%, transparent 42%),
+    #081f18;
+  color: rgba(230, 255, 245, 0.88);
+  transition: opacity 0.42s ease, visibility 0.42s ease;
+}
+
+html.boot-splash-done #boot-splash {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-splash-stage {
+  position: relative;
+  width: min(58vw, 220px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.boot-splash-aura {
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 32%, rgba(240, 180, 41, 0.34) 0%, transparent 42%),
+    radial-gradient(circle at 62% 68%, rgba(23, 98, 74, 0.28) 0%, transparent 48%),
+    radial-gradient(circle, rgba(126, 200, 168, 0.14) 0%, transparent 68%);
+  filter: blur(10px);
+  animation: boot-aura-pulse 5s ease-in-out infinite;
+}
+
+.boot-splash-ring,
+.boot-splash-ring-secondary,
+.boot-splash-ring-tertiary {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.boot-splash-ring {
+  inset: 4%;
+  border: 2px dashed rgba(126, 200, 168, 0.32);
+  animation: boot-orbit 24s linear infinite;
+}
+
+.boot-splash-ring-secondary {
+  inset: 10%;
+  border: 1.5px double rgba(240, 180, 41, 0.22);
+  animation: boot-orbit-reverse 32s linear infinite;
+}
+
+.boot-splash-ring-tertiary {
+  inset: 16%;
+  border: 1px dotted rgba(23, 98, 74, 0.35);
+  animation: boot-orbit 40s linear infinite;
+}
+
+.boot-splash-orbit {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  animation: boot-orbit 20s linear infinite;
+}
+
+.boot-splash-orbit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #f0b429;
+  box-shadow: 0 0 10px rgba(240, 180, 41, 0.55);
+}
+
+.boot-splash-stamp {
+  position: relative;
+  z-index: 2;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  animation: boot-stamp-spin 16s linear infinite;
+  filter: saturate(1.08) drop-shadow(0 10px 24px rgba(8, 31, 24, 0.42));
+}
+
+.boot-splash-shine {
+  position: absolute;
+  inset: 18%;
+  z-index: 3;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.boot-splash-shine::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    115deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 62%
+  );
+  transform: translateX(-130%) rotate(8deg);
+  animation: boot-shine 6.5s ease-in-out infinite;
+}
+
+.boot-splash-label {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(180, 255, 220, 0.62);
+  animation: boot-label-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes boot-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes boot-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes boot-stamp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes boot-aura-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes boot-shine {
+  0%,
+  72% {
+    transform: translateX(-130%) rotate(8deg);
+  }
+
+  100% {
+    transform: translateX(130%) rotate(8deg);
+  }
+}
+
+@keyframes boot-label-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-splash-ring,
+  .boot-splash-ring-secondary,
+  .boot-splash-ring-tertiary,
+  .boot-splash-orbit,
+  .boot-splash-stamp,
+  .boot-splash-aura,
+  .boot-splash-shine::after,
+  .boot-splash-label {
+    animation: none;
+  }
+}

@@ -1,5 +1,6 @@
 import type { ConversationSummary } from '@/types/message';
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
+import { GroupAvatar } from '@/components/messages/GroupAvatar/GroupAvatar';
 import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import styles from './ForwardMessageModal.module.css';
 
@@ -32,11 +33,8 @@ function ForwardMessageModal({
         ) : (
           <ul className={styles.list}>
             {items.map((item) => {
-              const avatar = resolveAuthorAvatar(
-                item.otherUser.name,
-                item.otherUser.login,
-                item.otherUser.avatarUrl,
-              );
+              const isGroup = item.type === 'group' && item.group;
+              const label = isGroup ? item.group!.name : item.otherUser!.name;
               return (
                 <li key={item.id}>
                   <button
@@ -44,8 +42,32 @@ function ForwardMessageModal({
                     className={styles.item}
                     onClick={() => onSelect(item.id)}
                   >
-                    <UserAvatar name={item.otherUser.name} src={avatar} size="sm" />
-                    <span>{item.otherUser.name}</span>
+                    {isGroup ? (
+                      <GroupAvatar name={item.group!.name} avatarUrl={item.group!.avatarUrl} size="sm" />
+                    ) : (
+                      <UserAvatar
+                        name={item.otherUser!.name}
+                        src={resolveAuthorAvatar(
+                          item.otherUser!.name,
+                          item.otherUser!.login,
+                          item.otherUser!.avatarUrl,
+                        )}
+                        size="sm"
+                      />
+                    )}
+                    <span>
+                      {label}
+                      {isGroup && (
+                        <small className={styles.groupHint}>
+                          {' '}
+                          ·
+                          {' '}
+                          {item.group!.memberCount}
+                          {' '}
+                          уч.
+                        </small>
+                      )}
+                    </span>
                   </button>
                 </li>
               );

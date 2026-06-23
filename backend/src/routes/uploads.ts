@@ -47,13 +47,14 @@ const MESSAGE_DOC_MIMES = new Set([
 
 function isMessageMimeAllowed(mime: string) {
   return (mime.startsWith('image/') && mime !== 'image/svg+xml')
+    || mime.startsWith('video/')
     || mime.startsWith('audio/')
     || MESSAGE_DOC_MIMES.has(mime);
 }
 
 const messageUpload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  limits: { fileSize: 25 * 1024 * 1024, files: 1 },
   fileFilter: (_req, file, cb) => {
     if (!isMessageMimeAllowed(file.mimetype)) {
       cb(new HttpError(400, 'Недопустимый тип файла для переписки'));

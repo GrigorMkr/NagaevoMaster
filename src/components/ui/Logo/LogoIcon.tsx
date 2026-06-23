@@ -1,6 +1,8 @@
 import { useId } from 'react';
 import { LOGO_ICON_SIZE_DEFAULT } from '@/constants';
 import { usePrefersReducedMotion } from '@/hooks/useScrollRotation';
+import { StampBenchScene } from './StampBenchScene';
+import { StampPlayingKids } from './StampPlayingKids';
 
 interface LogoIconProps {
   size?: number;
@@ -8,6 +10,9 @@ interface LogoIconProps {
   fluid?: boolean;
   ariaHidden?: boolean;
   animatedText?: boolean;
+  variant?: 'default' | 'stamp';
+  chimneySmokeColor?: string;
+  animateChimneySmoke?: boolean;
 }
 
 function LogoIcon({
@@ -16,9 +21,14 @@ function LogoIcon({
   fluid = false,
   ariaHidden = true,
   animatedText = true,
+  variant = 'default',
+  chimneySmokeColor = '#4dd0a0',
+  animateChimneySmoke = true,
 }: LogoIconProps) {
   const reducedMotion = usePrefersReducedMotion();
   const motionEnabled = animatedText && !reducedMotion;
+  const isStamp = variant === 'stamp';
+  const chimneySmokeOn = isStamp && animateChimneySmoke && !reducedMotion;
   const rawId = useId().replace(/:/g, '');
   const topArc = `${rawId}-top`;
   const bottomArc = `${rawId}-bottom`;
@@ -89,7 +99,14 @@ function LogoIcon({
         </filter>
       </defs>
 
-      <circle cx="50" cy="50" r="48" fill={`url(#${paper})`} />
+      <circle
+        cx="50"
+        cy="50"
+        r="48"
+        fill={isStamp ? 'rgba(8, 28, 22, 0.03)' : `url(#${paper})`}
+        stroke={isStamp ? 'rgba(126, 200, 168, 0.32)' : undefined}
+        strokeWidth={isStamp ? 0.8 : undefined}
+      />
       <circle
         cx="50"
         cy="50"
@@ -98,11 +115,11 @@ function LogoIcon({
         stroke="#17624a"
         strokeWidth="3"
         strokeDasharray="1.5 2.2"
-        opacity="0.85"
-        filter={`url(#${ink})`}
+        opacity={isStamp ? 0.72 : 0.85}
+        filter={isStamp ? undefined : `url(#${ink})`}
       />
-      <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" strokeWidth="1.4" opacity="0.9" />
-      <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" strokeWidth="0.8" opacity="0.45" />
+      <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" strokeWidth="1.4" opacity={isStamp ? 0.78 : 0.9} />
+      <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" strokeWidth="0.8" opacity={isStamp ? 0.38 : 0.45} />
 
       <circle cx="50" cy="9.5" r="1.4" fill="#c0782a" opacity="0.85" />
       <circle cx="90.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
@@ -150,7 +167,9 @@ function LogoIcon({
         </text>
       </g>
 
-      <g transform="translate(50 49)" filter={`url(#${ink})`}>
+      <g transform="translate(50 49)" filter={isStamp ? undefined : `url(#${ink})`}>
+        <g transform="translate(0 -7)">
+        {isStamp && <StampPlayingKids animate={chimneySmokeOn} />}
         <path
           d="M -12 5 L 0 -11 L 12 5 Z"
           fill="#f0b429"
@@ -164,14 +183,70 @@ function LogoIcon({
           width="20"
           height="13"
           rx="1.2"
-          fill="#fffdf8"
+          fill={isStamp ? 'rgba(126, 200, 168, 0.06)' : '#fffdf8'}
           stroke="#0a3d2e"
           strokeWidth="1"
         />
-        <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.45" />
-        <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
-        <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
-        <path d="M -1 5 V 2.5" stroke="#c0782a" strokeWidth="1.2" strokeLinecap="round" />
+        <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity={isStamp ? 0.55 : 0.45} />
+        <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity={isStamp ? 0.28 : 0.18} />
+        <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity={isStamp ? 0.28 : 0.18} />
+        {isStamp && (
+          <>
+            <rect
+              x="5.4"
+              y="-9.2"
+              width="2.6"
+              height="6.8"
+              rx="0.35"
+              fill="rgba(126, 200, 168, 0.12)"
+              stroke="#0a3d2e"
+              strokeWidth="0.85"
+            />
+            <rect
+              x="4.9"
+              y="-10.4"
+              width="3.6"
+              height="1.15"
+              rx="0.25"
+              fill="#17624a"
+              stroke="#0a3d2e"
+              strokeWidth="0.7"
+            />
+            <g fill={chimneySmokeColor} stroke="none">
+              {chimneySmokeOn ? (
+                <>
+                  <ellipse cx="6.7" cy="-10.8" rx="0.9" ry="0.65" opacity="0">
+                    <animate attributeName="cy" values="-10.8;-15.5;-18.5" dur="2.8s" repeatCount="indefinite" />
+                    <animate attributeName="rx" values="0.7;1.3;1.8" dur="2.8s" repeatCount="indefinite" />
+                    <animate attributeName="ry" values="0.5;1.1;1.5" dur="2.8s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0;0.72;0" dur="2.8s" repeatCount="indefinite" />
+                  </ellipse>
+                  <ellipse cx="6.2" cy="-10.8" rx="0.75" ry="0.55" opacity="0">
+                    <animate attributeName="cy" values="-10.8;-14.2;-17" dur="2.2s" begin="0.55s" repeatCount="indefinite" />
+                    <animate attributeName="rx" values="0.6;1.15;1.55" dur="2.2s" begin="0.55s" repeatCount="indefinite" />
+                    <animate attributeName="ry" values="0.45;0.95;1.25" dur="2.2s" begin="0.55s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0;0.62;0" dur="2.2s" begin="0.55s" repeatCount="indefinite" />
+                  </ellipse>
+                  <ellipse cx="7.1" cy="-10.8" rx="0.65" ry="0.5" opacity="0">
+                    <animate attributeName="cy" values="-10.8;-13.5;-16.2" dur="1.9s" begin="1.1s" repeatCount="indefinite" />
+                    <animate attributeName="rx" values="0.55;1;1.35" dur="1.9s" begin="1.1s" repeatCount="indefinite" />
+                    <animate attributeName="ry" values="0.4;0.85;1.1" dur="1.9s" begin="1.1s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0;0.55;0" dur="1.9s" begin="1.1s" repeatCount="indefinite" />
+                  </ellipse>
+                </>
+              ) : (
+                <ellipse cx="6.7" cy="-13.5" rx="1.1" ry="0.85" opacity="0.45" />
+              )}
+            </g>
+          </>
+        )}
+        {!isStamp && (
+          <path d="M -1 5 V 2.5" stroke="#c0782a" strokeWidth="1.2" strokeLinecap="round" />
+        )}
+        </g>
+        {isStamp && (
+          <StampBenchScene smokeColor={chimneySmokeColor} animate={chimneySmokeOn} />
+        )}
       </g>
     </svg>
   );

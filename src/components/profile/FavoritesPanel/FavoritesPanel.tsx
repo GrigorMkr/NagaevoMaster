@@ -18,9 +18,9 @@ function FavoritesPanel() {
   }, []);
 
   return (
-    <ProfileExpandableSection title="Избранное" count={items.length} loading={loading}>
+    <ProfileExpandableSection title="Избранное" icon="heart" iconAccent="#f08a7e" count={items.length} loading={loading}>
       {items.length === 0 ? (
-        <p className={styles.empty}>Пока пусто — нажмите ☆ на карточке услуги</p>
+        <p className={styles.empty}>Пока пусто — добавьте услугу в избранное на карточке</p>
       ) : (
         <div className={tileGrid.grid}>
           {items.map((listing) => (

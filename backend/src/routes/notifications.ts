@@ -6,7 +6,7 @@ const notificationsRouter = Router();
 
 interface NotificationItem {
     id: string;
-    type: 'forum_reply' | 'listing_published' | 'listing_rejected' | 'moderation_pending' | 'friend_request' | 'friend_accepted';
+    type: 'forum_reply' | 'listing_published' | 'listing_rejected' | 'moderation_pending' | 'friend_request' | 'friend_accepted' | 'group_invite';
     title: string;
     message: string;
     link: string;
@@ -63,6 +63,33 @@ notificationsRouter.get('/', requireAuth, async (req: AuthRequest, res, next) =>
                 message: `${friendship.addressee.name} принял(а) вашу заявку в друзья`,
                 link: '/profile?section=friends',
                 createdAt: friendship.updatedAt.toISOString(),
+            });
+        }
+
+        const recentGroupJoins = await prisma.conversationMember.findMany({
+            where: {
+                userId,
+                leftAt: null,
+                role: { not: 'owner' },
+                joinedAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
+                conversation: { type: 'group' },
+            },
+            include: {
+                conversation: { select: { id: true, name: true } },
+            },
+            orderBy: { joinedAt: 'desc' },
+            take: 15,
+        });
+
+        for (const membership of recentGroupJoins) {
+            const groupName = membership.conversation.name ?? 'Сообщество';
+            items.push({
+                id: `group-invite-${membership.conversationId}-${membership.joinedAt.getTime()}`,
+                type: 'group_invite',
+                title: 'Приглашение в сообщество',
+                message: `Вас добавили в «${groupName}»`,
+                link: `/profile?section=messages&chat=${membership.conversationId}`,
+                createdAt: membership.joinedAt.toISOString(),
             });
         }
 

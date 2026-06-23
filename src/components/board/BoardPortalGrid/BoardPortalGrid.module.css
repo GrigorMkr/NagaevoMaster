@@ -25,24 +25,65 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: 11.5rem;
   padding: 1rem 1rem 0.85rem;
   border-radius: var(--radius-xl);
   color: inherit;
   text-decoration: none;
   overflow: hidden;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 42%),
-    rgba(8, 31, 24, 0.55);
-  border: 1px solid color-mix(in srgb, var(--board-accent) 35%, transparent);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 16px 40px rgba(0, 0, 0, 0.22);
+  background: rgba(8, 31, 24, 0.88);
+  border: none;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
   transition:
     transform 0.35s var(--ease-out-expo),
-    border-color var(--transition),
     box-shadow var(--transition);
   animation: boardCardIn 0.55s var(--ease-out-expo) both;
+}
+
+.cardCover {
+  position: absolute;
+  inset: 0;
+  background-image: var(--board-cover);
+  background-size: cover;
+  background-position: var(--board-cover-pos, center);
+  transform: scale(1);
+  image-rendering: -webkit-optimize-contrast;
+  transition: transform 0.5s var(--ease-out-expo);
+  pointer-events: none;
+}
+
+.card:hover .cardCover {
+  transform: scale(1.04);
+}
+
+.cardScrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(6, 22, 17, 0.82) 0%,
+      rgba(6, 22, 17, 0.62) 38%,
+      rgba(6, 22, 17, 0.38) 62%,
+      rgba(6, 22, 17, 0.72) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(6, 22, 17, 0.88) 0%,
+      transparent 42%
+    );
+  pointer-events: none;
+}
+
+.cardScrim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  backdrop-filter: saturate(1.2) brightness(0.95);
+  -webkit-backdrop-filter: saturate(1.2) brightness(0.95);
+  mask-image: linear-gradient(90deg, transparent 0%, black 32%, black 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 32%, black 100%);
+  pointer-events: none;
 }
 
 @keyframes boardCardIn {
@@ -54,10 +95,7 @@
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--board-accent) 55%, transparent);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 0 0 1px color-mix(in srgb, var(--board-accent) 20%, transparent),
     0 20px 48px var(--board-glow);
   color: inherit;
 }
@@ -75,6 +113,7 @@
 
 .cardInner {
   position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: 0.65rem;
@@ -82,15 +121,7 @@
 }
 
 .icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-lg);
-  font-size: 1.35rem;
-  background: color-mix(in srgb, var(--board-accent) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--board-accent) 30%, transparent);
+  align-self: start;
 }
 
 .text {
@@ -112,13 +143,14 @@
   font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.2;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
 }
 
 .desc {
   margin: 0.4rem 0 0;
   font-size: var(--font-size-xs);
   line-height: 1.55;
-  color: var(--color-text-muted);
+  color: rgba(230, 255, 245, 0.82);
 }
 
 .examples {
@@ -157,6 +189,7 @@
 
 .gridCompact .card {
   padding: 0.75rem 0.8rem;
+  min-height: 9rem;
 }
 
 .gridCompact .title {

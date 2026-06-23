@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import classNames from 'classnames';
+import { RichIcon } from '@/components/ui/RichIcon';
 import { MessagesPanel } from '@/components/profile/MessagesPanel/MessagesPanel';
 import { FriendsList } from '@/components/profile/FriendsPanel/FriendsList';
 import styles from './SocialPanel.module.css';
@@ -42,6 +43,7 @@ function SocialPanel({
           className={classNames(styles.tab, tab === 'messages' && styles.tabActive)}
           onClick={() => setTab('messages')}
         >
+          <RichIcon name="messages" variant="inline" size="sm" accent="#5eb8ff" motion="pulse" />
           Сообщения
         </button>
         <button
@@ -51,6 +53,7 @@ function SocialPanel({
           className={classNames(styles.tab, tab === 'friends' && styles.tabActive)}
           onClick={() => setTab('friends')}
         >
+          <RichIcon name="users" variant="inline" size="sm" accent="#7ec8a8" motion="pulse" />
           Друзья
         </button>
       </div>

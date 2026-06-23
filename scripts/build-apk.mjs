@@ -38,6 +38,19 @@ function findAndroidSdk() {
   return null;
 }
 
+function syncCapacitorShellSplash() {
+  const shellDir = path.join(root, 'mobile', 'capacitor-shell');
+  const shellBackgroundsDir = path.join(shellDir, 'backgrounds');
+  mkdirSync(shellBackgroundsDir, { recursive: true });
+  for (const file of ['boot-splash.css', 'favicon.svg']) {
+    copyFileSync(path.join(root, 'public', file), path.join(shellDir, file));
+  }
+  copyFileSync(
+    path.join(root, 'public', 'backgrounds', 'desktop-red-lake.jpg'),
+    path.join(shellBackgroundsDir, 'desktop-red-lake.jpg'),
+  );
+}
+
 function runCapSync(javaHome) {
   const env = {
     ...process.env,
@@ -155,6 +168,7 @@ try {
   process.exit(1);
 }
 
+syncCapacitorShellSplash();
 const syncCode = runCapSync(javaHome);
 if (syncCode !== 0) {
   process.exit(syncCode);

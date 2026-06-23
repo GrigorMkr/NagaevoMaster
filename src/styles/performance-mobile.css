@@ -1,0 +1,128 @@
+/* Лёгкий режим: телефоны, Capacitor, reduced-motion */
+
+html.low-power {
+  --glass-blur: none;
+}
+
+html.low-power .siteSurface__imgDesktop {
+  transition: none;
+  opacity: 0;
+}
+
+html.low-power .siteSurface__imgMobile {
+  opacity: 0.82;
+}
+
+html.low-power .siteSurface__imgDesktop:not(.siteSurface__imgDesktopActive) {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  html.low-power .siteSurface__imgMobile {
+    display: none;
+    opacity: 0;
+  }
+
+  html.low-power .siteSurface__imgDesktop {
+    display: block;
+  }
+
+  html.low-power .siteSurface__imgDesktopActive {
+    opacity: 0.82;
+  }
+}
+
+html.low-power .siteSurface__blob {
+  animation: none;
+  filter: blur(36px);
+  opacity: 0.18;
+}
+
+html.low-power .siteSurface__ring,
+html.low-power .siteSurface__sparkles,
+html.low-power .siteSurface__shine,
+html.low-power .siteSurface__grid {
+  display: none;
+}
+
+html.low-power .heroStampRing,
+html.low-power .heroStampRingSecondary,
+html.low-power .heroStampRingTertiary,
+html.low-power .heroStampOrbit,
+html.low-power .heroStampOrbitSecondary,
+html.low-power .heroStampSmokeCore,
+html.low-power .heroStampSmokeFront,
+html.low-power .heroStampShine::after {
+  animation: none;
+}
+
+html.low-power .heroStampInner {
+  will-change: auto;
+  transform: none !important;
+}
+
+html.low-power .heroStampWrap {
+  cursor: default;
+  perspective: none;
+}
+
+html.low-power .heroTitleAccent {
+  animation: none;
+  background: var(--gradient-gold);
+  background-size: auto;
+}
+
+html.low-power .stageGlow,
+html.low-power .flyNeon,
+html.low-power .flySparkles,
+html.low-power .flySheen,
+html.low-power .flyRipple {
+  display: none;
+}
+
+html.low-power .flyInner {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(6, 24, 19, 0.42);
+  animation: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+html.low-power .flyFromLeft,
+html.low-power .flyFromRight {
+  animation-duration: 0.45s;
+  filter: none !important;
+}
+
+html.low-power .flyIcon,
+html.low-power .flyTitle,
+html.low-power .flyBeam {
+  animation: none;
+}
+
+html.low-power .tickerTrack {
+  animation-duration: 48s;
+}
+
+html.low-power .cardScrim::after {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.low-power [class*='motionFloat'],
+html.low-power [class*='motionPulse'],
+html.low-power [class*='motionSpin'] {
+  animation: none !important;
+}
+
+html.low-power .contentBlock,
+html.low-power [data-reveal] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+@media (max-width: 768px) {
+  html:not(.low-power) .siteSurface__blob {
+    filter: blur(48px);
+  }
+}

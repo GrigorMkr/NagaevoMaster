@@ -2,6 +2,8 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
+    <script src="/boot-splash.js"></script>
+    <link rel="stylesheet" href="/boot-splash.css" />
     <script src="/early-redirect.js"></script>
     <link rel="canonical" href="https://nagaevomaster.ru/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -25,6 +27,18 @@
     <title>Нагаево Мастер — Все услуги поселка Нагаево</title>
   </head>
   <body>
+    <div id="boot-splash" role="status" aria-live="polite" aria-label="Загрузка Нагаево Мастер">
+      <div class="boot-splash-stage">
+        <div class="boot-splash-aura" aria-hidden="true"></div>
+        <div class="boot-splash-ring" aria-hidden="true"></div>
+        <div class="boot-splash-ring-secondary" aria-hidden="true"></div>
+        <div class="boot-splash-ring-tertiary" aria-hidden="true"></div>
+        <div class="boot-splash-orbit" aria-hidden="true"></div>
+        <img class="boot-splash-stamp" src="/favicon.svg" width="160" height="160" alt="" />
+        <div class="boot-splash-shine" aria-hidden="true"></div>
+      </div>
+      <p class="boot-splash-label">Загрузка</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

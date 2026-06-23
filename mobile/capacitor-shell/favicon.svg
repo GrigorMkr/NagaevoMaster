@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-label="Нагаево Мастер">
+  <defs>
+    <path id="topArc" d="M 20 50 A 30 30 0 0 1 80 50" fill="none" />
+    <path id="bottomArc" d="M 80 50 A 30 30 0 0 1 20 50" fill="none" />
+    <radialGradient id="paper" cx="42%" cy="38%" r="62%">
+      <stop offset="0%" stop-color="#fffaf2" />
+      <stop offset="55%" stop-color="#f5efe3" />
+      <stop offset="100%" stop-color="#e8dfd0" />
+    </radialGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#17624a" />
+      <stop offset="35%" stop-color="#2d9a74" />
+      <stop offset="55%" stop-color="#f0b429" />
+      <stop offset="75%" stop-color="#fde68a" />
+      <stop offset="100%" stop-color="#17624a" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#paper)" />
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#17624a" stroke-width="3" stroke-dasharray="1.5 2.2" opacity="0.85" />
+  <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" stroke-width="1.4" opacity="0.9" />
+  <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" stroke-width="0.8" opacity="0.45" />
+  <circle cx="50" cy="9.5" r="1.4" fill="#c0782a" opacity="0.85" />
+  <circle cx="90.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
+  <circle cx="50" cy="90.5" r="1.4" fill="#c0782a" opacity="0.85" />
+  <circle cx="9.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
+  <text font-family="system-ui, sans-serif" font-size="7.2" font-weight="700" fill="url(#gold)" letter-spacing="0.2em">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">НАГАЕВО</textPath>
+  </text>
+  <text font-family="system-ui, sans-serif" font-size="6.8" font-weight="700" fill="url(#gold)" letter-spacing="0.26em">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">МАСТЕР</textPath>
+  </text>
+  <g transform="translate(50 49)">
+    <path d="M -12 5 L 0 -11 L 12 5 Z" fill="#f0b429" stroke="#0a3d2e" stroke-width="1" stroke-linejoin="round" />
+    <rect x="-10" y="5" width="20" height="13" rx="1.2" fill="#fffdf8" stroke="#0a3d2e" stroke-width="1" />
+    <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.45" />
+    <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
+    <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
+    <path d="M -1 5 V 2.5" stroke="#c0782a" stroke-width="1.2" stroke-linecap="round" />
+  </g>
+</svg>
