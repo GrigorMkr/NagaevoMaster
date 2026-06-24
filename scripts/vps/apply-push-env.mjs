@@ -1,6 +1,7 @@
 /**
- * Применяет deploy/push.env на VPS и перезапускает API.
+ * Применяет deploy/push.env и firebase-service-account.json на VPS.
  *
+ *   npm run fcm:setup
  *   npm run vps:push
  */
 import { readFileSync, existsSync } from 'node:fs';
@@ -11,14 +12,19 @@ import { Client } from 'ssh2';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const pushPath = resolve(root, 'deploy/push.env');
+const serviceAccountPath = resolve(root, 'deploy/firebase-service-account.json');
 const keyPath = join(homedir(), '.ssh', 'nagaevomaster_vps');
 const host = process.env.VPS_HOST ?? '161.104.18.17';
+const remoteServiceAccountPath = '/var/www/nagaevomaster/backend/firebase-service-account.json';
 
 const KEYS = [
   'VAPID_PUBLIC_KEY',
   'VAPID_PRIVATE_KEY',
   'VAPID_SUBJECT',
   'FCM_SERVER_KEY',
+  'FCM_PROJECT_ID',
+  'FCM_SERVICE_ACCOUNT_PATH',
+  'GOOGLE_APPLICATION_CREDENTIALS',
 ];
 
 function loadEnv(file) {
@@ -44,6 +50,11 @@ if (!vars.VAPID_PUBLIC_KEY || !vars.VAPID_PRIVATE_KEY) {
   process.exit(1);
 }
 
+if (existsSync(serviceAccountPath)) {
+  vars.FCM_SERVICE_ACCOUNT_PATH = remoteServiceAccountPath;
+  vars.GOOGLE_APPLICATION_CREDENTIALS = remoteServiceAccountPath;
+}
+
 const mergeScript = `#!/bin/bash
 set -euo pipefail
 ENV_FILE=/var/www/nagaevomaster/backend/.env
@@ -57,6 +68,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   mv "$ENV_FILE.tmp" "$ENV_FILE"
   printf '%s=%s\\n' "$key" "$val" >> "$ENV_FILE"
 done < "$PUSH_FILE"
+chmod 600 /var/www/nagaevomaster/backend/firebase-service-account.json 2>/dev/null || true
 pm2 restart nagaevomaster-api --update-env
 sleep 2
 curl -fsS http://127.0.0.1:4000/api/health && echo ""
@@ -73,6 +85,11 @@ function upload(sftp, path, content, mode = 0o644) {
     ws.on('error', reject);
     ws.end(content);
   });
+}
+
+function uploadFile(sftp, localPath, remotePath, mode = 0o600) {
+  const content = readFileSync(localPath);
+  return upload(sftp, remotePath, content, mode);
 }
 
 function run(conn, command) {
@@ -96,6 +113,10 @@ conn
           try {
             await upload(sftp, '/tmp/push-merge.env', pushBody);
             await upload(sftp, '/tmp/apply-push.sh', mergeScript, 0o755);
+            if (existsSync(serviceAccountPath)) {
+              await uploadFile(sftp, serviceAccountPath, remoteServiceAccountPath, 0o600);
+              console.log(`Загружен: ${remoteServiceAccountPath}`);
+            }
             resolve();
           } catch (e) {
             reject(e);
@@ -104,7 +125,7 @@ conn
       });
       await run(conn, 'bash /tmp/apply-push.sh');
       conn.end();
-      console.log('\nГотово. На сайте нажмите «Включить уведомления» в профиле.');
+      console.log('\nГотово. Push-уведомления настроены на VPS.');
     } catch (e) {
       console.error(e);
       conn.end();

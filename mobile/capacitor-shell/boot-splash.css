@@ -14,9 +14,13 @@ html.native-app #boot-splash {
   gap: 1.15rem;
   padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
   background:
-    radial-gradient(circle at 50% 38%, rgba(45, 154, 116, 0.14) 0%, transparent 52%),
-    radial-gradient(circle at 18% 72%, rgba(240, 180, 41, 0.08) 0%, transparent 42%),
-    #081f18;
+    linear-gradient(
+      180deg,
+      rgba(8, 31, 24, 0.48) 0%,
+      rgba(8, 31, 24, 0.58) 45%,
+      rgba(8, 31, 24, 0.68) 100%
+    ),
+    url('/backgrounds/desktop-red-lake.jpg') center 42% / cover no-repeat;
   color: rgba(230, 255, 245, 0.88);
   transition: opacity 0.42s ease, visibility 0.42s ease;
 }
@@ -99,8 +103,9 @@ html.boot-splash-done #boot-splash {
   width: 72%;
   height: 72%;
   border-radius: 50%;
-  animation: boot-stamp-spin 16s linear infinite;
-  filter: saturate(1.08) drop-shadow(0 10px 24px rgba(8, 31, 24, 0.42));
+  filter: drop-shadow(0 10px 24px rgba(8, 31, 24, 0.42))
+    drop-shadow(0 0 18px rgba(77, 208, 160, 0.28));
+  animation: boot-stamp-breathe 3.2s ease-in-out infinite;
 }
 
 .boot-splash-shine {
@@ -183,6 +188,17 @@ html.boot-splash-done #boot-splash {
   }
 }
 
+@keyframes boot-stamp-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 @keyframes boot-label-pulse {
   0%,
   100% {
@@ -199,10 +215,10 @@ html.boot-splash-done #boot-splash {
   .boot-splash-ring-secondary,
   .boot-splash-ring-tertiary,
   .boot-splash-orbit,
-  .boot-splash-stamp,
   .boot-splash-aura,
   .boot-splash-shine::after,
-  .boot-splash-label {
+  .boot-splash-label,
+  .boot-splash-stamp {
     animation: none;
   }
 }

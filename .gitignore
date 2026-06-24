@@ -17,6 +17,8 @@ deploy/regru.env
 deploy/notify.env
 deploy/oauth.env
 deploy/push.env
+deploy/google-services.json
+deploy/firebase-service-account.json
 deploy/captcha.env
 deploy/ssl-local/
 hosting.reg.ru.env

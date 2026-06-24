@@ -1,4 +1,4 @@
-/* Лёгкий режим: телефоны, Capacitor, reduced-motion */
+/* Лёгкий режим: телефоны в браузере и reduced-motion */
 
 html.low-power {
   --glass-blur: none;

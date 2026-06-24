@@ -2,11 +2,6 @@
   <defs>
     <path id="topArc" d="M 20 50 A 30 30 0 0 1 80 50" fill="none" />
     <path id="bottomArc" d="M 80 50 A 30 30 0 0 1 20 50" fill="none" />
-    <radialGradient id="paper" cx="42%" cy="38%" r="62%">
-      <stop offset="0%" stop-color="#fffaf2" />
-      <stop offset="55%" stop-color="#f5efe3" />
-      <stop offset="100%" stop-color="#e8dfd0" />
-    </radialGradient>
     <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#17624a" />
       <stop offset="35%" stop-color="#2d9a74" />
@@ -15,10 +10,10 @@
       <stop offset="100%" stop-color="#17624a" />
     </linearGradient>
   </defs>
-  <circle cx="50" cy="50" r="48" fill="url(#paper)" />
-  <circle cx="50" cy="50" r="47" fill="none" stroke="#17624a" stroke-width="3" stroke-dasharray="1.5 2.2" opacity="0.85" />
-  <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" stroke-width="1.4" opacity="0.9" />
-  <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" stroke-width="0.8" opacity="0.45" />
+  <circle cx="50" cy="50" r="48" fill="rgba(8, 28, 22, 0.03)" stroke="rgba(126, 200, 168, 0.32)" stroke-width="0.8" />
+  <circle cx="50" cy="50" r="47" fill="none" stroke="#17624a" stroke-width="3" stroke-dasharray="1.5 2.2" opacity="0.72" />
+  <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" stroke-width="1.4" opacity="0.78" />
+  <circle cx="50" cy="50" r="39" fill="none" stroke="#17624a" stroke-width="0.8" opacity="0.38" />
   <circle cx="50" cy="9.5" r="1.4" fill="#c0782a" opacity="0.85" />
   <circle cx="90.5" cy="50" r="1.4" fill="#c0782a" opacity="0.85" />
   <circle cx="50" cy="90.5" r="1.4" fill="#c0782a" opacity="0.85" />
@@ -30,11 +25,94 @@
     <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">МАСТЕР</textPath>
   </text>
   <g transform="translate(50 49)">
+    <g transform="translate(0 -7)">
+    <g transform="translate(-9 -1.2)">
+      <ellipse cx="0" cy="-9.2" rx="8.2" ry="1.1" fill="rgba(45, 154, 116, 0.2)" stroke="#2d9a74" stroke-width="0.35" opacity="0.7" />
+      <g transform="translate(-3.4 -14.8)">
+        <ellipse cx="0" cy="0.62" rx="0.82" ry="0.48" fill="#1a1208" />
+        <path d="M -0.68 2.2 L -1.22 0.65" stroke="#f0c9a0" stroke-width="0.52" fill="none" stroke-linecap="round" />
+        <path d="M 0.68 2.2 L 1.22 0.65" stroke="#f0c9a0" stroke-width="0.52" fill="none" stroke-linecap="round" />
+        <circle cx="0" cy="1.45" r="0.95" fill="#f0c9a0" stroke="#0a3d2e" stroke-width="0.4" />
+        <path d="M -0.5 1.95 H 0.5 V 4.65 H -0.5 Z" fill="#f0b429" stroke="#0a3d2e" stroke-width="0.38" />
+        <path d="M -0.42 4.55 L -0.57 6.85 M 0.42 4.55 L 0.57 6.85" stroke="#f0c9a0" stroke-width="0.58" fill="none" stroke-linecap="round" />
+        <circle cx="0" cy="0.15" r="0.58" fill="#f0b429" stroke="#0a3d2e" stroke-width="0.34" />
+      </g>
+      <g transform="translate(0 -14)">
+        <ellipse cx="-1.05" cy="0.95" rx="0.32" ry="0.48" fill="#1a1208" />
+        <ellipse cx="1.05" cy="0.95" rx="0.32" ry="0.48" fill="#1a1208" />
+        <circle cx="0" cy="1.05" r="0.78" fill="#f0c9a0" stroke="#0a3d2e" stroke-width="0.36" />
+        <path d="M -0.42 1.55 H 0.42 V 3.85 H -0.42 Z" fill="#f5a8c8" stroke="#0a3d2e" stroke-width="0.35" />
+        <path d="M -0.35 3.75 L -0.5 5.55 M 0.35 3.75 L 0.5 5.55" stroke="#f0c9a0" stroke-width="0.5" fill="none" stroke-linecap="round" />
+        <g transform="translate(0 1.72) scale(0.52)">
+          <path d="M 0 0.55 C 0 0.05 -0.65 -0.35 -0.95 -0.1 C -1.25 -0.35 -1.85 0.05 -1.85 0.55 C -1.85 1.2 0 2.55 0 2.55 C 0 2.55 1.85 1.2 1.85 0.55 C 1.85 0.05 1.25 -0.35 0.95 -0.1 C 0.65 -0.35 0 0.05 0 0.55 Z" fill="#e63946" stroke="#b91c3c" stroke-width="0.18" />
+        </g>
+      </g>
+      <g transform="translate(3.5 -15.7)">
+        <ellipse cx="0" cy="0.72" rx="1.02" ry="0.58" fill="#1a1208" />
+        <circle cx="0" cy="1.75" r="1.1" fill="#f0c9a0" stroke="#0a3d2e" stroke-width="0.42" />
+        <path d="M -0.58 2.35 H 0.58 V 5.45 H -0.58 Z" fill="#2d9a74" stroke="#0a3d2e" stroke-width="0.4" />
+        <path d="M -0.48 5.35 L -0.63 8.05 M 0.48 5.35 L 0.63 8.05" stroke="#f0c9a0" stroke-width="0.58" fill="none" stroke-linecap="round" />
+        <path d="M 0.85 2.7 L 1.65 1.55" stroke="#f0c9a0" stroke-width="0.55" fill="none" stroke-linecap="round" />
+      </g>
+    </g>
     <path d="M -12 5 L 0 -11 L 12 5 Z" fill="#f0b429" stroke="#0a3d2e" stroke-width="1" stroke-linejoin="round" />
-    <rect x="-10" y="5" width="20" height="13" rx="1.2" fill="#fffdf8" stroke="#0a3d2e" stroke-width="1" />
-    <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.45" />
-    <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
-    <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.18" />
-    <path d="M -1 5 V 2.5" stroke="#c0782a" stroke-width="1.2" stroke-linecap="round" />
+    <rect x="-10" y="5" width="20" height="13" rx="1.2" fill="rgba(126, 200, 168, 0.06)" stroke="#0a3d2e" stroke-width="1" />
+    <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.55" />
+    <rect x="-7.5" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.28" />
+    <rect x="4" y="8" width="3.5" height="3.5" rx="0.6" fill="#17624a" opacity="0.28" />
+    <rect x="5.4" y="-9.2" width="2.6" height="6.8" rx="0.35" fill="rgba(126, 200, 168, 0.12)" stroke="#0a3d2e" stroke-width="0.85" />
+    <rect x="4.9" y="-10.4" width="3.6" height="1.15" rx="0.25" fill="#17624a" stroke="#0a3d2e" stroke-width="0.7" />
+    <ellipse cx="6.7" cy="-13.2" rx="1" ry="0.75" fill="#4dd0a0" opacity="0.5" />
+    </g>
+    <g transform="translate(0 14.5)">
+      <path d="M -7.2 11.2 C -9.2 11.6 -9.6 13.1 -7.6 13.6 C -5.8 13.2 -6.2 11.7 -7.2 11.2 Z" fill="none" stroke="#0a3d2e" stroke-width="0.65" />
+      <path d="M 7.2 11.2 C 9.2 11.6 9.6 13.1 7.6 13.6 C 5.8 13.2 6.2 11.7 7.2 11.2 Z" fill="none" stroke="#0a3d2e" stroke-width="0.65" />
+      <rect x="-7.8" y="7.4" width="15.6" height="1.7" rx="0.35" fill="#c0782a" stroke="#0a3d2e" stroke-width="0.55" />
+      <rect x="-7.8" y="3.8" width="15.6" height="3.4" rx="0.45" fill="rgba(126, 200, 168, 0.14)" stroke="#0a3d2e" stroke-width="0.55" />
+      <path d="M -5.5 7.4 L -5.9 9.3 L -5.1 9.5" stroke="#f0c9a0" stroke-width="0.85" fill="none" stroke-linecap="round" />
+      <path d="M -3.7 7.4 L -3.3 9.3 L -4.1 9.5" stroke="#f0c9a0" stroke-width="0.85" fill="none" stroke-linecap="round" />
+      <path d="M 3.6 7.4 L 3.2 9.3 L 4.0 9.5" stroke="#f0c9a0" stroke-width="0.85" fill="none" stroke-linecap="round" />
+      <path d="M 5.6 7.4 L 6.0 9.3 L 5.2 9.5" stroke="#f0c9a0" stroke-width="0.85" fill="none" stroke-linecap="round" />
+      <path d="M -6.4 1.4 Q -7.4 0.2 -6.0 -0.3 Q -4.8 0.1 -4.0 1.0 Q -4.6 1.8 -5.5 2.0 Q -6.2 1.9 -6.4 1.4 Z" fill="#1a1208" stroke="#0a3d2e" stroke-width="0.35" />
+      <circle cx="-4.6" cy="2.75" r="1.45" fill="#f0c9a0" stroke="#0a3d2e" stroke-width="0.5" />
+      <path d="M -5.9 4.4 H -3.3 V 7.4 H -5.9 Z" fill="#2d9a74" stroke="#0a3d2e" stroke-width="0.45" />
+      <path d="M -4.0 4.7 Q -3.6 5.0 -3.5 5.1" stroke="#f0c9a0" stroke-width="0.62" fill="none" stroke-linecap="round" />
+      <path d="M -5.4 4.6 L -6.6 2.4 L -6.9 1.35" stroke="#f0c9a0" stroke-width="0.62" fill="none" stroke-linecap="round" />
+      <path d="M -5.35 2.02 Q -5.15 1.86 -4.95 2.02" stroke="#1a1208" stroke-width="0.36" fill="none" stroke-linecap="round" />
+      <path d="M -4.25 2.02 Q -4.05 1.86 -3.85 2.02" stroke="#1a1208" stroke-width="0.36" fill="none" stroke-linecap="round" />
+      <ellipse cx="-5.15" cy="2.38" rx="0.26" ry="0.19" fill="#fffdf8" stroke="#0a3d2e" stroke-width="0.22" />
+      <circle cx="-5.15" cy="2.38" r="0.11" fill="#0a3d2e" />
+      <ellipse cx="-4.05" cy="2.38" rx="0.26" ry="0.19" fill="#fffdf8" stroke="#0a3d2e" stroke-width="0.22" />
+      <circle cx="-4.05" cy="2.38" r="0.11" fill="#0a3d2e" />
+      <path d="M -6.2 3.1 Q -5.8 5.4 -4.6 5.35 Q -3.4 5.4 -3.0 3.1 Q -3.7 4.2 -4.6 4.35 Q -5.5 4.2 -6.2 3.1 Z" fill="#2a1f14" stroke="#0a3d2e" stroke-width="0.4" />
+      <ellipse cx="-4.6" cy="4.3" rx="0.65" ry="0.75" fill="#2a1f14" />
+      <path d="M 1.9 4.0 Q 1.1 1.2 2.8 0.05 Q 4.4 -0.55 5.9 0.05 Q 7.6 0.7 7.5 3.0 Q 7.4 5.3 5.6 5.7 Q 3.8 6.1 1.9 4.0 Z" fill="#1a1208" stroke="#0a3d2e" stroke-width="0.4" />
+      <ellipse cx="2.5" cy="0.85" rx="0.4" ry="0.55" fill="#1a1208" />
+      <ellipse cx="4.6" cy="0.28" rx="0.34" ry="0.48" fill="#1a1208" />
+      <ellipse cx="6.7" cy="0.82" rx="0.42" ry="0.56" fill="#1a1208" />
+      <ellipse cx="2.4" cy="2.55" rx="0.32" ry="0.44" fill="#1a1208" />
+      <ellipse cx="6.5" cy="2.45" rx="0.34" ry="0.46" fill="#1a1208" />
+      <ellipse cx="3.1" cy="3.15" rx="0.3" ry="0.42" fill="#1a1208" />
+      <ellipse cx="5.9" cy="3.05" rx="0.32" ry="0.44" fill="#1a1208" />
+      <circle cx="4.6" cy="2.85" r="1.35" fill="#f0c9a0" stroke="#0a3d2e" stroke-width="0.5" />
+      <path d="M 3.3 4.4 H 5.9 V 7.4 H 3.3 Z" fill="#c94a5a" stroke="#0a3d2e" stroke-width="0.45" />
+      <path d="M 3.5 4.6 Q 3.9 4.95 4.2 5.15" stroke="#f0c9a0" stroke-width="0.58" fill="none" stroke-linecap="round" />
+      <path d="M 5.7 4.6 Q 5.3 4.95 5.0 5.15" stroke="#f0c9a0" stroke-width="0.58" fill="none" stroke-linecap="round" />
+      <path d="M 3.95 2.18 Q 4.6 2.02 5.25 2.18" stroke="#1a1208" stroke-width="0.38" fill="none" stroke-linecap="round" />
+      <ellipse cx="4.1" cy="2.48" rx="0.26" ry="0.19" fill="#fffdf8" stroke="#0a3d2e" stroke-width="0.22" />
+      <circle cx="4.1" cy="2.48" r="0.11" fill="#0a3d2e" />
+      <ellipse cx="5.1" cy="2.48" rx="0.26" ry="0.19" fill="#fffdf8" stroke="#0a3d2e" stroke-width="0.22" />
+      <circle cx="5.1" cy="2.48" r="0.11" fill="#0a3d2e" />
+      <g transform="translate(4.6 5.35)">
+        <path d="M 0 0.55 C 0 0.05 -0.65 -0.35 -0.95 -0.1 C -1.25 -0.35 -1.85 0.05 -1.85 0.55 C -1.85 1.2 0 2.55 0 2.55 C 0 2.55 1.85 1.2 1.85 0.55 C 1.85 0.05 1.25 -0.35 0.95 -0.1 C 0.65 -0.35 0 0.05 0 0.55 Z" fill="#e63946" stroke="#b91c3c" stroke-width="0.18" />
+      </g>
+      <ellipse cx="0" cy="9.6" rx="1.75" ry="1.15" fill="rgba(126, 200, 168, 0.18)" stroke="#0a3d2e" stroke-width="0.5" />
+      <rect x="-0.32" y="6.4" width="0.64" height="3.1" rx="0.15" fill="#17624a" stroke="#0a3d2e" stroke-width="0.35" />
+      <ellipse cx="0" cy="6.1" rx="1.05" ry="0.75" fill="#0a3d2e" opacity="0.55" />
+      <path d="M -0.4 6.6 C -1.6 6.3 -2.6 5.7 -3.4 5.0" stroke="#c0782a" stroke-width="0.5" fill="none" />
+      <circle cx="-3.45" cy="4.95" r="0.38" fill="#c0782a" stroke="#0a3d2e" stroke-width="0.3" />
+      <ellipse cx="-4.6" cy="1.0" rx="0.75" ry="0.55" fill="#4dd0a0" opacity="0.42" />
+      <ellipse cx="0" cy="2.2" rx="0.9" ry="0.65" fill="#4dd0a0" opacity="0.35" />
+    </g>
   </g>
 </svg>

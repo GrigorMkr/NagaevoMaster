@@ -22,6 +22,7 @@ import {
 import { ensurePushNotifications } from '@/services/pushApi'
 import { resolveOAuthApiBase } from '@/utils/oauthApiBase'
 import { openOAuthUrl } from '@/utils/nativeNavigation'
+import { isNativeApp } from '@/utils/nativeApp'
 import { completeOAuthLogin } from '@/services/completeOAuthLogin'
 import { RecaptchaWidget } from '@/components/auth/RecaptchaWidget/RecaptchaWidget'
 import { GoogleLogo, VkLogo } from '@/components/auth/OAuthLogoButton/OAuthLogos'
@@ -228,12 +229,13 @@ function AuthPage() {
   const vkAuthUrl = `${apiBase}/auth/vk`
   const resolvedVkAppId = oauthStatus?.vkAppId ?? VK_KNOWN_APP_ID
   const oauthEnabled = Boolean(oauthStatus?.google || oauthStatus?.vk || resolvedVkAppId)
+  const showOAuth = !isNativeApp()
 
   const goAfterAuth = () => {
     navigate(returnPath, { replace: true })
   }
 
-  const oauthButtons = oauthStatus && oauthEnabled ? (
+  const oauthButtons = showOAuth && oauthStatus && oauthEnabled ? (
     <div className={styles.oauthRow}>
       {oauthStatus.google && (
         <button

@@ -1,7 +1,7 @@
 import webpush from 'web-push';
 import { prisma } from '../../lib/prisma.js';
 import { env } from '../../config/env.js';
-import { extractFcmToken, isFcmEndpoint, sendFcmMessage, type MessagePushPayload } from './fcmPush.js';
+import { extractFcmToken, isFcmEndpoint, isFcmConfigured, sendFcmMessage, sendFcmNotification, type MessagePushPayload } from './fcmPush.js';
 
 let configured = false;
 
@@ -22,7 +22,7 @@ function ensureWebPush() {
 function isPushConfigured(): boolean {
   return Boolean(
     (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY)
-    || env.FCM_SERVER_KEY,
+    || isFcmConfigured(),
   );
 }
 
@@ -118,22 +118,10 @@ async function sendFriendPush(payload: FriendPushPayload) {
     if (!ensureWebPush() && !isFcmEndpoint(sub.endpoint)) return;
 
     if (isFcmEndpoint(sub.endpoint)) {
-      await fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `key=${env.FCM_SERVER_KEY}`,
-        },
-        body: JSON.stringify({
-          to: extractFcmToken(sub.endpoint),
-          priority: 'high',
-          notification: {
-            title: body.title,
-            body: body.body,
-            sound: 'default',
-          },
-          data: { url: body.url },
-        }),
+      await sendFcmNotification(extractFcmToken(sub.endpoint), {
+        title: body.title,
+        body: body.body,
+        data: { url: body.url },
       }).catch(() => undefined);
       return;
     }
@@ -188,22 +176,11 @@ async function sendGroupInvitePush(payload: GroupInvitePushPayload) {
 
   await Promise.all(subscriptions.map(async (sub) => {
     if (isFcmEndpoint(sub.endpoint)) {
-      await fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `key=${env.FCM_SERVER_KEY}`,
-        },
-        body: JSON.stringify({
-          to: extractFcmToken(sub.endpoint),
-          priority: 'high',
-          notification: {
-            title: body.title,
-            body: body.body,
-            sound: 'default',
-          },
-          data: { url: body.url, messageId },
-        }),
+      await sendFcmNotification(extractFcmToken(sub.endpoint), {
+        title: body.title,
+        body: body.body,
+        messageId,
+        data: { url: body.url, messageId },
       }).catch(() => undefined);
       return;
     }

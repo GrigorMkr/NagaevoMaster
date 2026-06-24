@@ -1,5 +1,3 @@
-import { isNativeApp } from '@/utils/nativeApp';
-
 function prefersReducedMotion(): boolean {
   if (typeof window.matchMedia !== 'function') {
     return false;
@@ -24,13 +22,9 @@ function isNarrowViewport(): boolean {
   return window.innerWidth <= 768;
 }
 
-/** Телефоны, Android/iOS WebView и узкие touch-экраны. */
+/** Телефоны в браузере и узкие touch-экраны (не Capacitor). */
 function isLowPowerDevice(): boolean {
   if (prefersReducedMotion()) {
-    return true;
-  }
-
-  if (isNativeApp()) {
     return true;
   }
 

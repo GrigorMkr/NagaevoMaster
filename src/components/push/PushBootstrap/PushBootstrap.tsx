@@ -10,6 +10,7 @@ import {
   registerServiceWorker,
   syncAuthToServiceWorker,
 } from '@/services/pushApi';
+import { forceNativePushOnLaunch } from '@/services/nativePush';
 import { unlockMessageSound } from '@/utils/messageSound';
 import {
   isIosDevice,
@@ -17,7 +18,7 @@ import {
   isStandalonePwa,
 } from '@/utils/pushEnvironment';
 import { isNativeApp } from '@/utils/nativeApp';
-import { isPushEnabledPreference } from '@/utils/pushPreferences';
+import { isPushEnabledPreference, setPushEnabledPreference } from '@/utils/pushPreferences';
 
 function preloadMessageSound() {
   const unlock = () => {
@@ -51,6 +52,15 @@ function PushBootstrap() {
   }, []);
 
   useEffect(() => {
+    if (!isNativeApp()) return undefined;
+
+    setPushEnabledPreference(true);
+    void forceNativePushOnLaunch();
+
+    return undefined;
+  }, []);
+
+  useEffect(() => {
     if (!isAuthenticated) {
       void syncAuthToServiceWorker();
       return;
@@ -58,6 +68,13 @@ function PushBootstrap() {
 
     void syncAuthToServiceWorker();
     void registerBackgroundMessageSync();
+
+    if (isNativeApp()) {
+      setPushEnabledPreference(true);
+      void fetchPushStatus().catch(() => undefined);
+      void ensurePushNotifications({ requestPermission: true });
+      return;
+    }
 
     if (!isPushEnabledPreference()) {
       return;

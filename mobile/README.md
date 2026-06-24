@@ -40,8 +40,12 @@ npm run cap:ios
 
 ## Push (Android)
 
-1. `google-services.json` → `android/app/`
-2. `FCM_SERVER_KEY` в `deploy/push.env` → `npm run vps:push`
-3. Пересобрать APK
+1. Один раз: `npx firebase login`
+2. `npm run android:firebase` — `google-services.json` для APK
+3. `npm run fcm:setup` — сервисный аккаунт FCM v1 для API
+4. `npm run vps:push` — ключи на VPS
+5. `npm run build:apk`
+
+Файлы `deploy/google-services.json`, `deploy/firebase-service-account.json` в git не попадают.
 
 ID приложения: `ru.nagaevomaster.app`

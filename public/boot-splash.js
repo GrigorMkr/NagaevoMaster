@@ -6,7 +6,7 @@
   var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
 
   if (native) {
-    root.classList.add('native-app', 'low-power', 'boot-splash-active');
+    root.classList.add('native-app', 'boot-splash-active');
     return;
   }
 

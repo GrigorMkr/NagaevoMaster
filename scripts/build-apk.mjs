@@ -174,6 +174,14 @@ if (syncCode !== 0) {
   process.exit(syncCode);
 }
 
+const firebaseResult = spawnSync('node', ['scripts/setup-google-services.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+});
+if (firebaseResult.status !== 0) {
+  process.exit(firebaseResult.status ?? 1);
+}
+
 const configureResult = spawnSync('node', ['scripts/configure-android-push.mjs'], {
   cwd: root,
   stdio: 'inherit',

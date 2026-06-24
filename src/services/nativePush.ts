@@ -3,7 +3,7 @@ import { api } from './api';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { isNativeApp } from '@/utils/nativeApp';
 import { setPushSubscribed } from '@/utils/pushSubscribed';
-import { isPushEnabledPreference } from '@/utils/pushPreferences';
+import { isPushEnabledPreference, setPushEnabledPreference } from '@/utils/pushPreferences';
 import { playMessageSound } from '@/utils/messageSound';
 import { tryClaimMessageNotice } from '@/utils/messageNotice';
 
@@ -27,8 +27,14 @@ function hasAuthToken(): boolean {
   }
 }
 
+let pendingNativeToken: string | null = null;
+let nativePushInitialized = false;
+
 async function saveNativeToken(token: string): Promise<boolean> {
-  if (!hasAuthToken()) return false;
+  if (!hasAuthToken()) {
+    pendingNativeToken = token;
+    return false;
+  }
 
   await api.post('/push/subscribe', {
     endpoint: `${FCM_ENDPOINT_PREFIX}${token}`,
@@ -38,7 +44,16 @@ async function saveNativeToken(token: string): Promise<boolean> {
     },
   });
   setPushSubscribed(true);
+  pendingNativeToken = null;
   return true;
+}
+
+async function flushPendingNativePushToken(): Promise<boolean> {
+  if (!pendingNativeToken || !hasAuthToken()) {
+    return false;
+  }
+
+  return saveNativeToken(pendingNativeToken);
 }
 
 function navigateFromPushData(data?: Record<string, string>) {
@@ -57,35 +72,46 @@ function handleForegroundNotification(notification: { title?: string; body?: str
   void playMessageSound();
 }
 
-let nativePushInitialized = false;
+async function initNativePushListeners(PushNotifications: Awaited<ReturnType<typeof getPushNotificationsModule>>): Promise<void> {
+  if (!PushNotifications || nativePushInitialized) {
+    return;
+  }
 
-async function ensureNativePushNotifications(options?: { requestPermission?: boolean }): Promise<boolean> {
+  nativePushInitialized = true;
+
+  await PushNotifications.addListener('registration', (event) => {
+    void saveNativeToken(event.value).catch(() => undefined);
+  });
+
+  await PushNotifications.addListener('registrationError', () => {
+    nativePushInitialized = false;
+  });
+
+  await PushNotifications.addListener('pushNotificationReceived', (event) => {
+    handleForegroundNotification(event);
+  });
+
+  await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
+    navigateFromPushData(event.notification.data as Record<string, string> | undefined);
+  });
+}
+
+async function ensureNativePushNotifications(options?: {
+  requestPermission?: boolean;
+  force?: boolean;
+}): Promise<boolean> {
   if (!isNativeApp()) return false;
-  if (!hasAuthToken()) return false;
-  if (!isPushEnabledPreference()) return false;
+
+  const force = options?.force ?? false;
+  if (!force) {
+    if (!hasAuthToken()) return false;
+    if (!isPushEnabledPreference()) return false;
+  }
 
   const PushNotifications = await getPushNotificationsModule();
   if (!PushNotifications) return false;
 
-  if (!nativePushInitialized) {
-    nativePushInitialized = true;
-
-    await PushNotifications.addListener('registration', (event) => {
-      void saveNativeToken(event.value).catch(() => undefined);
-    });
-
-    await PushNotifications.addListener('registrationError', () => {
-      nativePushInitialized = false;
-    });
-
-    await PushNotifications.addListener('pushNotificationReceived', (event) => {
-      handleForegroundNotification(event);
-    });
-
-    await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
-      navigateFromPushData(event.notification.data as Record<string, string> | undefined);
-    });
-  }
+  await initNativePushListeners(PushNotifications);
 
   let permission = await PushNotifications.checkPermissions();
   if (permission.receive === 'prompt' && (options?.requestPermission ?? true)) {
@@ -97,7 +123,15 @@ async function ensureNativePushNotifications(options?: { requestPermission?: boo
   }
 
   await PushNotifications.register();
+  await flushPendingNativePushToken().catch(() => undefined);
   return true;
+}
+
+async function forceNativePushOnLaunch(): Promise<void> {
+  if (!isNativeApp()) return;
+
+  setPushEnabledPreference(true);
+  await ensureNativePushNotifications({ requestPermission: true, force: true });
 }
 
 async function unsubscribeNativePush(): Promise<void> {
@@ -105,10 +139,13 @@ async function unsubscribeNativePush(): Promise<void> {
   const PushNotifications = await getPushNotificationsModule();
   if (!PushNotifications) return;
   setPushSubscribed(false);
+  pendingNativeToken = null;
 }
 
 export {
   ensureNativePushNotifications,
+  flushPendingNativePushToken,
+  forceNativePushOnLaunch,
   unsubscribeNativePush,
   FCM_ENDPOINT_PREFIX,
 };

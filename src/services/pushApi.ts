@@ -237,16 +237,16 @@ function installPushLifecycleSync(): () => void {
 }
 
 async function ensurePushNotifications(options?: { requestPermission?: boolean }): Promise<boolean> {
+  if (isNativeApp()) {
+    return ensureNativePushNotifications(options);
+  }
+
   if (!hasAuthToken()) return false;
 
   if (!isPushEnabledPreference()) {
     await unsubscribeFromPush().catch(() => undefined);
     await unsubscribeNativePush().catch(() => undefined);
     return false;
-  }
-
-  if (isNativeApp()) {
-    return ensureNativePushNotifications(options);
   }
 
   if (!canAttemptPushSubscribe()) return false;
