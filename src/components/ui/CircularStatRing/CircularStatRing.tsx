@@ -102,12 +102,6 @@ function CircularStatRing({
   );
 }
 
-export {
-  CircularStatRing,
-  formatStatValue,
-  resolvePercent,
-};
+export { CircularStatRing };
 
-export type {
-  CircularStatRingProps,
-};
+export type { CircularStatRingProps };

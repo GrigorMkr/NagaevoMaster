@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
 import { selectIsAuthenticated } from '@/features/user/userSelectors';
-import { ROUTES } from '@/constants';
 import { isStandalonePwa, needsIosPwaInstall } from '@/utils/pushEnvironment';
 import styles from './IosSafariPushBanner.module.css';
 
@@ -47,11 +45,8 @@ function IosSafariPushBanner() {
   return (
     <div className={styles.banner} role="status">
       <p className={styles.text}>
-        <strong>iPhone:</strong> скачайте приложение для уведомлений в фоне.
+        <strong>iPhone:</strong> добавьте сайт на главный экран — так уведомления работают в фоне.
       </p>
-      <Link to={ROUTES.APP_DOWNLOAD} className={styles.link}>
-        Скачать
-      </Link>
       <button type="button" className={styles.dismiss} onClick={dismiss} aria-label="Скрыть">
         ×
       </button>

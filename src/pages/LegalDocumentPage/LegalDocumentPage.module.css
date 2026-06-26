@@ -1,0 +1,51 @@
+.article {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: rgba(6, 24, 19, 0.55);
+  box-shadow: var(--shadow-card);
+}
+
+.section + .section {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.heading {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.paragraph {
+  margin: 0 0 0.65rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.4rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.footerLinks {
+  max-width: 46rem;
+  margin: 1rem auto 0;
+  padding: 0 0.25rem 1.5rem;
+}
+
+.footerTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+}

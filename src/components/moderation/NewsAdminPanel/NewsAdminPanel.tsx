@@ -13,6 +13,7 @@ import {
 } from '@/services/moderationApi';
 import { uploadListingImage } from '@/services/listingsApi';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import styles from './NewsAdminPanel.module.css';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
@@ -140,6 +141,8 @@ function NewsAdminPanel() {
     <div className={styles.panel}>
       <form
         className={styles.form}
+        action={ECHO_FORM_ACTION}
+        method="post"
         onSubmit={(event) => {
           event.preventDefault();
           void handleSubmit();

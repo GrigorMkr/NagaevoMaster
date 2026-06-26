@@ -14,32 +14,133 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Нагаево Мастер" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#17624a" />
+    <meta name="theme-color" content="#081f18" />
+    <style>
+      html, body { background: #081f18; }
+      html.native-app #boot-splash,
+      html.boot-splash-active #boot-splash {
+        display: flex;
+      }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="google-site-verification" content="LKU7sDIwG9N0n04SjghLdAnFw1EI_0M-0Pg42BE80nM" />
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <meta
       name="description"
       content="Нагаево Мастер — агрегатор услуг и форум для поселка Нагаево. Поиск специалистов, техники и услуг в Нагаево и окрестностях."
     />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="googlebot" content="index, follow" />
+    <meta property="og:site_name" content="Нагаево Мастер" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:url" content="https://nagaevomaster.ru/" />
+    <meta property="og:title" content="Нагаево Мастер — Все услуги поселка Нагаево" />
+    <meta property="og:description" content="Нагаево Мастер — агрегатор услуг и форум для поселка Нагаево. Поиск специалистов, техники и услуг в Нагаево и окрестностях." />
     <meta property="og:image" content="https://nagaevomaster.ru/og-image.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Нагаево Мастер — Все услуги поселка Нагаево" />
+    <meta name="twitter:description" content="Поиск мастеров, объявления, форум и чат для жителей посёлка Нагаево." />
     <meta name="twitter:image" content="https://nagaevomaster.ru/og-image.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://nagaevomaster.ru/#organization",
+            "name": "Нагаево Мастер",
+            "url": "https://nagaevomaster.ru/",
+            "logo": "https://nagaevomaster.ru/icon-512.png",
+            "email": "info@nagaevomaster.ru",
+            "areaServed": {
+              "@type": "Place",
+              "name": "посёлок Нагаево, Республика Башкортостан"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://nagaevomaster.ru/#website",
+            "url": "https://nagaevomaster.ru/",
+            "name": "Нагаево Мастер",
+            "description": "Агрегатор услуг, доска объявлений и форум для посёлка Нагаево",
+            "inLanguage": "ru-RU",
+            "publisher": { "@id": "https://nagaevomaster.ru/#organization" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://nagaevomaster.ru/search?query={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
     <title>Нагаево Мастер — Все услуги поселка Нагаево</title>
   </head>
   <body>
     <div id="boot-splash" role="status" aria-live="polite" aria-label="Загрузка Нагаево Мастер">
       <div class="boot-splash-stage">
+        <div class="boot-splash-smoke-back" aria-hidden="true"></div>
+        <div class="boot-splash-smoke-core" aria-hidden="true"></div>
+        <div class="boot-splash-smoke-front" aria-hidden="true"></div>
         <div class="boot-splash-aura" aria-hidden="true"></div>
         <div class="boot-splash-ring" aria-hidden="true"></div>
         <div class="boot-splash-ring-secondary" aria-hidden="true"></div>
         <div class="boot-splash-ring-tertiary" aria-hidden="true"></div>
         <div class="boot-splash-orbit" aria-hidden="true"></div>
-        <img class="boot-splash-stamp" src="/favicon.svg" width="160" height="160" alt="" />
+        <div class="boot-splash-orbit-secondary" aria-hidden="true"></div>
+        <svg class="boot-splash-stamp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true" width="160" height="160">
+          <defs>
+            <path id="bsTopArc" d="M 20 50 A 30 30 0 0 1 80 50" fill="none" />
+            <path id="bsBottomArc" d="M 80 50 A 30 30 0 0 1 20 50" fill="none" />
+            <linearGradient id="bsGold" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#17624a" />
+              <stop offset="35%" stop-color="#2d9a74" />
+              <stop offset="55%" stop-color="#f0b429" />
+              <stop offset="75%" stop-color="#fde68a" />
+              <stop offset="100%" stop-color="#17624a" />
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="48" fill="rgba(8, 28, 22, 0.03)" stroke="rgba(126, 200, 168, 0.32)" stroke-width="0.8" />
+          <circle cx="50" cy="50" r="47" fill="none" stroke="#17624a" stroke-width="3" stroke-dasharray="1.5 2.2" opacity="0.72" />
+          <circle cx="50" cy="50" r="44" fill="none" stroke="#0a3d2e" stroke-width="1.4" opacity="0.78" />
+          <text font-family="system-ui, sans-serif" font-size="7.2" font-weight="700" fill="url(#bsGold)" letter-spacing="0.2em">
+            <textPath href="#bsTopArc" startOffset="50%" text-anchor="middle">НАГАЕВО</textPath>
+          </text>
+          <text font-family="system-ui, sans-serif" font-size="6.8" font-weight="700" fill="url(#bsGold)" letter-spacing="0.26em">
+            <textPath href="#bsBottomArc" startOffset="50%" text-anchor="middle">МАСТЕР</textPath>
+          </text>
+          <g transform="translate(50 49)">
+            <path d="M -12 5 L 0 -11 L 12 5 Z" fill="#f0b429" stroke="#0a3d2e" stroke-width="1" stroke-linejoin="round" />
+            <rect x="-10" y="5" width="20" height="13" rx="1.2" fill="rgba(126, 200, 168, 0.06)" stroke="#0a3d2e" stroke-width="1" />
+            <rect x="-3" y="11" width="6" height="7" rx="0.8" fill="#17624a" opacity="0.55" />
+            <rect x="5.4" y="-9.2" width="2.6" height="6.8" rx="0.35" fill="rgba(126, 200, 168, 0.12)" stroke="#0a3d2e" stroke-width="0.85" />
+          </g>
+        </svg>
         <div class="boot-splash-shine" aria-hidden="true"></div>
       </div>
       <p class="boot-splash-label">Загрузка</p>
     </div>
-    <div id="root"></div>
+    <div id="root">
+      <main lang="ru" style="max-width:48rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5;color:#0d1f18">
+        <h1>Нагаево Мастер — услуги и объявления посёлка Нагаево</h1>
+        <p>
+          Централизованная платформа для поиска специалистов, техники и услуг в посёлке Нагаево
+          и окрестностях (радиус до 50&nbsp;км): каталог мастеров, доска объявлений, форум и переписка.
+        </p>
+        <nav aria-label="Основные разделы">
+          <ul>
+            <li><a href="/services">Услуги и мастера</a></li>
+            <li><a href="/search">Поиск услуг</a></li>
+            <li><a href="/board">Доска объявлений</a></li>
+            <li><a href="/forum">Форум посёлка</a></li>
+            <li><a href="/news">Новости</a></li>
+            <li><a href="/about">О проекте</a></li>
+            <li><a href="/contact">Контакты</a></li>
+            <li><a href="/app">Скачать приложение</a></li>
+          </ul>
+        </nav>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

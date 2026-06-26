@@ -6,6 +6,7 @@ import { FORUM_CATEGORIES } from '@/data/categories';
 import { createForumTopic, type ForumTopicListItem } from '@/services/forumApi';
 import { forumTopicPath } from '@/utils/constants';
 import { validateUserContent } from '@/constants/communityRules';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { getErrorMessage } from '@/utils/errorMessage';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumNewTopicForm.module.css';
@@ -60,7 +61,7 @@ function ForumNewTopicForm({ defaultCategory, onCreated }: ForumNewTopicFormProp
   };
 
   return (
-    <form className={styles.form} onSubmit={(event) => void handleSubmit(event)}>
+    <form className={styles.form} action={ECHO_FORM_ACTION} method="post" onSubmit={(event) => void handleSubmit(event)}>
       <h2 className={styles.title}>Новая тема</h2>
 
       {!defaultCategory && (

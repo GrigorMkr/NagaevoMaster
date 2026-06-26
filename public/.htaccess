@@ -1,6 +1,7 @@
 <IfModule mod_mime.c>
   AddType application/manifest+json .webmanifest
   AddType application/vnd.android.package-archive .apk
+  AddType application/xml .xml
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -27,6 +28,7 @@
   RewriteRule ^api(?:/.*)?$ api/index.php [L,QSA]
 
   RewriteRule ^\.well-known/ - [L]
+  RewriteRule ^(robots\.txt|sitemap\.xml)$ - [L]
   RewriteRule ^index\.html$ - [L]
   # SPA: всё, что не файл (в т.ч. каталог без index), → index.html
   RewriteCond %{REQUEST_FILENAME} !-f
@@ -39,6 +41,6 @@
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "geolocation=(self), microphone=(self), camera=()"
-  Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.nagaevomaster.ru https://nagaevodk.ru https://www.google.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org; frame-src https://www.google.com https://www.gstatic.com; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://www.gstatic.com; img-src 'self' data: blob: https:; font-src 'self' data: https://maps.vk.com https://*.maps.vk.com; connect-src 'self' https://api.nagaevomaster.ru https://nagaevodk.ru https://www.google.com https://maps.vk.com https://*.maps.vk.com; frame-src https://www.google.com https://www.gstatic.com; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests"
   Header always set X-Frame-Options "DENY"
 </IfModule>

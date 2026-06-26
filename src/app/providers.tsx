@@ -12,6 +12,8 @@ import { LocationPromptBootstrap } from '@/components/location/LocationPromptBoo
 import { CanonicalHostRedirect } from '@/components/layout/CanonicalHostRedirect/CanonicalHostRedirect';
 import { PerformanceBootstrap } from '@/components/performance/PerformanceBootstrap';
 import { NativeAppBootstrap } from '@/components/native/NativeAppBootstrap/NativeAppBootstrap';
+import { NativePushPermissionModal } from '@/components/push/NativePushPermissionModal/NativePushPermissionModal';
+import { PushPermissionModal } from '@/components/push/PushPermissionModal/PushPermissionModal';
 import { BootSplashDismiss } from '@/components/boot/BootSplashDismiss';
 import { TOAST_DURATION_MS } from '@/constants';
 import { store } from './store';
@@ -30,6 +32,8 @@ function AppProviders({ children }: {
           <NotificationsBootstrap />
           <PresenceBootstrap />
           <PushBootstrap />
+          <NativePushPermissionModal />
+          <PushPermissionModal />
           <GlobalChatSync />
           <LocationPromptBootstrap />
           {children}

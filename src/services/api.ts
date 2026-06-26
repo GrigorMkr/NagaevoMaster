@@ -2,17 +2,30 @@ import axios from 'axios';
 import { API_TIMEOUT_MS } from '@/constants';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { isJsonApiResponse } from '@/utils/apiGuards';
+import { resolveAbsoluteApiBase } from '@/utils/apiBase';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '/api';
+let unauthorizedHandler: ((message?: string) => void) | null = null;
 
-let unauthorizedHandler: (() => void) | null = null;
-
-function setUnauthorizedHandler(handler: () => void): void {
+function setUnauthorizedHandler(handler: (message?: string) => void): void {
   unauthorizedHandler = handler;
 }
 
+function readBearerToken(): string | undefined {
+  try {
+    const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    return token ? `Bearer ${token}` : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function isStaleUnauthorized(error: { config?: { headers?: { Authorization?: string } } }): boolean {
+  const requestAuth = error.config?.headers?.Authorization;
+  const currentAuth = readBearerToken();
+  return Boolean(requestAuth && currentAuth && requestAuth !== currentAuth);
+}
+
 const api = axios.create({
-  baseURL: API_BASE_URL,
   timeout: API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
@@ -20,6 +33,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  config.baseURL = resolveAbsoluteApiBase();
   const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -41,8 +55,9 @@ api.interceptors.response.use((response) => {
     || requestUrl.includes('/auth/oauth/exchange')
     || requestUrl.includes('/auth/oauth/handoff');
 
-  if (status === 401 && !isAuthRequest && unauthorizedHandler) {
-    unauthorizedHandler();
+  if (status === 401 && !isAuthRequest && !isStaleUnauthorized(error) && unauthorizedHandler) {
+    const apiMessage = error.response?.data?.message;
+    unauthorizedHandler(typeof apiMessage === 'string' ? apiMessage : undefined);
   }
 
   const message = error.response?.data?.message ?? error.message ?? 'Произошла ошибка при запросе';

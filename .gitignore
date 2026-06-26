@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+artifacts
 *.local
 .env.production
 deploy.env
@@ -17,9 +18,13 @@ deploy/regru.env
 deploy/notify.env
 deploy/oauth.env
 deploy/push.env
+deploy/rustore.env
+deploy/rustore-push.env
+deploy/secrets.local.env
 deploy/google-services.json
 deploy/firebase-service-account.json
 deploy/captcha.env
+deploy/vkmaps.env
 deploy/ssl-local/
 hosting.reg.ru.env
 nagaevo-hosting.zip
@@ -30,6 +35,8 @@ src/assets/fonts/manrope-temp/
 .vscode/*
 !.vscode/extensions.json
 .idea
+.cursor/
+.build-stash/
 .DS_Store
 *.suo
 *.ntvs*

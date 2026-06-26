@@ -36,7 +36,18 @@ function getOnlineStats() {
   return { guestsOnline, usersOnline };
 }
 
+function getUsersOnlineStatus(userIds: string[]): Record<string, boolean> {
+  prunePresence();
+  const result: Record<string, boolean> = {};
+  for (const userId of userIds) {
+    const entry = online.get(userId);
+    result[userId] = entry?.type === 'user';
+  }
+  return result;
+}
+
 export {
   touchPresence,
   getOnlineStats,
+  getUsersOnlineStatus,
 }

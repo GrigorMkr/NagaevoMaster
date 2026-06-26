@@ -325,16 +325,6 @@ async function exchangeOAuthHandoff(handoff: string): Promise<string> {
     return response.data.token;
 }
 
-async function completeVkLogin(accessToken: string): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/auth/vk/complete', {
-        access_token: accessToken,
-    });
-    if (!isRecord(response.data) || typeof response.data.token !== 'string') {
-        throw new Error('Invalid VK auth response');
-    }
-    return response.data;
-}
-
 export {
   getAuthToken,
   saveAuthToken,
@@ -351,7 +341,6 @@ export {
   fetchOAuthStatus,
   exchangeOAuthCode,
   exchangeOAuthHandoff,
-  completeVkLogin,
   normalizeEmail,
   MOCK_VERIFICATION_CODE,
 }

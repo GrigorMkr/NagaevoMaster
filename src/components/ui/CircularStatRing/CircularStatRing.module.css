@@ -117,5 +117,6 @@
 
 .accent_muted {
   --ring-color: rgba(126, 200, 168, 0.72);
+
   opacity: 0.92;
 }

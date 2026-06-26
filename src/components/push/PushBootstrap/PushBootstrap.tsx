@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { App } from '@capacitor/app';
 import { useAppSelector } from '@/app/hooks';
 import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import {
@@ -10,7 +11,7 @@ import {
   registerServiceWorker,
   syncAuthToServiceWorker,
 } from '@/services/pushApi';
-import { forceNativePushOnLaunch } from '@/services/nativePush';
+import { forceNativePushOnLaunch, flushPendingNativePushToken, checkNativePushPermission } from '@/services/nativePush';
 import { unlockMessageSound } from '@/utils/messageSound';
 import {
   isIosDevice,
@@ -48,6 +49,9 @@ function PushBootstrap() {
       };
     }
     preloadMessageSound();
+    if (isNativeApp()) {
+      window.setTimeout(() => unlockMessageSound(), 300);
+    }
     return undefined;
   }, []);
 
@@ -72,7 +76,16 @@ function PushBootstrap() {
     if (isNativeApp()) {
       setPushEnabledPreference(true);
       void fetchPushStatus().catch(() => undefined);
-      void ensurePushNotifications({ requestPermission: true });
+      void (async () => {
+        const permission = await checkNativePushPermission();
+        const status = await fetchPushStatus().catch(() => null);
+        const needsSubscribe = !status?.subscribed;
+        await ensurePushNotifications({
+          requestPermission: permission === 'prompt' || (permission === 'granted' && needsSubscribe),
+          force: true,
+        });
+        await flushPendingNativePushToken().catch(() => undefined);
+      })();
       return;
     }
 
@@ -82,6 +95,21 @@ function PushBootstrap() {
 
     void fetchPushStatus().catch(() => undefined);
     void ensurePushNotifications({ requestPermission: true });
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isNativeApp() || !isAuthenticated) return undefined;
+
+    const listener = App.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive) return;
+      setPushEnabledPreference(true);
+      void flushPendingNativePushToken();
+      void ensurePushNotifications({ requestPermission: false, force: true });
+    });
+
+    return () => {
+      void listener.then((handle) => handle.remove());
+    };
   }, [isAuthenticated]);
 
   useEffect(() => {

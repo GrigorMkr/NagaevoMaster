@@ -233,11 +233,11 @@
 }
 
 @media (max-width: 520px) {
-  .logo:not(.footer):not(.hero) .wordmark {
+  .logo:not(.footer, .hero) .wordmark {
     display: none;
   }
 
-  .logo:not(.footer):not(.hero):not(.stamp) .logomark {
+  .logo:not(.footer, .hero, .stamp) .logomark {
     animation: stamp-idle 7s ease-in-out infinite;
     -webkit-animation: stamp-idle 7s ease-in-out infinite;
   }

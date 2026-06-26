@@ -7,6 +7,7 @@ import { CompactListingRow } from '@/components/listings/CompactListingRow/Compa
 import { NewsAdminPanel } from '@/components/moderation/NewsAdminPanel/NewsAdminPanel';
 import { AdminDashboardOverview } from '@/components/moderation/AdminDashboardOverview/AdminDashboardOverview';
 import { AdminUsersPanel } from '@/components/moderation/AdminUsersPanel/AdminUsersPanel';
+import { AdminDevApkPanel } from '@/components/moderation/AdminDevApkPanel/AdminDevApkPanel';
 import { CircularStatRing } from '@/components/ui/CircularStatRing/CircularStatRing';
 import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
 import { ModerationReviewModal, type ReviewMode } from '@/components/moderation/ModerationReviewModal/ModerationReviewModal';
@@ -20,7 +21,7 @@ import type { Listing, ListingStatus } from '@/types/listing';
 import { getErrorMessage } from '@/utils/errorMessage';
 import styles from './ModerationDashboard.module.css';
 
-type TabId = 'overview' | 'pending' | 'published' | 'rejected' | 'reports' | 'news' | 'users';
+type TabId = 'overview' | 'pending' | 'published' | 'rejected' | 'reports' | 'news' | 'users' | 'mobile';
 
 const BASE_TABS: { id: TabId; label: string }[] = [
   { id: 'overview', label: 'Обзор' },
@@ -36,7 +37,11 @@ function ModerationDashboard() {
   const isAdmin = useAppSelector(selectIsAdmin);
   const tabs = useMemo(
     () => (isAdmin
-      ? [...BASE_TABS, { id: 'users' as const, label: 'Пользователи' }]
+      ? [
+          ...BASE_TABS,
+          { id: 'mobile' as const, label: 'Приложение' },
+          { id: 'users' as const, label: 'Пользователи' },
+        ]
       : BASE_TABS),
     [isAdmin],
   );
@@ -51,7 +56,7 @@ function ModerationDashboard() {
   const [reviewMode, setReviewMode] = useState<ReviewMode | null>(null);
 
   const loadTabData = useCallback(async () => {
-    if (tab === 'overview' || tab === 'users') {
+    if (tab === 'overview' || tab === 'users' || tab === 'mobile') {
       setListings([]);
       setReports([]);
       setLoading(false);
@@ -190,6 +195,8 @@ function ModerationDashboard() {
           )
         ) : tab === 'users' ? (
           isAdmin ? <AdminUsersPanel /> : null
+        ) : tab === 'mobile' ? (
+          isAdmin ? <AdminDevApkPanel /> : null
         ) : loading && tab !== 'news' ? (
           <p className={styles.status}>Загрузка…</p>
         ) : tab === 'news' ? (

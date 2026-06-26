@@ -11,7 +11,7 @@ interface AuthRequest extends Request {
 function assertSessionValid(user: User, sessionVersion?: number) {
   const tokenVersion = sessionVersion ?? 0;
   if (tokenVersion !== user.sessionVersion) {
-    throw new HttpError(401, 'Сессия устарела. Войдите снова.');
+    throw new HttpError(401, 'Вход выполнен на другом устройстве. Войдите снова.');
   }
 }
 

@@ -3,7 +3,6 @@ import { ROUTES } from '@/constants';
 
 const PORTAL_TICKER = [
   'бесплатно',
-  'без VPN',
   'без подписок',
   'для своих',
   'Нагаево',

@@ -1,18 +1,34 @@
 import { useEffect } from 'react';
-import { dismissBootSplash, markBootSplashStarted } from '@/utils/bootSplash';
+import {
+  markBootAppReady,
+  markBootWindowLoaded,
+} from '@/utils/bootSplash';
+import {
+  preloadAppContent,
+  waitForNextPaint,
+  waitForWindowLoad,
+} from '@/utils/preloadAppContent';
 
 function BootSplashDismiss() {
   useEffect(() => {
-    markBootSplashStarted();
+    let cancelled = false;
 
-    const frame = window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        dismissBootSplash();
-      });
+    void waitForWindowLoad().then(() => {
+      if (!cancelled) {
+        markBootWindowLoaded();
+      }
     });
 
+    void (async () => {
+      await preloadAppContent();
+      await waitForNextPaint();
+      if (!cancelled) {
+        markBootAppReady();
+      }
+    })();
+
     return () => {
-      window.cancelAnimationFrame(frame);
+      cancelled = true;
     };
   }, []);
 

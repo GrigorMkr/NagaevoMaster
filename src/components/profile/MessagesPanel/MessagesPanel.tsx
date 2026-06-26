@@ -44,7 +44,10 @@ import { ensurePushNotifications } from '@/services/pushApi';
 import { unlockMessageSound } from '@/utils/messageSound';
 import { registerOutgoingMessage } from '@/utils/outgoingMessages';
 import { useUserLoginSearch, normalizeLoginQuery } from '@/hooks/useUserLoginSearch';
+import { useUsersOnline } from '@/hooks/useUsersOnline';
+import { UserNameWithStatus } from '@/components/ui/UserNameWithStatus/UserNameWithStatus';
 import { canAttemptPushSubscribe } from '@/utils/pushEnvironment';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import styles from './MessagesPanel.module.css';
 
 interface MessagesPanelProps {
@@ -74,6 +77,24 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
   const currentUser = useAppSelector(selectCurrentUser);
   const normalizedLoginQuery = normalizeLoginQuery(loginQuery);
   const { results: loginResults, loading: loginSearching } = useUserLoginSearch(loginQuery);
+
+  const trackedUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const item of conversations) {
+      if (item.otherUser) {
+        ids.add(item.otherUser.id);
+      }
+    }
+    for (const user of loginResults) {
+      ids.add(user.id);
+    }
+    if (activeConversation?.otherUser) {
+      ids.add(activeConversation.otherUser.id);
+    }
+    return [...ids];
+  }, [activeConversation?.otherUser, conversations, loginResults]);
+
+  const onlineMap = useUsersOnline(trackedUserIds);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -391,7 +412,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     } finally {
       setSending(false);
     }
-  }, [activeId, draft, isRecording, loadConversations, scrollChatToBottom, sending, uploading]);
+  }, [activeId, draft, isRecording, loadConversations, sending, uploading]);
 
   const handleSend = (event: FormEvent) => {
     event.preventDefault();
@@ -661,7 +682,11 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                           size="sm"
                         />
                         <span className={styles.loginResultMeta}>
-                          <span>{user.name}</span>
+                          <UserNameWithStatus
+                            name={user.name}
+                            userId={user.id}
+                            online={onlineMap[user.id]}
+                          />
                           <span className={styles.loginResultLogin}>@{user.login}</span>
                         </span>
                       </button>
@@ -709,7 +734,17 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                     )}
                     <div className={styles.conversationBody}>
                       <p className={styles.conversationName}>
-                        <span className={styles.conversationNameText}>{title}</span>
+                        <span className={styles.conversationNameText}>
+                          {!isGroup && item.otherUser ? (
+                            <UserNameWithStatus
+                              name={title}
+                              userId={item.otherUser.id}
+                              online={onlineMap[item.otherUser.id]}
+                            />
+                          ) : (
+                            title
+                          )}
+                        </span>
                         {isGroup && (
                           <span className={styles.groupBadge}>{item.group!.memberCount}</span>
                         )}
@@ -761,7 +796,17 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                 onClick={() => isGroupChat && setShowGroupInfo(true)}
               >
                 <div className={styles.chatTitleRow}>
-                  <h4 className={styles.chatTitle}>{chatTitle}</h4>
+                  {!isGroupChat && otherUser ? (
+                    <UserNameWithStatus
+                      name={chatTitle}
+                      userId={otherUser.id}
+                      online={onlineMap[otherUser.id]}
+                      className={styles.chatTitle}
+                      nameClassName={styles.chatTitle}
+                    />
+                  ) : (
+                    <h4 className={styles.chatTitle}>{chatTitle}</h4>
+                  )}
                   {!isGroupChat && otherUser!.isStaff && otherUser!.role && (
                     <StaffBadge role={otherUser!.role} />
                   )}
@@ -805,6 +850,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                     key={message.id}
                     message={message}
                     showSenderName={isGroupChat}
+                    senderOnline={isGroupChat ? onlineMap[message.senderId] : undefined}
                     highlighted={highlightMessageId === message.id}
                     onEdit={handleEditMessage}
                     onDelete={handleDeleteMessage}
@@ -839,7 +885,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
               </div>
             )}
 
-            <form className={styles.composeBar} onSubmit={handleSend} ref={composeBarRef}>
+            <form className={styles.composeBar} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSend} ref={composeBarRef}>
               <input
                 ref={fileInputRef}
                 type="file"

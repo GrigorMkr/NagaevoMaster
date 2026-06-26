@@ -22,6 +22,8 @@ function NativeAppBootstrap() {
       }
     };
 
+    void hideNativeSplash();
+
     onBootSplashDismissed(() => {
       void hideNativeSplash();
     });

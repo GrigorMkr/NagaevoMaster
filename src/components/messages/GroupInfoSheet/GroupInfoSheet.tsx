@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import classNames from 'classnames';
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
@@ -19,6 +20,7 @@ import { uploadImage } from '@/services/uploadsApi';
 import type { ChatMessage, GroupDetail } from '@/types/message';
 import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import styles from './GroupInfoSheet.module.css';
 
@@ -48,6 +50,8 @@ function GroupInfoSheet({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ChatMessage[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchRan, setSearchRan] = useState(false);
+  const [memberFilter, setMemberFilter] = useState('');
   const [addOpen, setAddOpen] = useState(false);
   const [pickFriends, setPickFriends] = useState<Set<string>>(new Set());
   const [reportReason, setReportReason] = useState('');
@@ -55,8 +59,11 @@ function GroupInfoSheet({
 
   const onCloseRef = useRef(onClose);
   const onUpdatedRef = useRef(onUpdated);
-  onCloseRef.current = onClose;
-  onUpdatedRef.current = onUpdated;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    onUpdatedRef.current = onUpdated;
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -75,6 +82,14 @@ function GroupInfoSheet({
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const applyGroupUpdate = useCallback((updated: GroupDetail) => {
     setGroup(updated);
@@ -183,9 +198,11 @@ function GroupInfoSheet({
       return;
     }
     setSearching(true);
+    setSearchRan(false);
     try {
       const result = await searchGroupMessages(groupId, q);
       setSearchResults(result.results);
+      setSearchRan(true);
     } catch (error) {
       toast.error(getErrorMessage(error, 'Ошибка поиска'));
     } finally {
@@ -193,7 +210,18 @@ function GroupInfoSheet({
     }
   };
 
-  return (
+  const filteredMembers = useMemo(() => {
+    if (!group) return [];
+    const needle = memberFilter.trim().toLowerCase();
+    if (!needle) return group.members;
+    return group.members.filter((member) => {
+      const name = member.user.name.toLowerCase();
+      const login = member.user.login.toLowerCase();
+      return name.includes(needle) || login.includes(needle);
+    });
+  }, [group, memberFilter]);
+
+  const sheet = (
     <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
       <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
         <div className={styles.heroBg} aria-hidden />
@@ -214,7 +242,15 @@ function GroupInfoSheet({
                 role="tab"
                 aria-selected={tab === key}
                 className={classNames(styles.tab, tab === key && styles.tabActive)}
-                onClick={() => setTab(key)}
+                onClick={() => {
+                  setTab(key);
+                  if (key !== 'search') {
+                    setSearchRan(false);
+                  }
+                  if (key !== 'members') {
+                    setMemberFilter('');
+                  }
+                }}
               >
                 {key === 'info' ? 'Инфо' : key === 'members' ? 'Участники' : 'Поиск'}
               </button>
@@ -222,6 +258,7 @@ function GroupInfoSheet({
           </div>
         </header>
 
+        <div className={styles.panelBody}>
         {tab === 'info' && (
           <div className={styles.infoTab}>
             <label className={classNames(styles.avatarBlock, canAdmin && styles.avatarEditable)}>
@@ -242,7 +279,7 @@ function GroupInfoSheet({
             </label>
 
             {editing ? (
-              <form className={styles.editForm} onSubmit={(e) => void handleSave(e)}>
+              <form className={styles.editForm} action={ECHO_FORM_ACTION} method="post" onSubmit={(e) => void handleSave(e)}>
                 <input
                   className={styles.nameEdit}
                   value={editName}
@@ -288,8 +325,20 @@ function GroupInfoSheet({
         )}
 
         {tab === 'members' && (
-          <ul className={styles.memberList}>
-            {group.members.map((member) => {
+          <>
+            <div className={styles.memberSearchBar}>
+              <input
+                className={styles.memberSearchInput}
+                value={memberFilter}
+                onChange={(e) => setMemberFilter(e.target.value)}
+                placeholder="Поиск по имени или @логину…"
+                aria-label="Поиск участников"
+              />
+            </div>
+            <ul className={styles.memberList}>
+            {filteredMembers.length === 0 ? (
+              <li className={styles.searchEmpty}>Участники не найдены</li>
+            ) : filteredMembers.map((member) => {
               const avatar = resolveAuthorAvatar(
                 member.user.name,
                 member.user.login,
@@ -316,6 +365,7 @@ function GroupInfoSheet({
               );
             })}
           </ul>
+          </>
         )}
 
         {tab === 'search' && (
@@ -324,10 +374,16 @@ function GroupInfoSheet({
               <input
                 className={styles.searchInput}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchRan(false);
+                }}
                 placeholder="Ключевые слова в переписке…"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') void runSearch();
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void runSearch();
+                  }
                 }}
               />
               <button type="button" className={styles.searchBtn} disabled={searching} onClick={() => void runSearch()}>
@@ -336,7 +392,9 @@ function GroupInfoSheet({
             </div>
             <ul className={styles.searchResults}>
               {searchResults.length === 0 ? (
-                <li className={styles.searchEmpty}>Введите запрос и нажмите «Найти»</li>
+                <li className={styles.searchEmpty}>
+                  {searchRan ? 'Сообщений не найдено' : 'Введите запрос и нажмите «Найти»'}
+                </li>
               ) : (
                 searchResults.map((msg) => (
                   <li key={msg.id}>
@@ -365,6 +423,7 @@ function GroupInfoSheet({
             </ul>
           </div>
         )}
+        </div>
           </>
         ) : null}
 
@@ -423,6 +482,8 @@ function GroupInfoSheet({
       </div>
     </div>
   );
+
+  return createPortal(sheet, document.body);
 }
 
 export {

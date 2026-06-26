@@ -1,0 +1,110 @@
+.panel {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.intro {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.card {
+  display: grid;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: rgba(8, 31, 24, 0.35);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-mint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.versionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: #ffd54f;
+  background: rgba(255, 213, 79, 0.12);
+  border-radius: var(--radius-full);
+}
+
+.metaText {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.notes {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: 0.25rem;
+}
+
+.downloadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: #081f18;
+  background: linear-gradient(135deg, #7ee8b8, #3ecf8e);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: filter var(--transition);
+}
+
+.downloadBtn:hover {
+  filter: brightness(1.05);
+}
+
+.secondaryLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-mint);
+  background: rgba(23, 98, 74, 0.18);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
+.fileName {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+.status {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

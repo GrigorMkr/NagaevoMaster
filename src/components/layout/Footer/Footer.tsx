@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '@/components/ui/Logo/Logo';
+import { LegalDocumentLinks } from '@/components/legal/LegalDocumentLinks/LegalDocumentLinks';
 import { CONTACT_EMAIL, FOOTER_NAV_ITEMS, GEO, APP_NAME, SITE_VERSION, SITE_UPDATED_LABEL } from '@/constants';
 import styles from './Footer.module.css';
 const Footer = memo(function Footer() {
@@ -39,6 +40,7 @@ const Footer = memo(function Footer() {
             <p className={styles.legalNote}>
               Товарный знак «Нагаево Мастер» и логотип принадлежат правообладателю сервиса.
             </p>
+            <LegalDocumentLinks className={styles.legalDocs} />
           </div>
           <div className={styles.bottomMeta}>
             <a href={`mailto:${CONTACT_EMAIL}`} className={styles.email}>

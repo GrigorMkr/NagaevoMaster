@@ -2,6 +2,7 @@
   --icon-accent: var(--color-mint);
   --icon-accent-2: var(--color-accent);
   --icon-size: 1.35rem;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -75,6 +76,7 @@
 
 .ribbon .icon {
   --icon-size: 0.82rem;
+
   filter: none;
   stroke: white;
 }

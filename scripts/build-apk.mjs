@@ -1,14 +1,16 @@
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureAndroidKeystore } from './ensure-android-keystore.mjs';
 import { findJavaHome } from './resolve-java-home.mjs';
 import { syncAndroidAssetLinks } from './sync-android-assetlinks.mjs';
 import { syncAppVersion } from './sync-app-version.mjs';
+import { syncAppIcon } from './sync-app-icon.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const androidDir = path.join(root, 'android');
+const isBundled = process.env.CAPACITOR_BUNDLED === '1' || process.env.CAPACITOR_BUNDLED === 'true';
 
 function ensureLocalProperties(androidSdk, javaHome) {
   const localProps = path.join(androidDir, 'local.properties');
@@ -55,7 +57,8 @@ function runCapSync(javaHome) {
   const env = {
     ...process.env,
     JAVA_HOME: javaHome,
-    CAPACITOR_WEB_DIR: 'mobile/capacitor-shell',
+    CAPACITOR_WEB_DIR: isBundled ? 'dist' : 'mobile/capacitor-shell',
+    CAPACITOR_BUNDLED: isBundled ? '1' : '0',
   };
   const result = spawnSync('npx', ['cap', 'sync', 'android'], {
     cwd: root,
@@ -83,6 +86,11 @@ function runGradle(javaHome) {
   return result.status ?? 1;
 }
 
+function readVersionName() {
+  const gradle = readFileSync(path.join(androidDir, 'app', 'build.gradle'), 'utf8');
+  return gradle.match(/versionName\s+"([^"]+)"/)?.[1] ?? '0.0.0';
+}
+
 function copyApk() {
   const signedSrc = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release.apk');
   const unsignedSrc = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'release', 'app-release-unsigned.apk');
@@ -97,10 +105,24 @@ function copyApk() {
     return false;
   }
 
-  const targets = [
-    path.join(root, 'public', 'downloads', 'nagaevomaster.apk'),
-    path.join(root, 'dist', 'downloads', 'nagaevomaster.apk'),
-  ];
+  const version = readVersionName();
+  const downloadDir = path.join(root, 'public', 'downloads');
+  const targets = isBundled
+    ? [
+        path.join(root, 'artifacts', 'rustore', `nagaevomaster-${version}.apk`),
+        path.join(downloadDir, 'nagaevomaster.apk'),
+        path.join(downloadDir, `nagaevomaster-${version}.apk`),
+      ]
+    : [
+        path.join(downloadDir, 'nagaevomaster.apk'),
+        path.join(downloadDir, `nagaevomaster-${version}.apk`),
+        path.join(root, 'dist', 'downloads', 'nagaevomaster.apk'),
+        path.join(root, 'dist', 'downloads', `nagaevomaster-${version}.apk`),
+      ];
+
+  if (isBundled) {
+    console.log('Bundled APK: artifacts/rustore/ + public/downloads/');
+  }
 
   for (const dst of targets) {
     mkdirSync(path.dirname(dst), { recursive: true });
@@ -137,6 +159,24 @@ if (!javaHome) {
 }
 
 console.log(`JAVA_HOME: ${javaHome}`);
+console.log(`Режим APK: ${isBundled ? 'вшитый сайт (bundled)' : 'оболочка + live-сайт'}`);
+
+if (isBundled) {
+  const hosting = spawnSync('npm', ['run', 'build:hosting'], {
+    cwd: root,
+    stdio: 'inherit',
+    shell: true,
+    env: { ...process.env, CAPACITOR_BUNDLED: '1' },
+  });
+  if (hosting.status !== 0) {
+    process.exit(hosting.status ?? 1);
+  }
+  const distIndex = path.join(root, 'dist', 'index.html');
+  if (!existsSync(distIndex)) {
+    console.error('dist/index.html не найден после build:hosting');
+    process.exit(1);
+  }
+}
 
 const androidSdk = findAndroidSdk();
 if (!androidSdk) {
@@ -168,7 +208,18 @@ try {
   process.exit(1);
 }
 
-syncCapacitorShellSplash();
+if (!isBundled) {
+  syncCapacitorShellSplash();
+}
+
+const iconResult = spawnSync('node', ['scripts/sync-app-icon.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+});
+if (iconResult.status !== 0) {
+  process.exit(iconResult.status ?? 1);
+}
+
 const syncCode = runCapSync(javaHome);
 if (syncCode !== 0) {
   process.exit(syncCode);
@@ -188,6 +239,22 @@ const configureResult = spawnSync('node', ['scripts/configure-android-push.mjs']
 });
 if (configureResult.status !== 0) {
   process.exit(configureResult.status ?? 1);
+}
+
+const soundResult = spawnSync('node', ['scripts/sync-message-sound-android.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+});
+if (soundResult.status !== 0) {
+  process.exit(soundResult.status ?? 1);
+}
+
+const rustorePushResult = spawnSync('node', ['scripts/configure-android-rustore-push.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+});
+if (rustorePushResult.status !== 0) {
+  process.exit(rustorePushResult.status ?? 1);
 }
 
 const code = runGradle(javaHome);

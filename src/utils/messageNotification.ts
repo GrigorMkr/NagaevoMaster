@@ -1,4 +1,6 @@
 import { playMessageSound } from '@/utils/messageSound';
+import { isNativeApp } from '@/utils/nativeApp';
+import { showNativeMessageNotification } from '@/utils/nativeMessageNotify';
 
 function buildNotificationTag(messageId?: string): string {
   return messageId ? `message-${messageId}` : 'nagaevo-message';
@@ -10,6 +12,18 @@ async function showMessageNotification(
   options?: { url?: string; messageId?: string },
 ): Promise<void> {
   const tag = buildNotificationTag(options?.messageId);
+  const url = options?.url ?? '/profile?section=messages';
+
+  if (isNativeApp()) {
+    const shown = await showNativeMessageNotification(senderName, preview, {
+      messageId: options?.messageId,
+      url,
+    });
+    if (!shown) {
+      void playMessageSound();
+    }
+    return;
+  }
 
   if (typeof window === 'undefined' || Notification.permission !== 'granted') {
     void playMessageSound();

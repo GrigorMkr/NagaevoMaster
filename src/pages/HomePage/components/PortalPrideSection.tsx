@@ -31,7 +31,7 @@ const PortalPrideSection = memo(function PortalPrideSection() {
             <p>
               <strong>Всё бесплатно</strong>
               {' '}
-              — без подписок, скрытых платежей и «танцев с бубном» вроде VPN.
+              — без подписок и скрытых платежей.
               Заходите и пользуетесь.
             </p>
           </div>

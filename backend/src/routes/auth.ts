@@ -41,6 +41,7 @@ import {
 } from '../middleware/security.js';
 import { assertRecaptchaValid, isRecaptchaEnabled } from '../services/captcha/recaptcha.js';
 import { toUserResponse } from '../utils/mappers.js';
+import { startUserSession } from '../services/session.js';
 
 const authRouter = Router();
 
@@ -135,9 +136,10 @@ authRouter.post('/login', authLimiter, async (req, res, next) => {
       throw new HttpError(403, 'Аккаунт заблокирован за нарушение правил платформы');
     }
     assertUserVerified(user);
+    const sessionUser = await startUserSession(user.id);
     res.json({
-      token: issueAuthToken(user, data.remember),
-      user: toUserResponse(user),
+      token: issueAuthToken(sessionUser, data.remember),
+      user: toUserResponse(sessionUser),
     });
   } catch (error) {
     next(error);
@@ -164,9 +166,10 @@ authRouter.post('/register/verify', authLimiter, async (req, res, next) => {
   try {
     const data = verifyCodeSchema.parse(req.body);
     const user = await verifyRegistrationCode(data.channel, data.target, data.code);
+    const sessionUser = await startUserSession(user.id);
     res.status(201).json({
-      token: issueAuthToken(user),
-      user: toUserResponse(user),
+      token: issueAuthToken(sessionUser),
+      user: toUserResponse(sessionUser),
     });
   } catch (error) {
     next(error);
@@ -226,13 +229,15 @@ authRouter.post('/recovery', verificationLimiter, async (req, res, next) => {
 });
 
 authRouter.get('/oauth/status', (_req, res) => {
+  const siteUrl = env.SITE_URL.replace(/\/$/, '');
   res.json({
     google: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
     vk: Boolean(env.VK_CLIENT_ID),
     vkAppId: env.VK_CLIENT_ID ?? null,
-    siteUrl: env.SITE_URL.replace(/\/$/, ''),
-    googleCallback: `${env.SITE_URL.replace(/\/$/, '')}/api/auth/google/callback`,
-    vkCallback: `${env.SITE_URL.replace(/\/$/, '')}/api/auth/vk/callback`,
+    siteUrl,
+    googleCallback: `${siteUrl}/api/auth/google/callback`,
+    vkCallback: `${siteUrl}/api/auth/vk/callback`,
+    vkWebRedirect: `${siteUrl}/auth`,
   });
 });
 
@@ -288,7 +293,8 @@ authRouter.get('/google/callback', async (req, res) => {
       res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative, platform, delivery));
       return;
     }
-    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative, platform, delivery));
+    const sessionUser = await startUserSession(user.id);
+    res.redirect(buildAuthSuccessRedirect(issueAuthToken(sessionUser), isNative, platform, delivery));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Ошибка Google';
     clearGoogleOAuthCookies(res);
@@ -370,7 +376,8 @@ authRouter.get('/vk/callback', async (req, res) => {
       res.redirect(buildAuthErrorRedirect('Аккаунт заблокирован', isNative, platform, delivery));
       return;
     }
-    res.redirect(buildAuthSuccessRedirect(issueAuthToken(user), isNative, platform, delivery));
+    const sessionUser = await startUserSession(user.id);
+    res.redirect(buildAuthSuccessRedirect(issueAuthToken(sessionUser), isNative, platform, delivery));
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Ошибка VK';
     clearVkOAuthCookies(res);
@@ -420,8 +427,9 @@ authRouter.post('/vk/complete', authLimiter, async (req, res, next) => {
     if (user.isBanned) {
       throw new HttpError(403, 'Аккаунт заблокирован');
     }
-    const token = issueAuthToken(user);
-    res.json({ token, user: toUserResponse(user) });
+    const sessionUser = await startUserSession(user.id);
+    const token = issueAuthToken(sessionUser);
+    res.json({ token, user: toUserResponse(sessionUser) });
   } catch (error) {
     next(error);
   }

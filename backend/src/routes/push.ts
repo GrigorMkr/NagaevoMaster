@@ -4,7 +4,8 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { env } from '../config/env.js';
-import { isPushConfigured } from '../services/push/webPush.js';
+import { isPushConfigured, isWebPushConfigured } from '../services/push/webPush.js';
+import { isFcmConfigured } from '../services/push/fcmPush.js';
 
 const pushRouter = Router();
 
@@ -75,6 +76,8 @@ pushRouter.get('/status', requireAuth, async (req: AuthRequest, res, next) => {
     const count = await dedupePushSubscriptions(req.user!.id);
     res.json({
       configured: isPushConfigured(),
+      webPushConfigured: isWebPushConfigured(),
+      fcmConfigured: isFcmConfigured(),
       subscribed: count > 0,
     });
   } catch (error) {

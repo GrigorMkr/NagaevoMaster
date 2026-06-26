@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { PasswordInput } from '@/components/ui/PasswordInput/PasswordInput';
 import { COMING_SOON_COPY, grantPreviewAccess } from '@/utils/siteAccess';
 import { APP_NAME } from '@/utils/constants';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import styles from './ComingSoonPage.module.css';
 interface ComingSoonPageProps {
     onAccessGranted: () => void;
@@ -23,7 +24,7 @@ function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
         setError('Неверный ключ доступа');
     };
     return (<>
-      <PageMeta title="Скоро запуск" description={`${APP_NAME} скоро откроется для жителей посёлка Нагаево.`} canonical="/"/>
+      <PageMeta title="Скоро запуск" description={`${APP_NAME} скоро откроется для жителей посёлка Нагаево.`} canonical="/" />
 
       <main className={styles.page}>
         <div className={styles.card}>
@@ -44,7 +45,7 @@ function ComingSoonPage({ onAccessGranted }: ComingSoonPageProps) {
             Вход для команды
           </button>
 
-          {showTeamForm && (<form className={styles.teamForm} onSubmit={handleSubmit}>
+          {showTeamForm && (<form className={styles.teamForm} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSubmit}>
               <label className={styles.teamLabel} htmlFor="preview-access-key">
                 Ключ доступа
               </label>

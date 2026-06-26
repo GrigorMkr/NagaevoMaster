@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /profile
+Disallow: /auth
+Disallow: /add-listing
+Disallow: /edit-listing
+Disallow: /native-oauth-bridge.html
+Disallow: /auth/app-return
 
 Sitemap: https://nagaevomaster.ru/sitemap.xml

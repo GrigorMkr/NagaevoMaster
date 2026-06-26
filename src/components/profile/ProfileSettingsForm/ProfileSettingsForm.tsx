@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import { useAppDispatch } from '@/app/hooks';
 import { setUser } from '@/features/user/userSlice';
@@ -7,14 +7,22 @@ import type { HomeLocation } from '@/types/location';
 import { Button } from '@/components/ui/Button/Button';
 import { UserAvatar } from '@/components/ui/UserAvatar/UserAvatar';
 import { HomeAddressMap } from '@/components/profile/HomeAddressMap/HomeAddressMap';
+import { AddressSearchField } from '@/components/location/AddressSearchField/AddressSearchField';
 import { USE_MOCK_FALLBACK } from '@/config/runtime';
-import { NAGAEVO_STREETS } from '@/constants/geo-data';
+import { REGION_SETTLEMENTS } from '@/constants/geo-data';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { MAX_AVATAR_BYTES, resizeImageForAvatar } from '@/utils/resizeImage';
 import { updateProfile } from '@/services/usersApi';
+import { reverseGeocode } from '@/services/geoApi';
 import { uploadImage } from '@/services/uploadsApi';
 import { buildAvatarUrl } from '@/utils/avatarUrl';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { getErrorMessage } from '@/utils/errorMessage';
+import {
+  formatBirthDateDisplay,
+  maskBirthDateInput,
+  parseBirthDateDisplay,
+} from '@/utils/birthDate';
 import { ensurePushNotifications, unsubscribeFromPush } from '@/services/pushApi';
 import { isPushEnabledPreference, setPushEnabledPreference } from '@/utils/pushPreferences';
 import { isPushApiAvailable } from '@/utils/pushEnvironment';
@@ -25,24 +33,8 @@ interface ProfileSettingsFormProps {
   user: User;
 }
 
-const STREET_OPTIONS = Object.entries(NAGAEVO_STREETS).map(([key, street]) => ({
-  key,
-  label: street.label,
-  lat: street.lat,
-  lng: street.lng,
-}));
-
-const currentYear = new Date().getFullYear();
-
 function resolveAvatarDisplay(url: string): string {
   return resolveUploadUrl(url);
-}
-
-function buildAddressText(streetLabel: string, house: string, extra: string): string {
-  const parts = [`с. Нагаево, ${streetLabel}`];
-  if (house.trim()) parts.push(`д. ${house.trim()}`);
-  if (extra.trim()) parts.push(extra.trim());
-  return parts.join(', ');
 }
 
 function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
@@ -50,11 +42,13 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone ?? '');
-  const [birthYear, setBirthYear] = useState(user.birthYear ? String(user.birthYear) : '');
-  const [streetKey, setStreetKey] = useState('');
-  const [house, setHouse] = useState('');
+  const [birthDateInput, setBirthDateInput] = useState(formatBirthDateDisplay(user.birthDate));
+  const [birthDateDirty, setBirthDateDirty] = useState(false);
+  const [settlementId, setSettlementId] = useState<string>(REGION_SETTLEMENTS[0].id);
+  const [addressQuery, setAddressQuery] = useState(user.homeLocation?.address ?? '');
   const [addressExtra, setAddressExtra] = useState('');
   const [homeLocation, setHomeLocation] = useState<HomeLocation | null>(user.homeLocation ?? null);
+  const [showAddressForm, setShowAddressForm] = useState(Boolean(user.homeLocation));
   const [avatarUrl, setAvatarUrl] = useState(
     user.avatarUrl ? resolveAvatarDisplay(user.avatarUrl) : buildAvatarUrl(user.name, user.email),
   );
@@ -63,6 +57,15 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   const [pushEnabled, setPushEnabled] = useState(isPushEnabledPreference);
   const [pushLoading, setPushLoading] = useState(false);
   const showPushToggle = isPushApiAvailable();
+  const reverseTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setBirthDateInput(formatBirthDateDisplay(user.birthDate));
+    setBirthDateDirty(false);
+  }, [user.id, user.birthDate]);
+
+  const selectedSettlement = REGION_SETTLEMENTS.find((item) => item.id === settlementId)
+    ?? REGION_SETTLEMENTS[0];
 
   const handleAvatarPick = () => {
     fileInputRef.current?.click();
@@ -110,29 +113,30 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
     }
   };
 
-  const handleStreetChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const key = event.target.value;
-    setStreetKey(key);
-    if (!key) {
-      setHomeLocation(null);
-      return;
-    }
-    const street = STREET_OPTIONS.find((item) => item.key === key);
-    if (!street) return;
-    const address = buildAddressText(street.label, house, addressExtra);
-    setHomeLocation({ lat: street.lat, lng: street.lng, address });
+  const buildFullAddress = (base: string, extra: string): string => {
+    const trimmedExtra = extra.trim();
+    return trimmedExtra ? `${base}, ${trimmedExtra}` : base;
   };
 
-  const syncAddressFromFields = (nextHouse: string, nextExtra: string, key = streetKey) => {
-    if (!key) return;
-    const street = STREET_OPTIONS.find((item) => item.key === key);
-    if (!street) return;
-    const address = buildAddressText(street.label, nextHouse, nextExtra);
-    setHomeLocation((current) => ({
-      lat: current?.lat ?? street.lat,
-      lng: current?.lng ?? street.lng,
-      address,
-    }));
+  const resolveAddressFromMap = (lat: number, lng: number) => {
+    if (reverseTimerRef.current) {
+      window.clearTimeout(reverseTimerRef.current);
+    }
+    reverseTimerRef.current = window.setTimeout(() => {
+      void reverseGeocode(lat, lng)
+        .then((result) => {
+          if (!result.label) {
+            return;
+          }
+          setAddressQuery(result.label);
+          setHomeLocation({
+            lat: result.lat,
+            lng: result.lng,
+            address: buildFullAddress(result.label, addressExtra),
+          });
+        })
+        .catch(() => undefined);
+    }, 400);
   };
 
   const handlePushToggle = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -163,22 +167,26 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
     setIsSaving(true);
 
     try {
-      const parsedBirthYear = birthYear.trim()
-        ? Number(birthYear)
+      const parsedBirthDate = birthDateInput.trim()
+        ? parseBirthDateDisplay(birthDateInput)
         : null;
 
-      if (parsedBirthYear != null && (parsedBirthYear < 1920 || parsedBirthYear > currentYear)) {
-        toast.error(`Год рождения: от 1920 до ${currentYear}`);
+      if (birthDateInput.trim() && !parsedBirthDate) {
+        toast.error('День рождения: формат дд.мм.гггг');
         return;
       }
+
+      const nextHomeLocation = showAddressForm ? homeLocation : null;
 
       const updatedUser = await updateProfile({
         name: name.trim(),
         phone: phone.trim(),
-        birthYear: parsedBirthYear,
-        homeAddress: homeLocation?.address ?? null,
-        homeLat: homeLocation?.lat ?? null,
-        homeLng: homeLocation?.lng ?? null,
+        ...(birthDateDirty
+          ? { birthDate: parsedBirthDate }
+          : {}),
+        homeAddress: nextHomeLocation?.address ?? null,
+        homeLat: nextHomeLocation?.lat ?? null,
+        homeLng: nextHomeLocation?.lng ?? null,
       });
       dispatch(setUser(updatedUser));
       toast.success('Профиль сохранён');
@@ -196,9 +204,9 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
       <h2 id="profile-settings-title" className={styles.title}>
         Настройки профиля
       </h2>
-      <p className={styles.subtitle}>Аватар, контакты, год рождения и адрес</p>
+      <p className={styles.subtitle}>Аватар, контакты, день рождения и адрес</p>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSubmit}>
         <div className={styles.avatarRow}>
           <UserAvatar name={name} src={avatarUrl} size="lg" />
           <div className={styles.avatarActions}>
@@ -242,16 +250,21 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
         </label>
 
         <label className={styles.field}>
-          <span>Год рождения</span>
+          <span>День рождения</span>
           <input
             className={pageStyles.input}
-            type="number"
-            min={1920}
-            max={currentYear}
-            value={birthYear}
-            onChange={(event) => setBirthYear(event.target.value)}
-            placeholder="Необязательно"
+            type="text"
+            inputMode="numeric"
+            value={birthDateInput}
+            onChange={(event) => {
+              setBirthDateDirty(true);
+              setBirthDateInput(maskBirthDateInput(event.target.value));
+            }}
+            placeholder="дд.мм.гггг"
+            maxLength={10}
+            autoComplete="bday"
           />
+          <p className={styles.hint}>Формат: дд.мм.гггг. Друзья увидят только тортик в ваш день рождения, дату не показываем</p>
         </label>
 
         <label className={styles.field}>
@@ -262,71 +275,96 @@ function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
 
         <div className={styles.addressBlock}>
           <h3 className={styles.addressTitle}>Домашний адрес</h3>
-          <p className={styles.hint}>Необязательно — друзья увидят на карте</p>
+          <p className={styles.hint}>
+            Уфа, Нагаево и сёла в радиусе 50 км — поиск по улице и номеру дома
+          </p>
 
-          <label className={styles.field}>
-            <span>Улица</span>
-            <select
-              className={pageStyles.input}
-              value={streetKey}
-              onChange={handleStreetChange}
-            >
-              <option value="">Не указывать</option>
-              {STREET_OPTIONS.map((street) => (
-                <option key={street.key} value={street.key}>{street.label}</option>
-              ))}
-            </select>
+          <label className={styles.toggleRow}>
+            <input
+              type="checkbox"
+              className={styles.toggleInput}
+              checked={showAddressForm}
+              onChange={(event) => {
+                const enabled = event.target.checked;
+                setShowAddressForm(enabled);
+                if (!enabled) {
+                  setHomeLocation(null);
+                  setAddressQuery('');
+                  setAddressExtra('');
+                }
+              }}
+            />
+            <span className={styles.toggleText}>
+              <strong>Указать адрес</strong>
+              <small>Друзья увидят на карте</small>
+            </span>
           </label>
 
-          {streetKey && (
+          {showAddressForm && (
             <>
-              <div className={styles.addressRow}>
-                <label className={styles.field}>
-                  <span>Дом</span>
-                  <input
-                    className={pageStyles.input}
-                    value={house}
-                    onChange={(event) => {
-                      const next = event.target.value;
-                      setHouse(next);
-                      syncAddressFromFields(next, addressExtra);
-                    }}
-                    placeholder="12"
-                  />
-                </label>
-                <label className={styles.field}>
-                  <span>Уточнение</span>
-                  <input
-                    className={pageStyles.input}
-                    value={addressExtra}
-                    onChange={(event) => {
-                      const next = event.target.value;
-                      setAddressExtra(next);
-                      syncAddressFromFields(house, next);
-                    }}
-                    placeholder="подъезд, этаж"
-                  />
-                </label>
-              </div>
+              <label className={styles.field}>
+                <span>Населённый пункт</span>
+                <select
+                  className={pageStyles.input}
+                  value={settlementId}
+                  onChange={(event) => setSettlementId(event.target.value)}
+                >
+                  {REGION_SETTLEMENTS.map((settlement) => (
+                    <option key={settlement.id} value={settlement.id}>{settlement.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className={styles.field}>
+                <span>Улица и дом</span>
+                <AddressSearchField
+                  settlement={selectedSettlement.searchLabel}
+                  near={{ lat: selectedSettlement.lat, lng: selectedSettlement.lng }}
+                  value={addressQuery}
+                  onChange={setAddressQuery}
+                  onSelect={(result) => {
+                    setAddressQuery(result.label);
+                    setHomeLocation({
+                      lat: result.lat,
+                      lng: result.lng,
+                      address: buildFullAddress(result.label, addressExtra),
+                    });
+                  }}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Уточнение</span>
+                <input
+                  className={pageStyles.input}
+                  value={addressExtra}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    setAddressExtra(next);
+                    if (homeLocation) {
+                      setHomeLocation({
+                        ...homeLocation,
+                        address: buildFullAddress(addressQuery, next),
+                      });
+                    }
+                  }}
+                  placeholder="квартира, подъезд, этаж"
+                />
+              </label>
 
               <HomeAddressMap
                 location={homeLocation}
+                mapCenter={[selectedSettlement.lat, selectedSettlement.lng]}
                 onPick={(lat, lng) => {
                   setHomeLocation((current) => ({
                     lat,
                     lng,
-                    address: current?.address ?? buildAddressText(
-                      STREET_OPTIONS.find((item) => item.key === streetKey)?.label ?? '',
-                      house,
-                      addressExtra,
-                    ),
+                    address: current?.address ?? buildFullAddress(addressQuery, addressExtra),
                   }));
                 }}
+                onReverseGeocode={resolveAddressFromMap}
               />
 
-              {homeLocation && (
-                <p className={styles.addressPreview}>{homeLocation.address}</p>
-              )}
             </>
           )}
         </div>

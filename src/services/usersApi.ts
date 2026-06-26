@@ -16,7 +16,7 @@ interface UpdateProfilePayload {
   name?: string;
   phone?: string;
   avatarUrl?: string;
-  birthYear?: number | null;
+  birthDate?: string | null;
   homeAddress?: string | null;
   homeLat?: number | null;
   homeLng?: number | null;
@@ -50,7 +50,7 @@ async function updateProfile(payload: UpdateProfilePayload): Promise<User> {
       name: payload.name ?? currentUser.name,
       phone: payload.phone ?? currentUser.phone,
       avatarUrl: payload.avatarUrl ?? currentUser.avatarUrl,
-      birthYear: payload.birthYear === null ? undefined : (payload.birthYear ?? currentUser.birthYear),
+      birthDate: payload.birthDate === null ? undefined : (payload.birthDate ?? currentUser.birthDate),
       homeLocation: payload.homeAddress === null
         ? undefined
         : (payload.homeLat != null && payload.homeLng != null && payload.homeAddress
@@ -92,7 +92,7 @@ interface PublicUserProfile {
     avatarUrl?: string;
     phone?: string;
     email?: string;
-    birthYear?: number;
+    birthdayToday?: boolean;
     homeLocation?: HomeLocation;
   };
   listings: Listing[];

@@ -9,6 +9,7 @@ import styles from './NativeTabBar.module.css';
 const TABS = [
   { to: ROUTES.HOME, label: 'Главная', glyph: '⌂', end: true },
   { to: ROUTES.SERVICES, label: 'Услуги', glyph: '◆' },
+  { to: ROUTES.BOARD, label: 'Доска', glyph: '▤' },
   { to: ROUTES.SEARCH, label: 'Поиск', glyph: '◎', featured: true },
   { to: ROUTES.FORUM, label: 'Форум', glyph: '✦' },
   { to: ROUTES.PROFILE, label: 'Профиль', glyph: '●', authFallback: ROUTES.AUTH },

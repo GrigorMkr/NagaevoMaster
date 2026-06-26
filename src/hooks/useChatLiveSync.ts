@@ -12,11 +12,14 @@ import { showMessageNotification } from '@/utils/messageNotification';
 import { isOutgoingMessage, pruneOutgoingMessages } from '@/utils/outgoingMessages';
 import { tryClaimMessageNotice } from '@/utils/messageNotice';
 import { isIosDevice } from '@/utils/pushEnvironment';
+import { isNativeApp } from '@/utils/nativeApp';
 
 const POLL_VISIBLE_MS = 2000;
 const POLL_HIDDEN_MS = 1000;
 const POLL_VISIBLE_IOS_MS = 1200;
 const POLL_HIDDEN_IOS_MS = 700;
+const POLL_VISIBLE_NATIVE_MS = 1000;
+const POLL_HIDDEN_NATIVE_MS = 1500;
 
 interface NewMessageNotice {
   senderName: string;
@@ -61,8 +64,18 @@ function formatPreview(message: ChatMessage): string {
   return '📎 Вложение';
 }
 
-function notifyIncomingMessage(senderName: string, preview: string, messageId?: string) {
-  void showMessageNotification(senderName, preview, { messageId });
+function notifyIncomingMessage(
+  senderName: string,
+  preview: string,
+  messageId?: string,
+  conversationId?: string,
+) {
+  void showMessageNotification(senderName, preview, {
+    messageId,
+    url: conversationId
+      ? `/profile?section=messages&chat=${conversationId}`
+      : '/profile?section=messages',
+  });
 }
 
 function fireNotice(
@@ -70,9 +83,19 @@ function fireNotice(
   enableSounds: boolean,
   onNewMessage?: (payload: NewMessageNotice) => void,
 ) {
-  if (enableSounds) {
+  const url = notice.conversationId
+    ? `/profile?section=messages&chat=${notice.conversationId}`
+    : '/profile?section=messages';
+
+  if (isNativeApp()) {
+    void showMessageNotification(notice.senderName, notice.preview, {
+      url,
+      messageId: undefined,
+    });
+  } else if (enableSounds) {
     void playMessageSound();
   }
+
   onNewMessage?.(notice);
   showMessageLightning(notice);
 }
@@ -106,6 +129,7 @@ function useChatLiveSync({
   const timerRef = useRef<number | null>(null);
   const enableSoundsRef = useRef(enableSounds);
   const currentUserIdRef = useRef(currentUserId);
+  const syncInitializedRef = useRef(false);
 
   useEffect(() => {
     lastMessageIdRef.current = null;
@@ -139,7 +163,7 @@ function useChatLiveSync({
         const soundsOn = enableSoundsRef.current;
         const userId = currentUserIdRef.current;
 
-        if (prevConversations.length > 0 && unread > prevUnreadRef.current) {
+        if (syncInitializedRef.current && unread > prevUnreadRef.current) {
           const bumped = conversations.find((item) => {
             const prev = prevConversations.find((p) => p.id === item.id);
             return item.unreadCount > 0 && (prev?.unreadCount ?? 0) < item.unreadCount;
@@ -159,25 +183,23 @@ function useChatLiveSync({
             const preview = bumped.lastMessage?.body ?? 'Новое сообщение';
             const displayName = conversationDisplayName(bumped);
             const avatarUrl = conversationAvatarUrl(bumped);
-            if (tabHidden) {
-              notifyIncomingMessage(displayName, preview, bumpedMessageId);
+            const notice: NewMessageNotice = {
+              senderName: displayName,
+              preview,
+              avatarUrl,
+              conversationId: bumped.id,
+            };
+            if (tabHidden || isNativeApp()) {
+              notifyIncomingMessage(displayName, preview, bumpedMessageId, bumped.id);
             } else {
-              fireNotice(
-                {
-                  senderName: displayName,
-                  preview,
-                  avatarUrl,
-                  conversationId: bumped.id,
-                },
-                soundsOn,
-                onNewMessageRef.current,
-              );
+              fireNotice(notice, soundsOn, onNewMessageRef.current);
             }
           }
         }
 
         prevUnreadRef.current = unread;
         conversationsRef.current = conversations;
+        syncInitializedRef.current = true;
         onConversations(conversations);
         onUnreadChange?.(unread);
 
@@ -201,8 +223,8 @@ function useChatLiveSync({
                 ? `${notifyNameRef.current ?? detail.group?.name ?? 'Группа'}: ${lastIncoming.senderName}`
                 : (notifyNameRef.current ?? detail.otherUser?.name ?? 'Чат');
               const avatarUrl = isGroup ? detail.group?.avatarUrl : detail.otherUser?.avatarUrl;
-              if (tabHidden) {
-                notifyIncomingMessage(senderName, preview, lastIncoming.id);
+              if (tabHidden || isNativeApp()) {
+                notifyIncomingMessage(senderName, preview, lastIncoming.id, activeConversationId);
               } else {
                 fireNotice(
                   {
@@ -239,8 +261,13 @@ function useChatLiveSync({
         window.clearInterval(timerRef.current);
       }
       const ios = isIosDevice();
-      const hiddenInterval = ios ? POLL_HIDDEN_IOS_MS : POLL_HIDDEN_MS;
-      const visibleInterval = ios ? POLL_VISIBLE_IOS_MS : POLL_VISIBLE_MS;
+      const native = isNativeApp();
+      const hiddenInterval = native
+        ? POLL_HIDDEN_NATIVE_MS
+        : (ios ? POLL_HIDDEN_IOS_MS : POLL_HIDDEN_MS);
+      const visibleInterval = native
+        ? POLL_VISIBLE_NATIVE_MS
+        : (ios ? POLL_VISIBLE_IOS_MS : POLL_VISIBLE_MS);
       const interval = document.visibilityState === 'hidden' ? hiddenInterval : visibleInterval;
       timerRef.current = window.setInterval(() => void tick(), interval);
     };

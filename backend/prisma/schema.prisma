@@ -27,7 +27,7 @@ model User {
   lastLng           Float?
   lastLocationLabel String?
   lastLocationAt    DateTime?
-  birthYear         Int?
+  birthDate         DateTime?     @db.Date
   homeAddress       String?
   homeLat           Float?
   homeLng           Float?

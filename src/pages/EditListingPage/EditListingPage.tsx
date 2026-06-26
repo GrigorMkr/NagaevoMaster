@@ -170,7 +170,7 @@ function EditListingPage() {
 
   return (
     <>
-      <PageMeta title="Редактирование объявления" canonical={`/edit-listing/${id}`} />
+      <PageMeta title="Редактирование объявления" canonical={`/edit-listing/${id}`} robots="noindex, nofollow" />
       <div className={pageStyles.page}>
         <div className="container">
           <PageHeader badge="Кабинет" title="Редактирование" />

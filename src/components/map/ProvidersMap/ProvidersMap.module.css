@@ -122,12 +122,12 @@
   object-fit: cover;
 }
 
-:global(.leaflet-popup-content-wrapper) {
+:global(.mmrgl-popup-content) {
   border-radius: 12px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
-:global(.leaflet-popup-tip) {
+:global(.mmrgl-popup-tip) {
   box-shadow: none;
 }
 
@@ -155,4 +155,5 @@
 .locateButton {
   margin: var(--spacing-sm);
   z-index: 1000;
+  pointer-events: auto;
 }

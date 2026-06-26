@@ -17,6 +17,9 @@ const ROUTES = {
     ABOUT: '/about',
     CONTACT: '/contact',
   APP_DOWNLOAD: '/app',
+  PRIVACY: '/privacy',
+  PERSONAL_DATA: '/personal-data',
+  TERMS: '/terms',
 } as const;
 function serviceDetailPath(id: string): string {
     return `/service/${id}`;

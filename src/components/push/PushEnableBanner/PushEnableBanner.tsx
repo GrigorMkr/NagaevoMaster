@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
+  ensurePushNotifications,
   fetchPushStatus,
   isPushSupported,
   subscribeToPush,
   syncPushSubscription,
 } from '@/services/pushApi';
+import { checkNativePushPermission } from '@/services/nativePush';
 import { getAuthToken } from '@/services/authApi';
+import { isNativeApp } from '@/utils/nativeApp';
 import styles from './PushEnableBanner.module.css';
 
 interface PushEnableBannerProps {
@@ -18,7 +21,23 @@ function PushEnableBanner({ compact = false }: PushEnableBannerProps) {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!isPushSupported() || !getAuthToken()) {
+    if (!getAuthToken()) {
+      setVisible(false);
+      return;
+    }
+
+    if (isNativeApp()) {
+      const permission = await checkNativePushPermission();
+      if (permission === 'granted') {
+        const status = await fetchPushStatus().catch(() => null);
+        setVisible(Boolean(status && !status.subscribed));
+        return;
+      }
+      setVisible(permission === 'prompt' || permission === 'denied');
+      return;
+    }
+
+    if (!isPushSupported()) {
       setVisible(false);
       return;
     }
@@ -63,16 +82,20 @@ function PushEnableBanner({ compact = false }: PushEnableBannerProps) {
   const handleEnable = useCallback(async () => {
     setLoading(true);
     try {
-      const ok = await subscribeToPush();
+      const ok = isNativeApp()
+        ? await ensurePushNotifications({ requestPermission: true, force: true })
+        : await subscribeToPush();
       if (ok) {
         toast.success('Уведомления включены — сообщения придут со звуком');
         setVisible(false);
       } else {
-        toast.error('Разрешите уведомления в настройках браузера');
+        toast.error(isNativeApp()
+          ? 'Разрешите уведомления в настройках телефона'
+          : 'Разрешите уведомления в браузере');
         await refresh();
       }
     } catch {
-      toast.error('Разрешите уведомления в настройках браузера');
+      toast.error('Разрешите уведомления в настройках');
     } finally {
       setLoading(false);
     }
@@ -84,7 +107,7 @@ function PushEnableBanner({ compact = false }: PushEnableBannerProps) {
     <div className={compact ? styles.bannerCompact : styles.banner}>
       <div className={styles.copy}>
         <strong>🔔 Уведомления со звуком</strong>
-        <p>Кто написал и текст — даже если сайт свёрнут</p>
+        <p>Кто написал и текст — даже если приложение свёрнуто</p>
       </div>
       <button type="button" className={styles.button} disabled={loading} onClick={() => void handleEnable()}>
         {loading ? '…' : 'Включить'}

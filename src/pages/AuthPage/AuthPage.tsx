@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -36,6 +36,7 @@ import { AppLoadingScreen } from '@/components/ui/AppLoadingScreen/AppLoadingScr
 import { ECHO_FORM_ACTION } from '@/constants/forms'
 import { VALIDATION } from '@/constants/validation'
 import { requestLocationPromptAfterAuth } from '@/constants/user-location'
+import { RegisterLegalAgreement } from '@/components/legal/RegisterLegalAgreement/RegisterLegalAgreement'
 import pageStyles from '@/styles/page.module.css'
 import styles from './AuthPage.module.css'
 
@@ -56,7 +57,6 @@ enum RecoveryStep {
 }
 
 const RESEND_COOLDOWN_SEC = 60
-const VK_KNOWN_APP_ID = '54646092'
 
 const loginSchema = z.object({
   user: z.string().email('Введите корректный email'),
@@ -129,6 +129,7 @@ function AuthPage() {
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [captchaResetKey, setCaptchaResetKey] = useState(0)
+  const [legalAccepted, setLegalAccepted] = useState(false)
   const hasOAuthReturn = useMemo(() => {
     const oauthError = searchParams.get('oauth_error')
     const handoff = searchParams.get('handoff')
@@ -137,6 +138,8 @@ function AuthPage() {
     return Boolean(oauthError || handoff || (oauth === '1' && oauthCode))
   }, [searchParams])
   const [isCompletingOAuth, setIsCompletingOAuth] = useState(hasOAuthReturn)
+  const [isRedirecting, setIsRedirecting] = useState(false)
+  const redirectAttemptedRef = useRef(false)
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
@@ -166,19 +169,45 @@ function AuthPage() {
 
   useEffect(() => {
     void fetchOAuthStatus()
-      .then((status) => setOauthStatus({
-        ...status,
-        vkAppId: status.vkAppId ?? VK_KNOWN_APP_ID,
-      }))
+      .then((status) => setOauthStatus(status))
       .catch(() => setOauthStatus({
         google: false,
         vk: false,
-        vkAppId: VK_KNOWN_APP_ID,
+        vkAppId: null,
         siteUrl: 'https://nagaevomaster.ru',
         googleCallback: 'https://nagaevomaster.ru/api/auth/google/callback',
         vkCallback: 'https://nagaevomaster.ru/api/auth/vk/callback',
       }))
   }, [])
+
+  const redirectAfterAuth = useCallback(() => {
+    if (redirectAttemptedRef.current) return
+    redirectAttemptedRef.current = true
+    setIsRedirecting(true)
+    navigate(returnPath, { replace: true })
+    window.setTimeout(() => {
+      const path = window.location.pathname
+      if (path === '/auth' || path.endsWith('/auth')) {
+        const target = returnPath.startsWith('/')
+          ? `${window.location.origin}${returnPath}`
+          : returnPath
+        window.location.replace(target)
+        return
+      }
+      setIsRedirecting(false)
+    }, 350)
+  }, [navigate, returnPath])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      redirectAttemptedRef.current = false
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated || isAuthLoading || isCompletingOAuth || isRedirecting) return
+    redirectAfterAuth()
+  }, [isAuthenticated, isAuthLoading, isCompletingOAuth, isRedirecting, redirectAfterAuth])
 
   useEffect(() => {
     const oauthError = searchParams.get('oauth_error')
@@ -204,7 +233,7 @@ function AuthPage() {
     void completeOAuthLogin(`?${searchParams.toString()}`).then((result) => {
       if (cancelled) return
       if (result.status === 'success') {
-        navigate(returnPath, { replace: true })
+        redirectAfterAuth()
         return
       }
       if (result.status === 'error') {
@@ -218,7 +247,7 @@ function AuthPage() {
     return () => {
       cancelled = true
     }
-  }, [navigate, returnPath, searchParams])
+  }, [navigate, redirectAfterAuth, returnPath, searchParams])
 
   useEffect(() => {
     setActiveTab(resolveAuthTab(searchParams.get('tab')))
@@ -227,17 +256,17 @@ function AuthPage() {
   const apiBase = resolveOAuthApiBase()
   const googleAuthUrl = `${apiBase}/auth/google`
   const vkAuthUrl = `${apiBase}/auth/vk`
-  const resolvedVkAppId = oauthStatus?.vkAppId ?? VK_KNOWN_APP_ID
-  const oauthEnabled = Boolean(oauthStatus?.google || oauthStatus?.vk || resolvedVkAppId)
-  const showOAuth = !isNativeApp()
+  const vkEnabled = Boolean(oauthStatus?.vk)
+  const oauthEnabled = Boolean(oauthStatus?.google || vkEnabled)
+  const showWebOAuth = !isNativeApp()
 
   const goAfterAuth = () => {
-    navigate(returnPath, { replace: true })
+    redirectAfterAuth()
   }
 
-  const oauthButtons = showOAuth && oauthStatus && oauthEnabled ? (
+  const oauthButtons = oauthStatus && oauthEnabled ? (
     <div className={styles.oauthRow}>
-      {oauthStatus.google && (
+      {showWebOAuth && oauthStatus.google && (
         <button
           type="button"
           className={styles.oauthLogoBtn}
@@ -247,7 +276,7 @@ function AuthPage() {
           <GoogleLogo />
         </button>
       )}
-      {(oauthStatus.vk || resolvedVkAppId) && (
+      {vkEnabled && (
         <button
           type="button"
           className={styles.oauthLogoBtn}
@@ -274,16 +303,13 @@ function AuthPage() {
     </>
   ) : null
 
-  if (isAuthLoading || isCompletingOAuth) {
-    return (
-      <AppLoadingScreen
-        label={isCompletingOAuth ? 'Завершаем вход…' : 'Проверяем сессию…'}
-      />
-    )
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to={returnPath} replace />
+  if (isAuthLoading || isCompletingOAuth || isRedirecting) {
+    const label = isCompletingOAuth
+      ? 'Завершаем вход…'
+      : isAuthLoading
+        ? 'Проверяем сессию…'
+        : 'Переход в профиль…'
+    return <AppLoadingScreen label={label} />
   }
 
   const resetRegisterFlow = () => {
@@ -334,6 +360,10 @@ function AuthPage() {
   }
 
   const handleSendCode = async (data: RegisterForm) => {
+    if (!legalAccepted) {
+      toast.error('Подтвердите согласие с документами')
+      return
+    }
     setIsSendingCode(true)
     try {
       const response = await sendRegistrationCode(verificationChannel, data)
@@ -441,7 +471,7 @@ function AuthPage() {
 
   return (
     <>
-      <PageMeta title="Вход и регистрация" canonical="/auth" />
+      <PageMeta title="Вход и регистрация" canonical="/auth" robots="noindex, nofollow" />
 
       <div className={`${pageStyles.page} ${styles.page}`}>
         <div className={`container ${styles.container}`}>
@@ -641,7 +671,9 @@ function AuthPage() {
                   )}
                 </div>
 
-                <Button type="submit" fullWidth variant="secondary" loading={isSendingCode}>
+                <RegisterLegalAgreement checked={legalAccepted} onChange={setLegalAccepted} />
+
+                <Button type="submit" fullWidth variant="secondary" loading={isSendingCode} disabled={!legalAccepted}>
                   Получить код
                 </Button>
               </form>
@@ -658,6 +690,8 @@ function AuthPage() {
 
               <form
                 className={`${styles.form} ${styles.registerForm}`}
+                action={ECHO_FORM_ACTION}
+                method="post"
                 onSubmit={codeForm.handleSubmit(handleVerifyCode)}
                 noValidate
               >
@@ -740,6 +774,8 @@ function AuthPage() {
               <p className={styles.hint}>Код отправлен на {recoveryEmail}</p>
               <form
                 className={styles.form}
+                action={ECHO_FORM_ACTION}
+                method="post"
                 onSubmit={recoveryResetForm.handleSubmit(handleRecoveryReset)}
                 noValidate
               >

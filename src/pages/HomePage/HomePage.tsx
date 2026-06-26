@@ -5,16 +5,12 @@ import { useNews } from '@/hooks/useNews';
 import { APP_DESCRIPTION } from '@/constants';
 import { HeroSection } from './components/HeroSection';
 import { NewsSection } from './components/NewsSection';
+import { BoardPortalSection } from './components/BoardPortalSection';
 import styles from './HomePage.module.css';
 
 const PopularServicesSection = lazy(async () => {
   const module = await import('./components/PopularServicesSection');
   return { default: module.PopularServicesSection };
-});
-
-const BoardPortalSection = lazy(async () => {
-  const module = await import('./components/BoardPortalSection');
-  return { default: module.BoardPortalSection };
 });
 
 const MapSection = lazy(async () => {
@@ -57,7 +53,12 @@ function HomePage() {
 
   return (
     <div className={styles.homeShell}>
-      <PageMeta description={APP_DESCRIPTION} canonical="/" />
+      <PageMeta
+        description={APP_DESCRIPTION}
+        canonical="/"
+        robots="index, follow, max-image-preview:large"
+        keywords="Нагаево, мастера, услуги, объявления, форум, специалисты, посёлок Нагаево, Башкортостан"
+      />
       <HeroSection />
       <section className={styles.mainContent}>
         <div className="container">
@@ -85,9 +86,7 @@ function HomePage() {
             </Suspense>
           </Reveal>
           <Reveal delay={100}>
-            <Suspense fallback={null}>
-              <BoardPortalSection />
-            </Suspense>
+            <BoardPortalSection />
           </Reveal>
           <Reveal delay={100}>
             <Suspense fallback={null}>

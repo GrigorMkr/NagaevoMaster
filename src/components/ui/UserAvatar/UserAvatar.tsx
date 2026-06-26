@@ -7,9 +7,10 @@ interface UserAvatarProps {
   src?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
+  showBirthdayCake?: boolean;
 }
 
-function UserAvatar({ name, src, size = 'md', className }: UserAvatarProps) {
+function UserAvatar({ name, src, size = 'md', className, showBirthdayCake = false }: UserAvatarProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const initials = name
     .split(' ')
@@ -22,7 +23,7 @@ function UserAvatar({ name, src, size = 'md', className }: UserAvatarProps) {
 
   return (
     <span
-      className={classNames(styles.avatar, styles[size], className)}
+      className={classNames(styles.avatar, styles[size], showBirthdayCake && styles.withBadge, className)}
       aria-hidden="true"
     >
       {showImage ? (
@@ -35,6 +36,9 @@ function UserAvatar({ name, src, size = 'md', className }: UserAvatarProps) {
         />
       ) : (
         <span className={styles.fallback}>{initials || 'Н'}</span>
+      )}
+      {showBirthdayCake && (
+        <span className={styles.birthdayBadge} title="День рождения">🎂</span>
       )}
     </span>
   );

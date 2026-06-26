@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ROUTES } from '@/constants';
@@ -9,6 +9,17 @@ function useNativeOAuthCompletion() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const handledSearchRef = useRef('');
+
+  const redirectAfterAuth = useCallback((returnPath: string) => {
+    navigate(returnPath, { replace: true });
+    window.setTimeout(() => {
+      const path = window.location.pathname;
+      if (path === '/auth' || path.endsWith('/auth') || path.includes('/auth/app-return')) {
+        const target = returnPath.startsWith('/') ? `${window.location.origin}${returnPath}` : returnPath;
+        window.location.replace(target);
+      }
+    }, 350);
+  }, [navigate]);
 
   useEffect(() => {
     if (!isNativeApp()) return;
@@ -25,7 +36,7 @@ function useNativeOAuthCompletion() {
     void completeOAuthLogin(`?${search}`).then((result) => {
       if (result.status === 'pending') return;
       if (result.status === 'success') {
-        navigate(result.returnPath, { replace: true });
+        redirectAfterAuth(result.returnPath);
         return;
       }
       if (result.status === 'error') {
@@ -33,7 +44,7 @@ function useNativeOAuthCompletion() {
         navigate(ROUTES.AUTH, { replace: true });
       }
     });
-  }, [navigate, searchParams]);
+  }, [navigate, redirectAfterAuth, searchParams]);
 }
 
 export {

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
 import { selectIsAuthenticated } from '@/features/user/userSelectors';
-import { ROUTES } from '@/constants';
 import {
   ensurePushNotifications,
   fetchPushStatus,
@@ -93,14 +91,11 @@ function PushSetupGate() {
 
   if (mode === 'ios-install') {
     return (
-      <section className={styles.gate} aria-label="Установка приложения">
+      <section className={styles.gate} aria-label="Установка на iPhone">
         <p className={styles.badge}>iPhone</p>
-        <p className={styles.text}>Установите приложение из App Store для уведомлений в фоне.</p>
-        <div className={styles.actions}>
-          <Link to={ROUTES.APP_DOWNLOAD} className={styles.primary}>
-            Скачать
-          </Link>
-        </div>
+        <p className={styles.text}>
+          Добавьте сайт на главный экран — так уведомления работают в фоне.
+        </p>
       </section>
     );
   }

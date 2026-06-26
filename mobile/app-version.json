@@ -1,13 +1,14 @@
 {
-  "version": "1.0.7",
-  "versionCode": 8,
-  "releasedAt": "2026-06-23",
-  "apkSizeMb": 4.5,
+  "version": "1.0.14",
+  "versionCode": 15,
+  "releasedAt": "2026-06-26",
+  "apkSizeMb": 27.9,
+  "apkFileName": "nagaevomaster-1.0.14.apk",
   "releaseNotes": [
-    "Вход только по email и паролю",
-    "Push-уведомления (FCM) при запуске и после входа",
-    "Анимированная печать на экране загрузки",
-    "Анимация печати и лёгкие эффекты на главной",
-    "Старый логотип в шапке, новая печать при старте"
-  ]
+    "Доска объявлений в нижней навигации приложения",
+    "Заставка с логотипом до полной загрузки сайта",
+    "Исправлена шапка под вырез экрана Android"
+  ],
+  "rustorePublished": true,
+  "rustoreUrl": "https://www.rustore.ru/catalog/app/ru.nagaevomaster.app"
 }

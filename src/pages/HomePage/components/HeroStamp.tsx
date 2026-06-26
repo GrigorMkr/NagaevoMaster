@@ -14,6 +14,7 @@ const HeroStamp = memo(function HeroStamp() {
   const [hovered, setHovered] = useState(false);
   const { reducedMotion, lowPower } = useScrollRotation(innerRef, tilt);
   const smoke = STAMP_SMOKE_PALETTE[smokeIndex] ?? STAMP_SMOKE_PALETTE[0]!;
+  const animateStamp = !reducedMotion;
 
   const smokeStyle = {
     '--stamp-smoke-core': smoke.core,
@@ -99,7 +100,7 @@ const HeroStamp = memo(function HeroStamp() {
             variant="stamp"
             className={styles.heroStampIcon}
             chimneySmokeColor={smoke.chimney}
-            animateChimneySmoke={!reducedMotion && !lowPower}
+            animateChimneySmoke={animateStamp}
           />
           <div className={styles.heroStampShine} />
         </div>

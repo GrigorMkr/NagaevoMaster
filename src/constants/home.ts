@@ -25,7 +25,7 @@ const HOME_FEATURES = [
     },
 ] as const;
 const HERO_SUBTITLE =
-  'Портал посёлка: мастера, общение, покупка и продажа — всё бесплатно, без VPN и подписок';
+  'Портал посёлка: мастера, общение, покупка и продажа — всё бесплатно, без подписок';
 const FORUM_TOPICS_PREVIEW_COUNT = 5;
 const NEWS_PREVIEW_COUNT = 3;
 

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
 import type { Listing } from '@/types/listing';
 import type { AccountLocation } from '@/types/location';
 import { GEO } from '@/constants';
+import { VkMap } from '@/components/map/VkMap/VkMap';
+import { isValidLatLng } from '@/utils/mapBounds';
 import { ClusterMarkers } from './ClusterMarkers';
 import { FitListingsBounds } from './FitListingsBounds';
 import { FlyToUserLocation } from './FlyToUserLocation';
@@ -11,16 +12,7 @@ import { MapFilters } from './MapFilters';
 import { MapViewport } from './MapViewport';
 import { SettlementMarker } from './SettlementMarker';
 import { UserLocationMarker } from './UserLocationMarker';
-import './mapIcons';
 import styles from './ProvidersMap.module.css';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-
-const MAP_TILES = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const MAP_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-  '&copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 interface ProvidersMapProps {
   listings: Listing[];
@@ -53,25 +45,35 @@ function ProvidersMap({
     setCategoryFilter(category);
   };
 
+  const center: [number, number] = useMemo(() => {
+    if (mapCenter && isValidLatLng(mapCenter.lat, mapCenter.lng)) {
+      return [mapCenter.lat, mapCenter.lng];
+    }
+    if (userLocation && isValidLatLng(userLocation.lat, userLocation.lng)) {
+      return [userLocation.lat, userLocation.lng];
+    }
+    return [GEO.center.lat, GEO.center.lng];
+  }, [mapCenter?.lat, mapCenter?.lng, userLocation?.lat, userLocation?.lng]);
+
+  const hasUserLocation = Boolean(
+    userLocation && isValidLatLng(userLocation.lat, userLocation.lng),
+  );
+
   return (
     <div className={styles.mapWrapper}>
       {showFilters && (
         <MapFilters categoryFilter={categoryFilter} onFilterChange={handleFilterChange} />
       )}
-      <MapContainer
-        center={[
-          mapCenter?.lat ?? userLocation?.lat ?? GEO.center.lat,
-          mapCenter?.lng ?? userLocation?.lng ?? GEO.center.lng,
-        ]}
+      <VkMap
+        center={center}
         zoom={GEO.defaultZoom}
         minZoom={GEO.minZoom}
         maxZoom={GEO.maxZoom}
         className={styles.map}
-        scrollWheelZoom
+        scrollZoom
         maxBounds={GEO.mapBounds}
-        maxBoundsViscosity={0.85}
+        zoomControl={false}
       >
-        <TileLayer attribution={MAP_ATTRIBUTION} url={MAP_TILES} />
         {fitToListings || categoryFilter ? (
           <FitListingsBounds
             key={categoryFilter ?? 'all'}
@@ -82,11 +84,11 @@ function ProvidersMap({
           <MapViewport />
         )}
         <LocateButton />
-        <FlyToUserLocation location={userLocation} />
+        <FlyToUserLocation location={hasUserLocation ? userLocation : null} />
         <SettlementMarker />
-        {userLocation && <UserLocationMarker location={userLocation} />}
+        {hasUserLocation && userLocation && <UserLocationMarker location={userLocation} />}
         <ClusterMarkers listings={filtered} />
-      </MapContainer>
+      </VkMap>
     </div>
   );
 }

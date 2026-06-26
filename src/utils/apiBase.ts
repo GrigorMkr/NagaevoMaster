@@ -1,6 +1,7 @@
 import { isNativeApp } from '@/utils/nativeApp';
 
 const SITE_ORIGIN = 'https://nagaevomaster.ru';
+const PROD_API_ORIGIN = 'https://api.nagaevomaster.ru';
 
 function isSiteOrigin(): boolean {
   if (typeof window === 'undefined') return true;
@@ -9,11 +10,14 @@ function isSiteOrigin(): boolean {
 }
 
 function resolveAbsoluteApiBase(): string {
-  if (typeof window !== 'undefined' && isSiteOrigin()) {
-    return `${window.location.origin}/api`;
+  if (typeof window !== 'undefined' && isNativeApp()) {
+    return `${PROD_API_ORIGIN}/api`;
   }
-  if (isNativeApp()) {
-    return `${SITE_ORIGIN}/api`;
+  if (typeof window !== 'undefined' && isSiteOrigin()) {
+    if (import.meta.env.PROD && window.location.hostname !== 'localhost') {
+      return `${PROD_API_ORIGIN}/api`;
+    }
+    return `${window.location.origin}/api`;
   }
   const configured = import.meta.env.VITE_API_URL;
   if (configured && String(configured).startsWith('http')) {
@@ -27,6 +31,7 @@ function resolveAbsoluteApiBase(): string {
 
 export {
   SITE_ORIGIN,
+  PROD_API_ORIGIN,
   isSiteOrigin,
   resolveAbsoluteApiBase,
 };

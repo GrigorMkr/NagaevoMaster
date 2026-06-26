@@ -5,6 +5,7 @@ import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { routeParam } from '../utils/params.js';
 import { sendFriendPush } from '../services/push/webPush.js';
+import { isBirthdayToday } from '../utils/birthDate.js';
 
 const friendsRouter = Router();
 
@@ -15,17 +16,26 @@ const userSelect = {
   avatarUrl: true,
 } as const;
 
+const friendUserSelect = {
+  ...userSelect,
+  birthDate: true,
+} as const;
+
 function toFriendUser(user: {
   id: string;
   name: string;
   email: string;
   avatarUrl: string | null;
-}) {
+  birthDate?: Date | null;
+}, options?: { includeBirthdayFlag?: boolean }) {
   return {
     id: user.id,
     name: user.name,
     login: user.email.split('@')[0] ?? user.email,
     avatarUrl: user.avatarUrl ?? undefined,
+    ...(options?.includeBirthdayFlag
+      ? { birthdayToday: isBirthdayToday(user.birthDate) }
+      : {}),
   };
 }
 
@@ -36,8 +46,8 @@ function mapFriendship(
     requesterId: string;
     addresseeId: string;
     createdAt: Date;
-    requester: { id: string; name: string; email: string; avatarUrl: string | null };
-    addressee: { id: string; name: string; email: string; avatarUrl: string | null };
+    requester: { id: string; name: string; email: string; avatarUrl: string | null; birthDate?: Date | null };
+    addressee: { id: string; name: string; email: string; avatarUrl: string | null; birthDate?: Date | null };
   },
   currentUserId: string,
 ) {
@@ -47,7 +57,7 @@ function mapFriendship(
     id: friendship.id,
     status: friendship.status,
     direction: isIncoming ? 'incoming' as const : 'outgoing' as const,
-    user: toFriendUser(other),
+    user: toFriendUser(other, { includeBirthdayFlag: friendship.status === 'accepted' }),
     createdAt: friendship.createdAt.toISOString(),
   };
 }
@@ -75,8 +85,8 @@ friendsRouter.get('/', requireAuth, async (req: AuthRequest, res, next) => {
         OR: [{ requesterId: userId }, { addresseeId: userId }],
       },
       include: {
-        requester: { select: userSelect },
-        addressee: { select: userSelect },
+        requester: { select: friendUserSelect },
+        addressee: { select: friendUserSelect },
       },
       orderBy: { updatedAt: 'desc' },
     });

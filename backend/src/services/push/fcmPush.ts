@@ -3,8 +3,15 @@ import { GoogleAuth } from 'google-auth-library';
 import { env } from '../../config/env.js';
 
 const FCM_ENDPOINT_PREFIX = 'fcm:';
+/** Канал уведомлений Android — совпадает с MainActivity.PUSH_CHANNEL_ID */
+const ANDROID_PUSH_CHANNEL_ID = 'nagaevo_messages';
 
 let fcmAuth: GoogleAuth | null = null;
+
+function isInvalidFcmTokenError(status: number, text: string): boolean {
+  if (status === 404) return true;
+  return /NOT_FOUND|UNREGISTERED|registration-token-not-registered|InvalidRegistration|NotRegistered/i.test(text);
+}
 
 interface FcmNotificationPayload {
   title: string;
@@ -56,9 +63,17 @@ function isFcmConfigured(): boolean {
   return Boolean(env.FCM_SERVER_KEY || (env.FCM_PROJECT_ID && resolveServiceAccountPath()));
 }
 
-async function sendFcmLegacy(token: string, payload: FcmNotificationPayload): Promise<boolean> {
+interface FcmSendResult {
+  ok: boolean;
+  invalidToken: boolean;
+}
+
+async function sendFcmLegacy(token: string, payload: FcmNotificationPayload): Promise<FcmSendResult> {
   const serverKey = env.FCM_SERVER_KEY;
-  if (!serverKey) return false;
+  if (!serverKey) {
+    console.warn('[fcm] legacy skipped: FCM_SERVER_KEY not set');
+    return { ok: false, invalidToken: false };
+  }
 
   const response = await fetch('https://fcm.googleapis.com/fcm/send', {
     method: 'POST',
@@ -72,7 +87,7 @@ async function sendFcmLegacy(token: string, payload: FcmNotificationPayload): Pr
       notification: {
         title: payload.title,
         body: payload.body,
-        sound: 'default',
+        sound: 'nagaevo_message',
         icon: 'notification_icon',
       },
       data: payload.data ?? {},
@@ -82,31 +97,32 @@ async function sendFcmLegacy(token: string, payload: FcmNotificationPayload): Pr
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     console.warn('[fcm] failed', response.status, text.slice(0, 120));
-    return false;
+    return { ok: false, invalidToken: isInvalidFcmTokenError(response.status, text) };
   }
 
   const result = await response.json().catch(() => null) as { failure?: number; results?: { error?: string }[] } | null;
   const error = result?.results?.[0]?.error;
   if (result?.failure || error) {
     console.warn('[fcm] token error', error);
-    return false;
+    return { ok: false, invalidToken: isInvalidFcmTokenError(0, error ?? '') };
   }
 
-  return true;
+  return { ok: true, invalidToken: false };
 }
 
-async function sendFcmV1(token: string, payload: FcmNotificationPayload): Promise<boolean> {
+async function sendFcmV1(token: string, payload: FcmNotificationPayload): Promise<FcmSendResult> {
   const auth = getFcmAuth();
   const projectId = env.FCM_PROJECT_ID;
   if (!auth || !projectId) {
-    return false;
+    console.warn('[fcm] v1 skipped: FCM_PROJECT_ID or service account missing');
+    return { ok: false, invalidToken: false };
   }
 
   const client = await auth.getClient();
   const accessTokenResponse = await client.getAccessToken();
   const accessToken = accessTokenResponse.token;
   if (!accessToken) {
-    return false;
+    return { ok: false, invalidToken: false };
   }
 
   const response = await fetch(`https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`, {
@@ -126,8 +142,11 @@ async function sendFcmV1(token: string, payload: FcmNotificationPayload): Promis
         android: {
           priority: 'HIGH',
           notification: {
-            sound: 'default',
-            channelId: 'default',
+            sound: 'nagaevo_message',
+            channelId: ANDROID_PUSH_CHANNEL_ID,
+            notificationPriority: 'PRIORITY_HIGH',
+            defaultSound: true,
+            defaultVibrateTimings: true,
           },
         },
       },
@@ -137,17 +156,20 @@ async function sendFcmV1(token: string, payload: FcmNotificationPayload): Promis
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     console.warn('[fcm] v1 failed', response.status, text.slice(0, 160));
-    return false;
+    return { ok: false, invalidToken: isInvalidFcmTokenError(response.status, text) };
   }
 
-  return true;
+  return { ok: true, invalidToken: false };
 }
 
-async function sendFcmNotification(token: string, payload: FcmNotificationPayload): Promise<boolean> {
+async function sendFcmNotification(token: string, payload: FcmNotificationPayload): Promise<FcmSendResult> {
   if (resolveServiceAccountPath() && env.FCM_PROJECT_ID) {
-    const ok = await sendFcmV1(token, payload);
-    if (ok) {
-      return true;
+    const v1 = await sendFcmV1(token, payload);
+    if (v1.ok) {
+      return v1;
+    }
+    if (v1.invalidToken) {
+      return v1;
     }
   }
 
@@ -162,8 +184,13 @@ interface MessagePushPayload {
   messageId: string;
 }
 
-async function sendFcmMessage(token: string, payload: MessagePushPayload): Promise<boolean> {
-  const ok = await sendFcmNotification(token, {
+interface FcmMessageSendResult {
+  ok: boolean;
+  invalidToken: boolean;
+}
+
+async function sendFcmMessage(token: string, payload: MessagePushPayload): Promise<FcmMessageSendResult> {
+  const result = await sendFcmNotification(token, {
     title: payload.senderName,
     body: payload.preview,
     messageId: payload.messageId,
@@ -174,7 +201,7 @@ async function sendFcmMessage(token: string, payload: MessagePushPayload): Promi
     },
   });
 
-  if (ok) {
+  if (result.ok) {
     console.info('[fcm] sent', {
       userId: payload.recipientUserId,
       messageId: payload.messageId,
@@ -182,7 +209,7 @@ async function sendFcmMessage(token: string, payload: MessagePushPayload): Promi
     });
   }
 
-  return ok;
+  return result;
 }
 
 export {

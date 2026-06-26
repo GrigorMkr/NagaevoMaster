@@ -61,7 +61,7 @@ function NativeOAuthReturnPage() {
 
   return (
     <>
-      <PageMeta title="Возврат в приложение" canonical="/auth/app-return" />
+      <PageMeta title="Возврат в приложение" canonical="/auth/app-return" robots="noindex, nofollow" />
       <div className={styles.page}>
         <div className={styles.card}>
           <h1 className={styles.title}>Вход выполнен</h1>

@@ -14,13 +14,12 @@ html.native-app #boot-splash {
   gap: 1.15rem;
   padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
   background:
+    radial-gradient(circle at 50% 38%, rgba(77, 208, 160, 0.14) 0%, transparent 52%),
     linear-gradient(
       180deg,
-      rgba(8, 31, 24, 0.48) 0%,
-      rgba(8, 31, 24, 0.58) 45%,
-      rgba(8, 31, 24, 0.68) 100%
-    ),
-    url('/backgrounds/desktop-red-lake.jpg') center 42% / cover no-repeat;
+      rgba(8, 31, 24, 0.92) 0%,
+      rgba(8, 31, 24, 0.98) 100%
+    );
   color: rgba(230, 255, 245, 0.88);
   transition: opacity 0.42s ease, visibility 0.42s ease;
 }
@@ -31,12 +30,55 @@ html.boot-splash-done #boot-splash {
   pointer-events: none;
 }
 
+html.boot-splash-active:not(.boot-splash-done) #root {
+  visibility: hidden;
+}
+
+html.boot-splash-done #root {
+  visibility: visible;
+}
+
 .boot-splash-stage {
   position: relative;
   width: min(58vw, 220px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
+}
+
+.boot-splash-smoke-back,
+.boot-splash-smoke-core,
+.boot-splash-smoke-front {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.boot-splash-smoke-back {
+  inset: -4%;
+  background: radial-gradient(circle at 50% 50%, rgba(45, 154, 116, 0.38) 0%, transparent 68%);
+  filter: blur(34px);
+  opacity: 0.72;
+}
+
+.boot-splash-smoke-core {
+  inset: 6%;
+  background:
+    radial-gradient(circle at 34% 38%, rgba(77, 208, 160, 0.62) 0%, transparent 52%),
+    radial-gradient(circle at 66% 64%, rgba(45, 154, 116, 0.48) 0%, transparent 56%),
+    radial-gradient(circle, rgba(126, 200, 168, 0.32) 0%, transparent 70%);
+  filter: blur(20px);
+  opacity: 0.82;
+  animation: boot-smoke-drift 8s ease-in-out infinite;
+}
+
+.boot-splash-smoke-front {
+  inset: 14%;
+  background: radial-gradient(circle at 48% 52%, rgba(77, 208, 160, 0.42) 0%, transparent 58%);
+  filter: blur(12px);
+  opacity: 0.68;
+  animation: boot-smoke-drift 6s ease-in-out infinite reverse;
 }
 
 .boot-splash-aura {
@@ -77,14 +119,24 @@ html.boot-splash-done #boot-splash {
   animation: boot-orbit 40s linear infinite;
 }
 
-.boot-splash-orbit {
+.boot-splash-orbit,
+.boot-splash-orbit-secondary {
   position: absolute;
   inset: 6%;
   border-radius: 50%;
+}
+
+.boot-splash-orbit {
   animation: boot-orbit 20s linear infinite;
 }
 
-.boot-splash-orbit::before {
+.boot-splash-orbit-secondary {
+  inset: 12%;
+  animation: boot-orbit-reverse 28s linear infinite;
+}
+
+.boot-splash-orbit::before,
+.boot-splash-orbit-secondary::before {
   content: '';
   position: absolute;
   top: 0;
@@ -102,7 +154,10 @@ html.boot-splash-done #boot-splash {
   z-index: 2;
   width: 72%;
   height: 72%;
+  max-width: 160px;
+  max-height: 160px;
   border-radius: 50%;
+  display: block;
   filter: drop-shadow(0 10px 24px rgba(8, 31, 24, 0.42))
     drop-shadow(0 0 18px rgba(77, 208, 160, 0.28));
   animation: boot-stamp-breathe 3.2s ease-in-out infinite;
@@ -138,7 +193,7 @@ html.boot-splash-done #boot-splash {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(180, 255, 220, 0.62);
+  color: rgba(180, 255, 220, 0.72);
   animation: boot-label-pulse 2.2s ease-in-out infinite;
 }
 
@@ -158,12 +213,6 @@ html.boot-splash-done #boot-splash {
   }
 }
 
-@keyframes boot-stamp-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes boot-aura-pulse {
   0%,
   100% {
@@ -174,6 +223,21 @@ html.boot-splash-done #boot-splash {
   50% {
     opacity: 0.95;
     transform: scale(1.04);
+  }
+}
+
+@keyframes boot-smoke-drift {
+  0%,
+  100% {
+    transform: scale(0.94) translate(0, 0);
+  }
+
+  33% {
+    transform: scale(1.04) translate(2%, -1.5%);
+  }
+
+  66% {
+    transform: scale(0.98) translate(-1.5%, 2%);
   }
 }
 
@@ -215,10 +279,13 @@ html.boot-splash-done #boot-splash {
   .boot-splash-ring-secondary,
   .boot-splash-ring-tertiary,
   .boot-splash-orbit,
+  .boot-splash-orbit-secondary,
   .boot-splash-aura,
   .boot-splash-shine::after,
   .boot-splash-label,
-  .boot-splash-stamp {
+  .boot-splash-stamp,
+  .boot-splash-smoke-core,
+  .boot-splash-smoke-front {
     animation: none;
   }
 }

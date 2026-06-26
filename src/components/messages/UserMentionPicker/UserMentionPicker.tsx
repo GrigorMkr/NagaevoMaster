@@ -58,7 +58,7 @@ function UserMentionPicker({
       user.name.toLowerCase().includes(q)
       || user.login.toLowerCase().includes(q),
     );
-  }, [currentUserId, excludeUserIds, friends, normalized.length, search, searchResults]);
+  }, [currentUserId, excludeUserIds, friends, normalized, search, searchResults]);
 
   const isLoading = (normalized.length >= 2 && searching) || (loadingFriends && friends.length === 0);
 

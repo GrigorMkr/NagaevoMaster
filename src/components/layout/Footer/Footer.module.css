@@ -90,6 +90,10 @@
   color: var(--color-text-on-dark-subtle);
 }
 
+.legalDocs {
+  margin-top: 0.65rem;
+}
+
 .bottomMeta {
   display: flex;
   flex-direction: column;

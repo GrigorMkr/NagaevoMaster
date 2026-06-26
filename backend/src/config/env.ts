@@ -60,6 +60,7 @@ const env = {
   VK_CLIENT_ID: process.env.VK_CLIENT_ID,
   VK_CLIENT_SECRET: process.env.VK_CLIENT_SECRET,
   VK_SERVICE_TOKEN: process.env.VK_SERVICE_TOKEN,
+  VK_MAPS_API_KEY: process.env.VK_MAPS_API_KEY,
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_SUBJECT: process.env.VAPID_SUBJECT ?? 'mailto:noreply@nagaevomaster.ru',

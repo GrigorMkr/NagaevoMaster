@@ -154,7 +154,7 @@ function ProfilePage() {
 
   return (
     <>
-      <PageMeta title="Профиль" canonical="/profile" />
+      <PageMeta title="Профиль" canonical="/profile" robots="noindex, nofollow" />
 
       <div className={pageStyles.page}>
         <div className="container">

@@ -11,7 +11,7 @@ interface User {
     role: UserRole;
     emailVerified?: boolean;
     phoneVerified?: boolean;
-    birthYear?: number;
+    birthDate?: string;
     savedLocation?: AccountLocation;
     homeLocation?: HomeLocation;
     createdAt: string;

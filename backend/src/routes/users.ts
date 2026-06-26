@@ -5,6 +5,7 @@ import { requireAuth, type AuthRequest } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { routeParam } from '../utils/params.js';
 import { toListingResponse, toReviewResponse, toUserResponse } from '../utils/mappers.js';
+import { isBirthdayToday } from '../utils/birthDate.js';
 const usersRouter = Router();
 const listingUserSelect = {
     select: {
@@ -18,7 +19,7 @@ const updateProfileSchema = z.object({
     name: z.string().min(2).optional(),
     phone: z.string().min(10).optional(),
     avatarUrl: z.string().url().max(2048).optional(),
-    birthYear: z.number().int().min(1920).max(new Date().getFullYear()).nullable().optional(),
+    birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
     homeAddress: z.string().max(240).nullable().optional(),
     homeLat: z.number().min(-90).max(90).nullable().optional(),
     homeLng: z.number().min(-180).max(180).nullable().optional(),
@@ -42,10 +43,15 @@ usersRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
 });
 usersRouter.patch('/me', requireAuth, async (req: AuthRequest, res, next) => {
     try {
-        const data = updateProfileSchema.parse(req.body);
+        const { birthDate, ...rest } = updateProfileSchema.parse(req.body);
         const user = await prisma.user.update({
             where: { id: req.user!.id },
-            data,
+            data: {
+                ...rest,
+                birthDate: birthDate === undefined
+                    ? undefined
+                    : (birthDate ? new Date(`${birthDate}T12:00:00.000Z`) : null),
+            },
         });
         res.json(toUserResponse(user));
     }
@@ -165,7 +171,7 @@ usersRouter.get('/:userId/profile', requireAuth, async (req: AuthRequest, res, n
                 email: true,
                 phone: true,
                 avatarUrl: true,
-                birthYear: true,
+                birthDate: true,
                 homeAddress: true,
                 homeLat: true,
                 homeLng: true,
@@ -201,7 +207,7 @@ usersRouter.get('/:userId/profile', requireAuth, async (req: AuthRequest, res, n
                     ? {
                         phone: user.phone ?? undefined,
                         email: user.email,
-                        birthYear: user.birthYear ?? undefined,
+                        birthdayToday: isBirthdayToday(user.birthDate),
                         homeLocation,
                     }
                     : {}),

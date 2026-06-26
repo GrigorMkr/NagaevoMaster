@@ -19,11 +19,15 @@ import { getErrorMessage } from '@/utils/errorMessage';
 import { FriendActionMenu, type FriendMenuAction } from './FriendActionMenu';
 import { FriendProfileSheet } from './FriendProfileSheet';
 import { AvatarLightbox } from './AvatarLightbox';
+import { UserNameWithStatus } from '@/components/ui/UserNameWithStatus/UserNameWithStatus';
+import { useUsersOnline } from '@/hooks/useUsersOnline';
 import styles from './FriendsPanel.module.css';
 
 interface FriendUserRowProps {
   user: FriendUser;
   badge?: string;
+  showBirthdayCake?: boolean;
+  online?: boolean;
   onOpenProfile: () => void;
   onOpenAvatar: () => void;
   onOpenMenu: () => void;
@@ -34,6 +38,8 @@ interface FriendUserRowProps {
 function FriendUserRow({
   user,
   badge,
+  showBirthdayCake = false,
+  online,
   onOpenProfile,
   onOpenAvatar,
   onOpenMenu,
@@ -50,14 +56,24 @@ function FriendUserRow({
         onClick={onOpenAvatar}
         aria-label="Открыть фото"
       >
-        <UserAvatar name={user.name} src={avatar} size="sm" />
+        <UserAvatar
+          name={user.name}
+          src={avatar}
+          size="sm"
+          showBirthdayCake={showBirthdayCake && Boolean(user.birthdayToday)}
+        />
       </button>
       <button
         type="button"
         className={styles.identity}
         onClick={onOpenProfile}
       >
-        <span className={styles.userName}>{user.name}</span>
+        <UserNameWithStatus
+          name={user.name}
+          userId={user.id}
+          online={online}
+          nameClassName={styles.userName}
+        />
         <span className={styles.userLogin}>@{user.login}</span>
       </button>
       {badge && <span className={styles.badge}>{badge}</span>}
@@ -158,6 +174,7 @@ function FriendEntryRow({
   runAction,
   onOpenProfile,
   onOpenAvatar,
+  onlineMap,
 }: {
   entry: FriendEntry;
   onMessageUser?: (userId: string) => void;
@@ -167,6 +184,7 @@ function FriendEntryRow({
   runAction: ReturnType<typeof useFriendActions>['runAction'];
   onOpenProfile: (userId: string) => void;
   onOpenAvatar: (user: FriendUser) => void;
+  onlineMap: Record<string, boolean>;
 }) {
   const isOpen = menuUserId === entry.user.id;
   const canMessage = entry.status === 'accepted';
@@ -198,6 +216,8 @@ function FriendEntryRow({
     <FriendUserRow
       user={entry.user}
       badge={badge}
+      showBirthdayCake={entry.status === 'accepted'}
+      online={onlineMap[entry.user.id]}
       menuOpen={isOpen}
       onOpenProfile={() => onOpenProfile(entry.user.id)}
       onOpenAvatar={() => onOpenAvatar(entry.user)}
@@ -230,6 +250,7 @@ function SearchResultRow({
   runAction,
   onOpenProfile,
   onOpenAvatar,
+  onlineMap,
 }: {
   user: FriendSearchResult;
   onChanged: () => void;
@@ -241,6 +262,7 @@ function SearchResultRow({
   runAction: ReturnType<typeof useFriendActions>['runAction'];
   onOpenProfile: (userId: string) => void;
   onOpenAvatar: (user: FriendUser) => void;
+  onlineMap: Record<string, boolean>;
 }) {
   const [adding, setAdding] = useState(false);
   const isOpen = menuUserId === user.id;
@@ -304,6 +326,8 @@ function SearchResultRow({
     <FriendUserRow
       user={user}
       badge={badge}
+      showBirthdayCake={user.relation === 'friends'}
+      online={onlineMap[user.id]}
       menuOpen={isOpen}
       onOpenProfile={() => onOpenProfile(user.id)}
       onOpenAvatar={() => onOpenAvatar(user)}
@@ -387,6 +411,19 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
     return () => window.clearTimeout(timer);
   }, [searchQuery]);
 
+  const trackedUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const entry of [...overview.friends, ...overview.incoming, ...overview.outgoing]) {
+      ids.add(entry.user.id);
+    }
+    for (const user of searchResults) {
+      ids.add(user.id);
+    }
+    return [...ids];
+  }, [overview.friends, overview.incoming, overview.outgoing, searchResults]);
+
+  const onlineMap = useUsersOnline(trackedUserIds);
+
   if (loading) {
     return <p className={styles.empty}>Загрузка…</p>;
   }
@@ -401,6 +438,7 @@ function FriendsList({ onMessageUser }: { onMessageUser?: (userId: string) => vo
     onChanged: () => { void load(); setSearchQuery(''); },
     onOpenProfile: openProfile,
     onOpenAvatar: openAvatar,
+    onlineMap,
   };
 
   return (

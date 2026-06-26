@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button/Button';
 import { createForumReply } from '@/services/forumApi';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { validateUserContent } from '@/constants/communityRules';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ForumReplyForm.module.css';
 
@@ -42,7 +43,7 @@ function ForumReplyForm({ topicId, disabled, onReplyAdded }: ForumReplyFormProps
   };
 
   return (
-    <form className={styles.form} onSubmit={(event) => void handleSubmit(event)}>
+    <form className={styles.form} action={ECHO_FORM_ACTION} method="post" onSubmit={(event) => void handleSubmit(event)}>
       <label className="sr-only" htmlFor="forum-reply">Ваш ответ</label>
       <textarea
         id="forum-reply"

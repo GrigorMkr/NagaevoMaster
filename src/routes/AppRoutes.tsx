@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout/Layout';
-import { RequireAuth } from '@/components/routing/RequireAuth/RequireAuth';
 import { HomePage } from '@/pages/HomePage/HomePage';
 import { BoardKindPage } from '@/pages/BoardKindPage/BoardKindPage';
 import { BoardHubPage } from '@/pages/BoardHubPage/BoardHubPage';
@@ -21,6 +20,7 @@ import { NewsPage } from '@/pages/NewsPage/NewsPage';
 import { MessagesRedirect } from '@/pages/MessagesPage/MessagesRedirect';
 import { AppDownloadPage } from '@/pages/AppDownloadPage/AppDownloadPage';
 import { NativeOAuthReturnPage } from '@/pages/NativeOAuthReturnPage/NativeOAuthReturnPage';
+import { LegalDocumentPage } from '@/pages/LegalDocumentPage/LegalDocumentPage';
 import { NotFoundPage } from '@/pages/NotFoundPage/NotFoundPage';
 
 function AppRoutes() {
@@ -28,87 +28,17 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
-        <Route
-          path="board"
-          element={(
-            <RequireAuth>
-              <BoardHubPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="board/:kind"
-          element={(
-            <RequireAuth>
-              <BoardKindPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="services"
-          element={(
-            <RequireAuth>
-              <ServicesPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="services/beauty/:subcategory"
-          element={(
-            <RequireAuth>
-              <ServicesCategoryPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="services/:category"
-          element={(
-            <RequireAuth>
-              <ServicesCategoryPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="service/:id"
-          element={(
-            <RequireAuth>
-              <ServiceDetailPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="forum"
-          element={(
-            <RequireAuth>
-              <ForumPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="forum/topic/:id"
-          element={(
-            <RequireAuth>
-              <ForumTopicPage />
-            </RequireAuth>
-          )}
-        />
-        <Route
-          path="forum/:category"
-          element={(
-            <RequireAuth>
-              <ForumCategoryPage />
-            </RequireAuth>
-          )}
-        />
+        <Route path="board" element={<BoardHubPage />} />
+        <Route path="board/:kind" element={<BoardKindPage />} />
+        <Route path="services" element={<ServicesPage />} />
+        <Route path="services/beauty/:subcategory" element={<ServicesCategoryPage />} />
+        <Route path="services/:category" element={<ServicesCategoryPage />} />
+        <Route path="service/:id" element={<ServiceDetailPage />} />
+        <Route path="forum" element={<ForumPage />} />
+        <Route path="forum/topic/:id" element={<ForumTopicPage />} />
+        <Route path="forum/:category" element={<ForumCategoryPage />} />
         <Route path="news" element={<NewsPage />} />
-        <Route
-          path="search"
-          element={(
-            <RequireAuth>
-              <SearchPage />
-            </RequireAuth>
-          )}
-        />
+        <Route path="search" element={<SearchPage />} />
         <Route path="add-listing" element={<AddListingPage />} />
         <Route path="edit-listing/:id" element={<EditListingPage />} />
         <Route path="profile" element={<ProfilePage />} />
@@ -119,6 +49,9 @@ function AppRoutes() {
         <Route path="about" element={<AboutPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="app" element={<AppDownloadPage />} />
+        <Route path="privacy" element={<LegalDocumentPage slug="privacy" />} />
+        <Route path="personal-data" element={<LegalDocumentPage slug="personal-data" />} />
+        <Route path="terms" element={<LegalDocumentPage slug="terms" />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

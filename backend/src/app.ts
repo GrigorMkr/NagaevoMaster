@@ -28,6 +28,7 @@ import { newsRouter } from './routes/news.js';
 import { pushRouter } from './routes/push.js';
 import { listingSocialRouter } from './routes/listingSocial.js';
 import { groupsRouter } from './routes/groups.js';
+import { geoRouter } from './routes/geo.js';
 
 function createApp() {
   const app = express();
@@ -35,7 +36,23 @@ function createApp() {
   app.disable('x-powered-by');
   app.use(securityHeaders);
   app.use(cors({
-    origin: env.CORS_ORIGIN.split(',').map((value) => value.trim()),
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      const allowed = env.CORS_ORIGIN.split(',').map((value) => value.trim());
+      if (
+        allowed.includes(origin)
+        || origin === 'https://localhost'
+        || origin === 'http://localhost'
+        || origin.startsWith('capacitor://')
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
   }));
   app.use(express.json({ limit: '2mb' }));
@@ -61,6 +78,7 @@ function createApp() {
   app.use('/api/presence', presenceRouter);
   app.use('/api/blocks', blocksRouter);
   app.use('/api/friends', friendsRouter);
+  app.use('/api/geo', geoRouter);
   app.use('/api/news', newsRouter);
   app.use('/api/push', pushRouter);
   app.use('/api/forum', forumRouter);

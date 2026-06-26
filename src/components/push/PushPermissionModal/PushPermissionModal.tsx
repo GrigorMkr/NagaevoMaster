@@ -7,6 +7,7 @@ import {
   isPushSupported,
   subscribeToPush,
 } from '@/services/pushApi';
+import { isNativeApp } from '@/utils/nativeApp';
 import styles from './PushPermissionModal.module.css';
 
 const DISMISS_KEY = 'nagaevo-push-prompt-dismissed';
@@ -17,7 +18,7 @@ function PushPermissionModal() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !isPushSupported()) return;
+    if (!isAuthenticated || !isPushSupported() || isNativeApp()) return;
     if (Notification.permission === 'denied') return;
     if (sessionStorage.getItem(DISMISS_KEY) === '1') return;
 

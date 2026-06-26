@@ -1,4 +1,5 @@
 import { SITE_URL } from '@/constants/app';
+import { isNativeApp } from '@/utils/nativeApp';
 
 const CANONICAL_HOST = new URL(SITE_URL).hostname;
 
@@ -13,7 +14,7 @@ function isCanonicalHost(): boolean {
 }
 
 function redirectToCanonicalHost(): void {
-  if (typeof window === 'undefined' || isCanonicalHost()) return;
+  if (typeof window === 'undefined' || isNativeApp() || isCanonicalHost()) return;
   const { pathname, search, hash } = window.location;
   window.location.replace(`${SITE_URL}${pathname}${search}${hash}`);
 }

@@ -1,8 +1,7 @@
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
-import { isNativeApp, isNativeAndroid } from '@/utils/nativeApp';
-import { SITE_ORIGIN } from '@/utils/apiBase';
+import { isNativeApp, isNativeAndroid, isNativeIos } from '@/utils/nativeApp';
 import { writeStoredOAuthReturnPath } from '@/utils/nativeOAuthReturn';
 import {
   completeOAuthLogin,
@@ -32,17 +31,23 @@ function isInternalAppPath(url: URL): boolean {
 function openNativeOAuthReturn(oauthSearch: string) {
   const suffix = normalizeOAuthSearch(oauthSearch);
   stashOAuthPending(suffix);
-  window.location.replace(`${SITE_ORIGIN}/auth/app-return${suffix}`);
+  const next = `/auth/app-return${suffix}`;
+  if (`${window.location.pathname}${window.location.search}` === next) {
+    window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
+    return;
+  }
+  window.history.pushState(window.history.state, '', next);
+  window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
 }
 
 async function finishNativeOAuthLogin(oauthSearch: string): Promise<boolean> {
   const result = await completeOAuthLogin(oauthSearch);
   if (result.status === 'success') {
-    window.location.replace(result.returnPath);
+    navigateInApp(result.returnPath);
     return true;
   }
   if (result.status === 'error') {
-    window.location.replace(`/auth?oauth_error=${encodeURIComponent(result.message)}`);
+    navigateInApp('/auth', `?oauth_error=${encodeURIComponent(result.message)}`);
     return true;
   }
   if (result.status === 'pending') {
@@ -83,7 +88,7 @@ async function openOAuthUrl(path: string) {
     }
 
     const isVkOAuth = url.pathname.endsWith('/auth/vk');
-    if (isVkOAuth) {
+    if (isVkOAuth && isNativeApp()) {
       url.searchParams.set('delivery', 'webview');
       window.location.assign(url.href);
       return;
@@ -92,6 +97,10 @@ async function openOAuthUrl(path: string) {
     if (isNativeAndroid()) {
       url.searchParams.set('platform', 'android');
     }
+    if (isNativeIos()) {
+      url.searchParams.set('platform', 'ios');
+    }
+
     await openExternalInAppBrowser(url.href);
     return;
   }

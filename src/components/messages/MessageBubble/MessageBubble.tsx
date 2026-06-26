@@ -3,12 +3,14 @@ import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 import type { ChatMessage } from '@/types/message';
 import { serviceDetailPath } from '@/constants';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import { formatMessageSentAt } from '@/utils/formatMessageTime';
 import { getReactionOnlySize, isReactionOnlyMessage, type ReactionOnlySize } from '@/utils/messageReactions';
 import { MessageRichText } from '@/components/messages/MessageRichText/MessageRichText';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { VoiceMessagePlayer } from '@/components/messages/VoiceMessagePlayer/VoiceMessagePlayer';
 import { StaffBadge } from '@/components/ui/StaffBadge/StaffBadge';
+import { UserNameWithStatus } from '@/components/ui/UserNameWithStatus/UserNameWithStatus';
 import { ImageLightbox } from '@/components/ui/ImageLightbox/ImageLightbox';
 import { ListingPhoto } from '@/components/ui/ListingPhoto/ListingPhoto';
 import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
@@ -17,6 +19,7 @@ import styles from './MessageBubble.module.css';
 interface MessageBubbleProps {
   message: ChatMessage;
   showSenderName?: boolean;
+  senderOnline?: boolean;
   highlighted?: boolean;
   onEdit?: (messageId: string, body: string) => Promise<void>;
   onDelete?: (messageId: string) => Promise<void>;
@@ -30,7 +33,15 @@ const REACTION_ONLY_SIZE_CLASS: Record<ReactionOnlySize, string> = {
   many: 'reactionOnlyMany',
 };
 
-function MessageBubble({ message, showSenderName, highlighted, onEdit, onDelete, onForward }: MessageBubbleProps) {
+function MessageBubble({
+  message,
+  showSenderName,
+  senderOnline,
+  highlighted,
+  onEdit,
+  onDelete,
+  onForward,
+}: MessageBubbleProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(message.body);
@@ -105,7 +116,13 @@ function MessageBubble({ message, showSenderName, highlighted, onEdit, onDelete,
       )}
     >
       {showSenderName && !message.isMine && !message.isDeleted && (
-        <p className={styles.senderName}>{message.senderName}</p>
+        <p className={styles.senderName}>
+          <UserNameWithStatus
+            name={message.senderName}
+            userId={message.senderId}
+            online={senderOnline}
+          />
+        </p>
       )}
       <div
         className={classNames(
@@ -253,7 +270,7 @@ function MessageBubble({ message, showSenderName, highlighted, onEdit, onDelete,
             )}
 
             {editing ? (
-              <form className={styles.editForm} onSubmit={(event) => void handleSaveEdit(event)}>
+              <form className={styles.editForm} action={ECHO_FORM_ACTION} method="post" onSubmit={(event) => void handleSaveEdit(event)}>
                 <textarea
                   className={styles.editInput}
                   value={editText}

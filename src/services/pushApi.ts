@@ -117,8 +117,18 @@ async function fetchVapidPublicKey(): Promise<string | null> {
   }
 }
 
-async function fetchPushStatus(): Promise<{ configured: boolean; subscribed: boolean }> {
-  const response = await api.get<{ configured: boolean; subscribed: boolean }>('/push/status');
+async function fetchPushStatus(): Promise<{
+  configured: boolean;
+  webPushConfigured?: boolean;
+  fcmConfigured?: boolean;
+  subscribed: boolean;
+}> {
+  const response = await api.get<{
+    configured: boolean;
+    webPushConfigured?: boolean;
+    fcmConfigured?: boolean;
+    subscribed: boolean;
+  }>('/push/status');
   setPushSubscribed(response.data.subscribed);
   return response.data;
 }
@@ -236,9 +246,15 @@ function installPushLifecycleSync(): () => void {
   };
 }
 
-async function ensurePushNotifications(options?: { requestPermission?: boolean }): Promise<boolean> {
+async function ensurePushNotifications(options?: {
+  requestPermission?: boolean;
+  force?: boolean;
+}): Promise<boolean> {
   if (isNativeApp()) {
-    return ensureNativePushNotifications(options);
+    return ensureNativePushNotifications({
+      requestPermission: options?.requestPermission,
+      force: options?.force ?? true,
+    });
   }
 
   if (!hasAuthToken()) return false;

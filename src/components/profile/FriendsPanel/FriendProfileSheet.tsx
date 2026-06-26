@@ -54,7 +54,7 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
   const avatar = profile
     ? resolveAuthorAvatar(profile.user.name, profile.user.login, profile.user.avatarUrl)
     : undefined;
-  const hasContacts = !!(profile?.user.phone || profile?.user.email);
+  const hasContacts = !!(profile?.user.phone || profile?.user.email || profile?.user.birthdayToday);
 
   return (
     <>
@@ -78,7 +78,12 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
                   disabled={!avatar}
                   aria-label={avatar ? 'Открыть фото' : 'Нет фото'}
                 >
-                  <UserAvatar name={profile.user.name} src={avatar} size="lg" />
+                  <UserAvatar
+                    name={profile.user.name}
+                    src={avatar}
+                    size="lg"
+                    showBirthdayCake={Boolean(profile.user.birthdayToday)}
+                  />
                 </button>
                 <div>
                   <h3 className={styles.name}>{profile.user.name}</h3>
@@ -90,8 +95,8 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
                 <section className={styles.contacts}>
                   <h4 className={styles.sectionTitle}>Контакты</h4>
                   <ul className={styles.contactList}>
-                    {profile.user.birthYear && (
-                      <li>Год рождения: {profile.user.birthYear}</li>
+                    {profile.user.birthdayToday && (
+                      <li>Сегодня день рождения 🎂</li>
                     )}
                     {profile.user.phone && (
                       <li>
@@ -117,7 +122,7 @@ function FriendProfileSheet({ userId, onClose }: FriendProfileSheetProps) {
                   <p className={styles.addressLine}>{profile.user.homeLocation.address}</p>
                   <a
                     className={styles.mapLink}
-                    href={`https://www.openstreetmap.org/?mlat=${profile.user.homeLocation.lat}&mlon=${profile.user.homeLocation.lng}#map=16/${profile.user.homeLocation.lat}/${profile.user.homeLocation.lng}`}
+                    href={`https://maps.vk.com/?pt=${profile.user.homeLocation.lng},${profile.user.homeLocation.lat}&z=16`}
                     target="_blank"
                     rel="noreferrer"
                   >

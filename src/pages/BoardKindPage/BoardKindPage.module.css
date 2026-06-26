@@ -57,7 +57,7 @@
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 40%, black 100%);
 }
 
-.hero > *:not(.heroCover):not(.heroScrim) {
+.hero > *:not(.heroCover, .heroScrim) {
   position: relative;
   z-index: 1;
 }

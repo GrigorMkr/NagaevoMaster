@@ -31,14 +31,22 @@ function syncAppVersion({ bumpDate = false } = {}) {
     ? JSON.parse(readFileSync(sourcePath, 'utf8'))
     : {};
 
+  const version = gradle?.versionName ?? existing.version ?? '1.0.0';
+  const apkFileName = `nagaevomaster-${version}.apk`;
+
   const next = {
-    version: gradle?.versionName ?? existing.version ?? '1.0.0',
+    version,
     versionCode: gradle?.versionCode ?? existing.versionCode ?? 1,
     releasedAt: bumpDate
       ? new Date().toISOString().slice(0, 10)
       : (existing.releasedAt ?? new Date().toISOString().slice(0, 10)),
     apkSizeMb: readApkSizeMb() ?? existing.apkSizeMb ?? 3,
+    apkFileName,
     releaseNotes: Array.isArray(existing.releaseNotes) ? existing.releaseNotes : [],
+    rustorePublished: existing.rustorePublished === true,
+    rustoreUrl: typeof existing.rustoreUrl === 'string' && existing.rustoreUrl
+      ? existing.rustoreUrl
+      : 'https://www.rustore.ru/catalog/app/ru.nagaevomaster.app',
   };
 
   const json = `${JSON.stringify(next, null, 2)}\n`;

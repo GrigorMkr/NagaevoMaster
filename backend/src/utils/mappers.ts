@@ -1,4 +1,5 @@
 import type { Listing, Review, User } from '@prisma/client';
+import { formatBirthDateIso } from './birthDate.js';
 
 function parseImages(images: string): string[] {
     try {
@@ -45,7 +46,7 @@ function toUserResponse(user: User) {
         role: user.role,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
-        birthYear: user.birthYear ?? undefined,
+        birthDate: formatBirthDateIso(user.birthDate),
         savedLocation,
         homeLocation,
         createdAt: user.createdAt.toISOString(),

@@ -19,11 +19,12 @@ function ensureWebPush() {
   return true;
 }
 
+function isWebPushConfigured(): boolean {
+  return Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY);
+}
+
 function isPushConfigured(): boolean {
-  return Boolean(
-    (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY)
-    || isFcmConfigured(),
-  );
+  return Boolean(isWebPushConfigured() || isFcmConfigured());
 }
 
 async function sendMessagePush(payload: MessagePushPayload) {
@@ -50,8 +51,8 @@ async function sendMessagePush(payload: MessagePushPayload) {
 
   await Promise.all(subscriptions.map(async (sub) => {
     if (isFcmEndpoint(sub.endpoint)) {
-      const ok = await sendFcmMessage(extractFcmToken(sub.endpoint), payload);
-      if (!ok) {
+      const result = await sendFcmMessage(extractFcmToken(sub.endpoint), payload);
+      if (!result.ok && result.invalidToken) {
         await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => undefined);
       }
       return;
@@ -208,6 +209,7 @@ async function sendGroupInvitePush(payload: GroupInvitePushPayload) {
 export {
   ensureWebPush,
   isPushConfigured,
+  isWebPushConfigured,
   sendMessagePush,
   sendFriendPush,
   sendGroupInvitePush,

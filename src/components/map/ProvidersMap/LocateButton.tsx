@@ -1,24 +1,44 @@
 import { memo, useCallback } from 'react';
 import classNames from 'classnames';
-import { useMap } from 'react-leaflet';
-import { GEO } from '@/constants';
+import { USER_LOCATION_MAP_ZOOM } from '@/constants';
 import { useAccountLocation } from '@/hooks/useAccountLocation';
+import { safeLatLngToLngLat } from '@/utils/mapBounds';
+import { useVkMap } from '@/components/map/VkMap/VkMapContext';
 import styles from './ProvidersMap.module.css';
+
 const LocateButton = memo(function LocateButton() {
-    const map = useMap();
-    const { accountLocation, isLocating, detectLocationAsync } = useAccountLocation();
-    const handleLocate = useCallback(() => {
-        if (accountLocation) {
-            map.setView([accountLocation.lat, accountLocation.lng], GEO.defaultZoom, { animate: true });
-            return;
-        }
-        void detectLocationAsync();
-    }, [accountLocation, detectLocationAsync, map]);
-    return (<button type="button" className={classNames(styles.filterButton, styles.locateButton)} onClick={handleLocate} disabled={isLocating}>
+  const { map, mapLoaded } = useVkMap();
+  const { isLocating, detectLocationAsync } = useAccountLocation();
+
+  const handleLocate = useCallback(() => {
+    if (!map || !mapLoaded) {
+      return;
+    }
+    void detectLocationAsync({ forceFresh: true }).then((location) => {
+      const coords = location ? safeLatLngToLngLat(location.lat, location.lng) : null;
+      if (!coords) {
+        return;
+      }
+      map.flyTo({
+        center: coords,
+        zoom: USER_LOCATION_MAP_ZOOM,
+        duration: 750,
+      });
+    });
+  }, [detectLocationAsync, map, mapLoaded]);
+
+  return (
+    <button
+      type="button"
+      className={classNames(styles.filterButton, styles.locateButton)}
+      onClick={handleLocate}
+      disabled={isLocating}
+    >
       {isLocating ? 'Определяем…' : 'Моё местоположение'}
-    </button>);
+    </button>
+  );
 });
 
 export {
   LocateButton,
-}
+};

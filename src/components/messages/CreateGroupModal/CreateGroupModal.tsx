@@ -7,6 +7,7 @@ import { uploadImage } from '@/services/uploadsApi';
 import { useAppSelector } from '@/app/hooks';
 import { selectCurrentUser } from '@/features/user/userSelectors';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { ECHO_FORM_ACTION } from '@/constants/forms';
 import styles from './CreateGroupModal.module.css';
 
 interface CreateGroupModalProps {
@@ -68,7 +69,7 @@ function CreateGroupModal({ onCreated, onClose }: CreateGroupModalProps) {
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
-      <form className={styles.sheet} onClick={(e) => e.stopPropagation()} onSubmit={(e) => void handleSubmit(e)}>
+      <form className={styles.sheet} action={ECHO_FORM_ACTION} method="post" onClick={(e) => e.stopPropagation()} onSubmit={(e) => void handleSubmit(e)}>
         <div className={styles.glow} aria-hidden />
 
         <header className={styles.header}>

@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import classNames from 'classnames';
 import { ScrollToTop } from '@/components/routing/ScrollToTop';
 import { IosSafariPushBanner } from '@/components/push/IosSafariPushBanner/IosSafariPushBanner';
 import { Header } from '../Header/Header';
@@ -9,7 +10,7 @@ import { SiteBackground } from '@/components/layout/SiteBackground/SiteBackgroun
 import styles from './Layout.module.css';
 function Layout() {
     const location = useLocation();
-    return (<div className={styles.layout}>
+    return (<div className={classNames(styles.layout, 'layout')}>
       <ScrollToTop />
       <SiteBackground />
 

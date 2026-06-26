@@ -10,7 +10,7 @@ import {
 } from '@/services/authApi';
 import { ensurePushNotifications } from '@/services/pushApi';
 import { readStoredOAuthReturnPath } from '@/utils/nativeOAuthReturn';
-import { isSiteOrigin, SITE_ORIGIN } from '@/utils/apiBase';
+import { isSiteOrigin } from '@/utils/apiBase';
 import { isNativeApp } from '@/utils/nativeApp';
 import {
   clearOAuthPending,
@@ -61,13 +61,18 @@ function getInflightKey(search: string): string | null {
 }
 
 function ensureNativeOAuthLanding(search: string): boolean {
-  if (!isNativeApp() || isSiteOrigin()) {
+  if (!isNativeApp()) {
     return true;
   }
 
   const normalized = normalizeOAuthSearch(search);
+  if (isSiteOrigin() || window.location.pathname === '/auth/app-return') {
+    return true;
+  }
+
   stashOAuthPending(normalized);
-  window.location.replace(`${SITE_ORIGIN}/auth/app-return${normalized}`);
+  window.history.replaceState(window.history.state, '', `/auth/app-return${normalized}`);
+  window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
   return false;
 }
 

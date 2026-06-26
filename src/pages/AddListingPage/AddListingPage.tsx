@@ -111,9 +111,9 @@ function AddListingPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const kindParam = searchParams.get('kind');
-  const listingKind: ListingKind = kindParam === 'sale' || kindParam === 'vacancy' || kindParam === 'lost'
-    ? kindParam
-    : 'service';
+  const listingKind = useMemo((): ListingKind => (
+    kindParam === 'sale' || kindParam === 'vacancy' || kindParam === 'lost' ? kindParam : 'service'
+  ), [kindParam]);
   const boardConfig = getBoardKindConfig(listingKind);
   const categoryOptions = boardConfig
     ? boardConfig.categories.map((cat) => ({ slug: cat.slug, name: cat.name, icon: cat.icon }))
@@ -134,15 +134,15 @@ function AddListingPage() {
   const [publishing, setPublishing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const selectedCat = useMemo(
-    () => boardConfig
-      ? boardConfig.categories.find((c) => c.slug === form.category)
-      : undefined,
-    [boardConfig, form.category],
-  );
+  const selectedCat = useMemo(() => {
+    const config = getBoardKindConfig(listingKind);
+    return config?.categories.find((c) => c.slug === form.category);
+  }, [listingKind, form.category]);
   const serviceSelectedCat = useMemo(
-    () => (!boardConfig ? SERVICE_CATEGORIES.find((c) => c.slug === form.category) : undefined),
-    [boardConfig, form.category],
+    () => (getBoardKindConfig(listingKind)
+      ? undefined
+      : SERVICE_CATEGORIES.find((c) => c.slug === form.category)),
+    [listingKind, form.category],
   );
 
   const previewListing = useMemo(
@@ -240,7 +240,7 @@ function AddListingPage() {
 
   return (
     <>
-      <PageMeta title="Добавить объявление" canonical="/add-listing" />
+      <PageMeta title="Добавить объявление" canonical="/add-listing" robots="noindex, nofollow" />
 
       <div className={pageStyles.page}>
         <div className="container">

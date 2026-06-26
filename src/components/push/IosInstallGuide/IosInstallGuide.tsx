@@ -13,9 +13,9 @@ function IosInstallGuide({ compact = false }: IosInstallGuideProps) {
     <div className={classNames(styles.guide, compact && styles.guideCompact)}>
       {!compact && (
         <>
-          <h3 className={styles.title}>Установите приложение на iPhone</h3>
+          <h3 className={styles.title}>Добавьте сайт на главный экран iPhone</h3>
           <p className={styles.lead}>
-            Push-уведомления со звуком работают только из приложения на главном экране.
+            Push-уведомления со звуком работают, когда сайт открыт с главного экрана.
           </p>
         </>
       )}

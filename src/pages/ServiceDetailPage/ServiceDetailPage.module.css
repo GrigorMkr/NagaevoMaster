@@ -22,6 +22,7 @@
 .shell {
   min-height: calc(100dvh - var(--header-height, 64px));
   padding: 0.75rem 0 2rem;
+  cursor: pointer;
   background:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(77, 208, 160, 0.14), transparent),
     transparent;
@@ -235,10 +236,6 @@
 
 .similarSlide {
   flex: 0 0 min(280px, 78vw);
-}
-
-.shell {
-  cursor: pointer;
 }
 
 .shell [data-detail-surface] {

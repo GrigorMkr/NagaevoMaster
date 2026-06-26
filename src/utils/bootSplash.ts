@@ -1,7 +1,9 @@
-const BOOT_SPLASH_MIN_MS = 700;
-const BOOT_SPLASH_MAX_MS = 12000;
+const BOOT_SPLASH_MIN_MS = 350;
+const BOOT_SPLASH_MAX_MS = 20000;
 
 let dismissStarted = false;
+let windowLoaded = false;
+let appContentReady = false;
 let dismissCallbacks: Array<() => void> = [];
 
 function onBootSplashDismissed(callback: () => void) {
@@ -18,6 +20,23 @@ function runDismissCallbacks() {
       // ignore
     }
   });
+}
+
+function markBootWindowLoaded() {
+  windowLoaded = true;
+  tryDismissBootSplash();
+}
+
+function markBootAppReady() {
+  appContentReady = true;
+  tryDismissBootSplash();
+}
+
+function tryDismissBootSplash() {
+  if (!windowLoaded || !appContentReady || dismissStarted) {
+    return;
+  }
+  dismissBootSplash();
 }
 
 function dismissBootSplash() {
@@ -56,15 +75,10 @@ function dismissBootSplash() {
   }, BOOT_SPLASH_MAX_MS);
 }
 
-function markBootSplashStarted() {
-  if (typeof document === 'undefined') {
-    return;
-  }
-  document.documentElement.dataset.bootSplashStartedAt = String(Date.now());
-}
-
 export {
   dismissBootSplash,
-  markBootSplashStarted,
+  markBootAppReady,
+  markBootWindowLoaded,
   onBootSplashDismissed,
+  tryDismissBootSplash,
 };

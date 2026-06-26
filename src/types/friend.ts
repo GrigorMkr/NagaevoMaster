@@ -3,6 +3,7 @@ interface FriendUser {
   name: string;
   login: string;
   avatarUrl?: string;
+  birthdayToday?: boolean;
 }
 
 type FriendRelation = 'none' | 'friends' | 'pending_sent' | 'pending_received';
