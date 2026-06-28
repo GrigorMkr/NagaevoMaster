@@ -2,20 +2,47 @@
 
 Автоматическая сборка APK и загрузка черновика в [RuStore Console](https://console.rustore.ru).
 
-Репозиторий GitFlic: https://gitflic.ru/project/impherion/nagaevo-master
+**Рабочий репозиторий CI:** https://gitflic.ru/project/nagaevomaster/nagaevo-master  
+**Компания:** `nagaevomaster` · **Runner:** локальный агент на вашем ПК
 
 Официальная инструкция: [GitFlic + RuStore](https://docs.gitflic.ru/cicd/rustore/) · [RuStore DevTools](https://www.rustore.ru/help/developers/tools/dev-tools/gitflic)
 
-## Быстрый старт
+## Автонастройка (одной командой)
 
-1. **GitFlic** — зарегистрируйтесь, создайте компанию, перенесите или запушьте проект в `nagaevo-master`.
-2. **Runner** — зарегистрируйте [GitFlic Agent](https://docs.gitflic.ru/cicd/runner/) на машине с:
-   - Node.js 20+
-   - JDK 21+
-   - Android SDK (как для `npm run build:apk`)
-3. **Переменные CI/CD** — скопируйте `deploy/gitflic-ci.env.example`, заполните в GitFlic → Настройки проекта → CI/CD.
-4. **Первую версию** в RuStore всё равно загрузите вручную ([`RUSTORE.md`](./RUSTORE.md)) — дальше обновления из пайплайна.
-5. Пуш в `main` → пайплайн **build:rustore** → вручную **deploy:rustore**.
+```bash
+# 1. deploy/gitflic.env — GITFLIC_TOKEN из профиля GitFlic
+cp deploy/gitflic.env.example deploy/gitflic.env
+
+# 2. Создаёт компанию (если нет), runner, JSON переменных, запускает пайплайн
+npm run gitflic:setup
+```
+
+Скрипт `scripts/ci/setup-gitflic.mjs`:
+
+- собирает секреты из `android/keystore.properties`, `deploy/google-services.json`, `deploy/vkmaps.env`, `deploy/rustore.env`;
+- пишет `artifacts/gitflic/ci-variables-upload.json` для загрузки в UI;
+- регистрирует [GitFlic Runner](https://docs.gitflic.ru/cicd/runner/) в `%USERPROFILE%\gitflic-runner`;
+- запускает пайплайн с переменными (если API не принимает POST для переменных).
+
+**Runner должен быть запущен** (окно PowerShell с `java -jar runner.jar start`). После перезагрузки ПК:
+
+```powershell
+cd $env:USERPROFILE\gitflic-runner
+$env:JAVA_HOME = "C:\Program Files\Microsoft\jdk-21.0.10.7-hotspot"  # или ваш JDK 21+
+& "$env:JAVA_HOME\bin\java.exe" -jar runner.jar start --config=config/application.properties
+```
+
+## Быстрый старт (вручную)
+
+1. **Компания** — на gitflic.ru runner работает только на уровне компании ([документация](https://docs.gitflic.ru/cicd/agent/)). Проект должен быть в компании: `nagaevomaster/nagaevo-master`.
+2. **Runner** — Node 20+, JDK 21+, Android SDK (`%LOCALAPPDATA%\Android\Sdk`).
+3. **Переменные CI/CD** — GitFlic → [Настройки проекта → CI/CD](https://gitflic.ru/project/nagaevomaster/nagaevo-master/setting/cicd) → загрузить `artifacts/gitflic/ci-variables-upload.json`.
+4. **Первую версию** в RuStore загрузите вручную ([`RUSTORE.md`](./RUSTORE.md)).
+5. Пуш в `main` → **build:rustore** → вручную **deploy:rustore**.
+
+```bash
+npm run gitflic:pipeline   # запуск пайплайна через API
+```
 
 ## Переменные CI/CD
 
@@ -44,7 +71,8 @@ npm run rustore:auth
 | `gitflic-ci.yaml` | Пайплайн: сборка → деплой |
 | `rustore-deploy.sh` | Метаданные версии + вызов API |
 | `scripts/rustore/deploy.mjs` | RuStore Public API (черновик, APK, модерация) |
-| `scripts/ci/prepare-android-ci.mjs` | Keystore и секреты на runner |
+| `scripts/ci/setup-gitflic.mjs` | Автонастройка runner + переменные |
+| `scripts/ci/trigger-gitflic-pipeline.mjs` | Запуск пайплайна через API |
 
 ## Перед каждым релизом
 
@@ -68,14 +96,14 @@ npm run rustore:deploy
 
 ## Подключение к GitFlic
 
-Если код пока только на GitHub / локально:
+Remotes:
 
 ```bash
-git remote add gitflic https://gitflic.ru/project/impherion/nagaevo-master.git
-git push -u gitflic main
+git remote add gitflic-company https://gitflic.ru/project/nagaevomaster/nagaevo-master.git
+git push -u gitflic-company main
 ```
 
-Или импортируйте репозиторий в интерфейсе GitFlic.
+Старый remote пользователя (если был): `https://gitflic.ru/project/impherion/nagaevo-master.git`
 
 ## Ограничения RuStore
 

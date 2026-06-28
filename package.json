@@ -54,6 +54,8 @@
     "rustore:deploy": "node scripts/rustore/deploy.mjs",
     "rustore:assets": "node scripts/prepare-rustore-assets.mjs",
     "rustore:screenshots": "npx playwright install chromium && node scripts/prepare-rustore-assets.mjs",
+    "gitflic:setup": "node scripts/ci/setup-gitflic.mjs",
+    "gitflic:pipeline": "node scripts/ci/trigger-gitflic-pipeline.mjs",
     "android:icons": "node scripts/sync-app-icon.mjs",
     "seo:sitemap": "node scripts/generate-sitemap.mjs",
     "google:verify-dns": "node scripts/regru/add-dns-txt.mjs",

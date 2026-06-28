@@ -20,6 +20,7 @@ deploy/oauth.env
 deploy/push.env
 deploy/rustore.env
 deploy/rustore-push.env
+deploy/gitflic.env
 deploy/secrets.local.env
 deploy/google-services.json
 deploy/firebase-service-account.json
