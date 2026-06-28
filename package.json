@@ -57,6 +57,7 @@
     "gitflic:setup": "node scripts/ci/setup-gitflic.mjs",
     "gitflic:pipeline": "node scripts/ci/trigger-gitflic-pipeline.mjs",
     "gitflic:verify": "node scripts/ci/verify-gitflic.mjs",
+    "gitflic:push": "node scripts/ci/gitflic-push.mjs",
     "android:icons": "node scripts/sync-app-icon.mjs",
     "seo:sitemap": "node scripts/generate-sitemap.mjs",
     "google:verify-dns": "node scripts/regru/add-dns-txt.mjs",
