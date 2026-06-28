@@ -9,6 +9,7 @@ import { BAN_POLICY_TEXT } from '../constants/communityRules.js';
 import { assertCleanContent, findContentViolations } from '../services/moderation/contentFilter.js';
 import { getOnlineStats } from '../services/presence.js';
 import { getAdminDashboardStats } from '../services/adminStats.js';
+import { getAdminNetworkUsers } from '../services/adminNetwork.js';
 
 const moderationRouter = Router();
 
@@ -96,6 +97,16 @@ moderationRouter.get('/dashboard-stats', async (req: AuthRequest, res, next) => 
     try {
         assertModerator(req.user!.role);
         res.json(await getAdminDashboardStats());
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+moderationRouter.get('/users/network', async (req: AuthRequest, res, next) => {
+    try {
+        assertAdmin(req.user!.role);
+        res.json(await getAdminNetworkUsers());
     }
     catch (error) {
         next(error);

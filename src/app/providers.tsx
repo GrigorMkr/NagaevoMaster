@@ -12,6 +12,9 @@ import { LocationPromptBootstrap } from '@/components/location/LocationPromptBoo
 import { CanonicalHostRedirect } from '@/components/layout/CanonicalHostRedirect/CanonicalHostRedirect';
 import { PerformanceBootstrap } from '@/components/performance/PerformanceBootstrap';
 import { NativeAppBootstrap } from '@/components/native/NativeAppBootstrap/NativeAppBootstrap';
+import { SiteIntegrationsBootstrap } from '@/components/integrations/SiteIntegrationsBootstrap/SiteIntegrationsBootstrap';
+import { RuStoreReviewBootstrap } from '@/components/native/RuStoreReviewBootstrap/RuStoreReviewBootstrap';
+import { RuStoreUpdateBootstrap } from '@/components/native/RuStoreUpdateBootstrap/RuStoreUpdateBootstrap';
 import { NativePushPermissionModal } from '@/components/push/NativePushPermissionModal/NativePushPermissionModal';
 import { PushPermissionModal } from '@/components/push/PushPermissionModal/PushPermissionModal';
 import { BootSplashDismiss } from '@/components/boot/BootSplashDismiss';
@@ -27,6 +30,9 @@ function AppProviders({ children }: {
           <BootSplashDismiss />
           <PerformanceBootstrap />
           <NativeAppBootstrap />
+          <SiteIntegrationsBootstrap />
+          <RuStoreUpdateBootstrap />
+          <RuStoreReviewBootstrap />
           <AccountLocationBootstrap />
           <AuthBootstrap />
           <NotificationsBootstrap />

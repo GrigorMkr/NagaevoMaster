@@ -24,7 +24,8 @@ import {
   forwardMessage,
 } from '@/services/messagesApi';
 import { blockUser, fetchBlockStatus, unblockUser } from '@/services/blocksApi';
-import { uploadMessageAttachment } from '@/services/uploadsApi';
+import { MESSAGE_ATTACHMENT_ACCEPT, MESSAGE_ATTACHMENT_HINT, MESSAGE_ATTACHMENT_MAX_BYTES, MESSAGE_ATTACHMENT_MAX_MB } from '@/constants/messageAttachments';
+import { uploadMessageAttachment, prepareUploadFile } from '@/services/uploadsApi';
 import type { ChatMessage, ConversationSummary, GroupDetail } from '@/types/message';
 import { ForwardMessageModal } from '@/components/messages/ForwardMessageModal/ForwardMessageModal';
 import { CreateGroupModal } from '@/components/messages/CreateGroupModal/CreateGroupModal';
@@ -66,6 +67,8 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
   const [blockedByMe, setBlockedByMe] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   const [forwardTarget, setForwardTarget] = useState<ChatMessage | null>(null);
@@ -419,11 +422,28 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     void submitDraft();
   };
 
-  const handleSendAttachment = async (file: File) => {
+  const handleSendAttachment = async (file: File, options?: { prepared?: boolean }) => {
     if (!activeId) return;
-    setUploading(true);
+
+    let uploadable: File;
     try {
-      const uploaded = await uploadMessageAttachment(file);
+      uploadable = options?.prepared ? file : await prepareUploadFile(file);
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Не удалось открыть файл'));
+      return;
+    }
+
+    if (uploadable.size > MESSAGE_ATTACHMENT_MAX_BYTES) {
+      toast.error(`Файл слишком большой. Максимум ${MESSAGE_ATTACHMENT_MAX_MB} МБ`);
+      return;
+    }
+
+    setUploading(true);
+    setUploadFileName(uploadable.name);
+    setUploadProgress(0);
+    try {
+      const uploaded = await uploadMessageAttachment(uploadable, setUploadProgress, { prepared: true });
+      setUploadProgress(100);
       const message = await sendMessage(activeId, {
         type: uploaded.kind,
         attachmentUrl: uploaded.url,
@@ -439,28 +459,46 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
       toast.error(getErrorMessage(error, 'Не удалось отправить файл'));
     } finally {
       setUploading(false);
+      setUploadProgress(null);
+      setUploadFileName(null);
     }
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (file) {
-      void handleSendAttachment(file);
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
     }
+
+    const preparedPromise = prepareUploadFile(file);
+
+    void (async () => {
+      try {
+        const uploadable = await preparedPromise;
+        await handleSendAttachment(uploadable, { prepared: true });
+      } catch (error) {
+        toast.error(getErrorMessage(error, 'Не удалось открыть файл'));
+      } finally {
+        input.value = '';
+      }
+    })();
   };
 
   const handleVoiceToggle = async () => {
     if (!activeId) return;
     if (isRecording) {
       setUploading(true);
+      setUploadFileName('Голосовое сообщение');
+      setUploadProgress(0);
       try {
         const file = await stopRecording();
         if (!file) {
           toast.error('Запись пуста');
           return;
         }
-        const uploaded = await uploadMessageAttachment(file);
+        const uploaded = await uploadMessageAttachment(file, setUploadProgress);
+        setUploadProgress(100);
         const message = await sendMessage(activeId, {
           type: 'voice',
           attachmentUrl: uploaded.url,
@@ -474,6 +512,8 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
         toast.error(getErrorMessage(error, 'Не удалось отправить голосовое'));
       } finally {
         setUploading(false);
+        setUploadProgress(null);
+        setUploadFileName(null);
       }
       return;
     }
@@ -481,7 +521,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
     try {
       await startRecording();
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Разрешите доступ к микрофону в браузере'));
+      toast.error(getErrorMessage(error, 'Разрешите доступ к микрофону'));
     }
   };
 
@@ -885,12 +925,31 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
               </div>
             )}
 
+            {uploading && uploadProgress !== null && (
+              <div className={styles.uploadBar} role="status" aria-live="polite">
+                <div className={styles.uploadMeta}>
+                  <span className={styles.uploadLabel}>
+                    Загрузка
+                    {uploadFileName ? `: ${uploadFileName}` : ''}
+                  </span>
+                  <span className={styles.uploadPercent}>{uploadProgress}%</span>
+                </div>
+                <div className={styles.uploadTrack} aria-hidden>
+                  <div
+                    className={styles.uploadFill}
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <form className={styles.composeBar} action={ECHO_FORM_ACTION} method="post" onSubmit={handleSend} ref={composeBarRef}>
               <input
                 ref={fileInputRef}
                 type="file"
                 className={styles.hiddenInput}
-                accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,audio/*"
+                accept={MESSAGE_ATTACHMENT_ACCEPT}
+                title={MESSAGE_ATTACHMENT_HINT}
                 onChange={handleFileChange}
               />
 
@@ -900,7 +959,7 @@ function MessagesPanel({ chatId, withUserId, onChatChange, onUnreadChange }: Mes
                   className={styles.innerBtn}
                   disabled={uploading || isRecording}
                   onClick={() => fileInputRef.current?.click()}
-                  aria-label="Прикрепить файл"
+                  aria-label={`Прикрепить файл. ${MESSAGE_ATTACHMENT_HINT}`}
                 >
                   <ToolbarIcon name="paperclip" accent="#5eb8ff" motion="float" />
                 </button>

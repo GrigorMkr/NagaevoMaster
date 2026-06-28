@@ -33,7 +33,7 @@ function LocationPromptBootstrap() {
 
     if (hasLocationConsentAccepted()) {
       if (!accountLocation) {
-        void detectLocationAsync({ silent: true });
+        void detectLocationAsync({ silent: true, forceFresh: true });
       }
       setOpen(false);
       return;
@@ -70,7 +70,7 @@ function LocationPromptBootstrap() {
 
   const handleAccept = useCallback(async () => {
     setLocationConsentAccepted();
-    const location = await detectLocationAsync({ silent: true });
+    const location = await detectLocationAsync({ silent: true, forceFresh: true });
     setOpen(false);
     if (!location) {
       return;

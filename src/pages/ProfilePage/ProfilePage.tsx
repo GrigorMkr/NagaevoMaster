@@ -197,7 +197,7 @@ function ProfilePage() {
               <ProfileSettingsForm user={currentUser} />
             </ProfileExpandableSection>
 
-            {canModerate && <ModerationDashboard />}
+            {canModerate && <ModerationDashboard onMessageUser={openMessageWithUser} />}
 
             <ProfileExpandableSection
               title="Мои объявления"

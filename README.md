@@ -46,7 +46,7 @@ npm run preview
 
 ```bash
 # Фронт на REG.RU (нужен deploy.env)
-npm run build:hosting   # bump версии сайта в футере + сборка
+npm run build:hosting   
 npm run deploy:hosting
 
 # API на VPS
@@ -66,7 +66,7 @@ npm run build:apk         # → public/downloads/nagaevomaster.apk
 npm run deploy:hosting
 ```
 
-Подробнее: [`mobile/README.md`](mobile/README.md)
+Подробнее: [`mobile/README.md`](mobile/README.md) · [`mobile/RUSTORE.md`](mobile/RUSTORE.md) · [`mobile/GITFLIC.md`](mobile/GITFLIC.md)
 
 ## Полезное
 

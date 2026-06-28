@@ -16,6 +16,9 @@ import {
   updateGroup,
 } from '@/services/groupsApi';
 import { UserMentionPicker } from '@/components/messages/UserMentionPicker/UserMentionPicker';
+import { AddFriendButton } from '@/components/friends/AddFriendButton/AddFriendButton';
+import { UserNameWithStatus } from '@/components/ui/UserNameWithStatus/UserNameWithStatus';
+import { useUsersOnline } from '@/hooks/useUsersOnline';
 import { uploadImage } from '@/services/uploadsApi';
 import type { ChatMessage, GroupDetail } from '@/types/message';
 import { resolveAuthorAvatar } from '@/utils/resolveAuthorAvatar';
@@ -103,6 +106,12 @@ function GroupInfoSheet({
     () => new Set(group?.members.map((m) => m.userId) ?? []),
     [group],
   );
+
+  const memberUserIds = useMemo(
+    () => group?.members.map((member) => member.userId) ?? [],
+    [group],
+  );
+  const onlineMap = useUsersOnline(memberUserIds);
 
   const openAddMembers = () => {
     setPickFriends(new Set());
@@ -349,18 +358,29 @@ function GroupInfoSheet({
                 <li key={member.userId} className={styles.memberRow}>
                   <UserAvatar name={member.user.name} src={avatar} size="sm" />
                   <div className={styles.memberInfo}>
-                    <span className={styles.memberName}>{member.user.name}</span>
+                    <UserNameWithStatus
+                      name={member.user.name}
+                      userId={member.userId === currentUserId ? undefined : member.userId}
+                      online={member.userId === currentUserId ? undefined : (onlineMap[member.userId] ?? false)}
+                      nameClassName={styles.memberName}
+                    />
+                    <span className={styles.memberLogin}>@{member.user.login}</span>
                     {roleLabel && <span className={styles.roleBadge}>{roleLabel}</span>}
                   </div>
-                  {canAdmin && member.userId !== currentUserId && member.role !== 'owner' && (
-                    <button
-                      type="button"
-                      className={styles.removeBtn}
-                      onClick={() => void handleRemove(member.userId)}
-                    >
-                      Удалить
-                    </button>
-                  )}
+                  <div className={styles.memberActions}>
+                    {member.userId !== currentUserId && (
+                      <AddFriendButton userId={member.userId} size="sm" />
+                    )}
+                    {canAdmin && member.userId !== currentUserId && member.role !== 'owner' && (
+                      <button
+                        type="button"
+                        className={styles.removeBtn}
+                        onClick={() => void handleRemove(member.userId)}
+                      >
+                        Удалить
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })}

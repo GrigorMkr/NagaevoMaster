@@ -47,6 +47,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Нужен доступ к GPS, чтобы показать ваше местоположение на карте и найти ближайших мастеров.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Нужен доступ к микрофону, чтобы записывать голосовые сообщения в переписке.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

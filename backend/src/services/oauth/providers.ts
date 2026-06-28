@@ -108,6 +108,10 @@ async function findOrCreateOAuthUser(profile: OAuthProfile) {
       ...googleField,
       ...vkField,
     },
+  }).then(async (user) => {
+    const { sendWelcomeMessageToUser } = await import('../welcomeMessage.js');
+    void sendWelcomeMessageToUser(user.id).catch(() => {});
+    return user;
   });
 }
 

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Нагаево Мастер — презентация</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: #1a2e28;
+      background: #f4f7f5;
+      line-height: 1.45;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 18mm 20mm 16mm;
+      page-break-after: always;
+      background:
+        radial-gradient(circle at 85% 8%, rgba(77, 208, 160, 0.14), transparent 38%),
+        radial-gradient(circle at 10% 92%, rgba(45, 154, 116, 0.1), transparent 42%),
+        #f8fbf9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page:last-child {
+      page-break-after: auto;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(45, 154, 116, 0.12);
+      color: #2d9a74;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: #123228;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: #3f5d52;
+      max-width: 120mm;
+      margin-bottom: 22px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 68mm;
+      gap: 14mm;
+      align-items: center;
+      margin-top: 8mm;
+    }
+
+    .lead {
+      font-size: 15px;
+      color: #2f4a40;
+    }
+
+    .lead p + p {
+      margin-top: 10px;
+    }
+
+    .qr-card {
+      background: #fff;
+      border: 1px solid rgba(45, 154, 116, 0.18);
+      border-radius: 16px;
+      padding: 10mm 8mm;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(18, 50, 40, 0.08);
+    }
+
+    .qr-card img {
+      width: 52mm;
+      height: auto;
+      display: block;
+      margin: 0 auto 8px;
+      border-radius: 8px;
+    }
+
+    .site-link {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f7a5c;
+      text-decoration: none;
+    }
+
+    .site-link span {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #5b756b;
+      margin-top: 2px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .feature {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      border: 1px solid rgba(45, 154, 116, 0.12);
+    }
+
+    .feature h3 {
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #174636;
+    }
+
+    .feature p {
+      font-size: 12.5px;
+      color: #456258;
+    }
+
+    .steps {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid rgba(45, 154, 116, 0.1);
+    }
+
+    .step-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4dd0a0, #2d9a74);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step h3 {
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .step p {
+      font-size: 12.5px;
+      color: #4a6359;
+    }
+
+    .footer-note {
+      position: absolute;
+      left: 20mm;
+      right: 20mm;
+      bottom: 12mm;
+      font-size: 11px;
+      color: #6a8278;
+      border-top: 1px solid rgba(45, 154, 116, 0.15);
+      padding-top: 8px;
+    }
+
+    .cta-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(77, 208, 160, 0.18), rgba(45, 154, 116, 0.08));
+      border: 1px solid rgba(45, 154, 116, 0.2);
+    }
+
+    .cta-box strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+      color: #174636;
+    }
+
+    .cta-box p {
+      font-size: 13px;
+      color: #3f5d52;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #123228;
+    }
+
+    .section-intro {
+      font-size: 14px;
+      color: #456258;
+      margin-bottom: 12px;
+      max-width: 150mm;
+    }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <div class="badge">Посёлок Нагаево</div>
+    <h1>Нагаево Мастер</h1>
+    <p class="subtitle">Портал посёлка: мастера, общение, покупка и продажа — всё бесплатно, без подписок.</p>
+
+    <div class="hero-grid">
+      <div class="lead">
+        <p>
+          <strong>Нагаево Мастер</strong> — это сайт и приложение для жителей посёлка и окрестностей.
+          Здесь можно найти мастера, посмотреть объявления, пообщаться в чате и на форуме.
+        </p>
+        <p>
+          Мы сделали всё в одном месте, чтобы не искать специалистов по чатам и доскам объявлений.
+          Регистрация бесплатная — заходите и пробуйте.
+        </p>
+
+        <div class="cta-box">
+          <strong>Заходите на сайт</strong>
+          <p>Отсканируйте QR-код или откройте ссылку в браузере. Есть и мобильное приложение для Android.</p>
+        </div>
+      </div>
+
+      <aside class="qr-card">
+        <img src="qr.png" alt="QR-код на сайт nagaevomaster.ru" />
+        <a class="site-link" href="https://nagaevomaster.ru">
+          nagaevomaster.ru
+          <span>официальный сайт</span>
+        </a>
+      </aside>
+    </div>
+
+    <p class="footer-note">Сделано для своих — делитесь ссылкой с соседями и друзьями в Нагаево.</p>
+  </section>
+
+  <section class="page">
+    <div class="badge">Кратко о возможностях</div>
+    <h2>Что внутри?</h2>
+    <p class="section-intro">Платформа для поиска специалистов, техники и услуг в посёлке Нагаево и в радиусе до 50 км.</p>
+
+    <div class="features">
+      <article class="feature">
+        <h3>Каталог мастеров</h3>
+        <p>Строительство, ремонт, транспорт и другие услуги — с отзывами и рейтингами от соседей.</p>
+      </article>
+      <article class="feature">
+        <h3>Объявления</h3>
+        <p>Покупка и продажа внутри посёлка — удобно и без лишних посредников.</p>
+      </article>
+      <article class="feature">
+        <h3>Чат и сообщения</h3>
+        <p>Общайтесь напрямую с исполнителями: текст, файлы, голосовые сообщения.</p>
+      </article>
+      <article class="feature">
+        <h3>Форум посёлка</h3>
+        <p>Обсуждения, советы и взаимопомощь — живое сообщество Нагаево.</p>
+      </article>
+      <article class="feature">
+        <h3>Новости</h3>
+        <p>Локальные новости посёлка и важные материалы из региональных СМИ.</p>
+      </article>
+      <article class="feature">
+        <h3>Карта</h3>
+        <p>Смотрите, кто рядом с вами, и выбирайте ближайших специалистов.</p>
+      </article>
+    </div>
+
+    <div class="steps">
+      <article class="step">
+        <div class="step-num">01</div>
+        <div>
+          <h3>Зайдите на сайт</h3>
+          <p>Откройте <strong>nagaevomaster.ru</strong> или отсканируйте QR-код.</p>
+        </div>
+      </article>
+      <article class="step">
+        <div class="step-num">02</div>
+        <div>
+          <h3>Зарегистрируйтесь</h3>
+          <p>Быстрая регистрация — email, соцсети или вход с телефона.</p>
+        </div>
+      </article>
+      <article class="step">
+        <div class="step-num">03</div>
+        <div>
+          <h3>Найдите нужное</h3>
+          <p>Выберите категорию, сравните мастеров и напишите напрямую.</p>
+        </div>
+      </article>
+    </div>
+
+    <p class="footer-note">
+      Сайт: <strong>https://nagaevomaster.ru</strong> · Приложение Android: раздел «Скачать» на сайте
+    </p>
+  </section>
+</body>
+</html>

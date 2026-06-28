@@ -9,7 +9,9 @@ import {
   MOBILE_APP_VERSION_CODE,
 } from '@/constants/mobileApp';
 import { ROUTES } from '@/constants';
+import { useVkWidgets } from '@/constants/vkWidgets';
 import { isNativeApp } from '@/utils/nativeApp';
+import { VkVideoEmbed } from '@/components/vk';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AppDownloadPage.module.css';
 
@@ -26,6 +28,8 @@ function formatReleaseDate(isoDate: string): string {
 }
 
 function AppDownloadPage() {
+  const vk = useVkWidgets();
+
   if (isNativeApp()) {
     return <Navigate to={ROUTES.HOME} replace />;
   }
@@ -64,6 +68,13 @@ function AppDownloadPage() {
               </ul>
             )}
           </section>
+
+          {vk.video && (
+            <section className={styles.videoSection} aria-label="Видео о приложении">
+              <h2 className={styles.videoTitle}>Как пользоваться</h2>
+              <VkVideoEmbed title="Нагаево Мастер — видео" />
+            </section>
+          )}
 
           <a
             href={MOBILE_APP_RUSTORE_URL}

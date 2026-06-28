@@ -1,5 +1,6 @@
 /** HTTP и UI-тайминги */
 const API_TIMEOUT_MS = 15000;
+const UPLOAD_TIMEOUT_MS = 300_000;
 const TOAST_DURATION_MS = 4000;
 const FORM_SUBMIT_DELAY_MS = 500;
 /** Ограничения длины текста */
@@ -27,6 +28,7 @@ const SCROLL_ROTATION_FACTOR = 0.18;
 
 export {
   API_TIMEOUT_MS,
+  UPLOAD_TIMEOUT_MS,
   TOAST_DURATION_MS,
   FORM_SUBMIT_DELAY_MS,
   META_DESCRIPTION_MAX_LENGTH,

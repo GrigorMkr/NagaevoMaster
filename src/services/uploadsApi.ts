@@ -1,15 +1,17 @@
-import { api } from './api';
+import {
+  postMultipartUpload,
+  prepareUploadFile,
+  sendMultipartUpload,
+  type UploadProgressHandler,
+} from './multipartUpload';
+
 interface UploadResponse {
     id: string;
     url: string;
 }
+
 async function uploadImage(file: File): Promise<UploadResponse> {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post<UploadResponse>('/uploads', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data;
+    return postMultipartUpload<UploadResponse>('/uploads', file);
 }
 
 interface MessageUploadResponse extends UploadResponse {
@@ -18,18 +20,19 @@ interface MessageUploadResponse extends UploadResponse {
     kind: 'file' | 'voice';
 }
 
-async function uploadMessageAttachment(file: File): Promise<MessageUploadResponse> {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post<MessageUploadResponse>('/uploads/message', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data;
+async function uploadMessageAttachment(
+    file: File,
+    onProgress?: UploadProgressHandler,
+    options?: { prepared?: boolean },
+): Promise<MessageUploadResponse> {
+    const uploadFile = options?.prepared ? file : await prepareUploadFile(file);
+    return sendMultipartUpload<MessageUploadResponse>('/uploads/message', uploadFile, onProgress);
 }
 
 export {
   uploadImage,
   uploadMessageAttachment,
+  prepareUploadFile,
 }
 
 export type {

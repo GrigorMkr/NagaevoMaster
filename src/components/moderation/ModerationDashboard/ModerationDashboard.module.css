@@ -18,6 +18,30 @@
   color: var(--color-text-muted);
 }
 
+.liveStatWrap {
+  position: relative;
+}
+
+.networkOpenBtn {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(232, 184, 74, 0.18);
+  cursor: pointer;
+}
+
+.networkOpenBtn:hover {
+  background: rgba(232, 184, 74, 0.28);
+}
+
 .liveBar {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

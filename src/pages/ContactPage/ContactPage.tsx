@@ -18,6 +18,12 @@ import { PageHeader } from '@/components/ui/PageHeader/PageHeader';
 import { Button } from '@/components/ui/Button/Button';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { VkContactUsWidget } from '@/components/vk';
+import {
+  getVkCommunityMeUrl,
+  getVkCommunityUrl,
+  useVkWidgets,
+} from '@/constants/vkWidgets';
 import pageStyles from '@/styles/page.module.css';
 import styles from './ContactPage.module.css';
 
@@ -34,6 +40,7 @@ function ContactPage() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const authLoading = useAppSelector(selectAuthLoading);
   const user = useAppSelector(selectCurrentUser);
+  const vk = useVkWidgets();
 
   const {
     register,
@@ -56,6 +63,10 @@ function ContactPage() {
       toast.error(error instanceof Error ? error.message : 'Не удалось отправить сообщение');
     }
   };
+
+  const communityUrl = getVkCommunityUrl(vk.communityId);
+  const communityMeUrl = getVkCommunityMeUrl(vk.communityId);
+  const showVkContact = vk.communityId !== null && vk.communityId !== 0;
 
   return (
     <>
@@ -93,6 +104,38 @@ function ContactPage() {
                       </p>
                     </div>
                   </div>
+                  {showVkContact && (
+                    <div className={styles.infoItem}>
+                      <span>💬</span>
+                      <div>
+                        <strong>ВКонтакте</strong>
+                        <p className={styles.vkLead}>
+                          Напишите администрации в личные сообщения сообщества.
+                        </p>
+                        <VkContactUsWidget className={styles.vkWidget} />
+                        {communityMeUrl && (
+                          <a
+                            className={styles.vkFallbackLink}
+                            href={communityMeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Открыть диалог без виджета
+                          </a>
+                        )}
+                        {communityUrl && (
+                          <a
+                            className={styles.vkFallbackLink}
+                            href={communityUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Страница сообщества
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </Reveal>

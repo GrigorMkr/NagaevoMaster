@@ -1,20 +1,26 @@
-import { memo, useCallback, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
+import { memo, useCallback, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type SyntheticEvent } from 'react';
 import classNames from 'classnames';
 import { LogoIcon } from '@/components/ui/Logo/LogoIcon';
 import { STAMP_SMOKE_PALETTE } from '@/data/stampSmokePalette';
-import { useScrollRotation } from '@/hooks/useScrollRotation';
+import { usePrefersReducedMotion } from '@/hooks/useScrollRotation';
+import { usePerformanceProfile } from '@/hooks/usePerformanceProfile';
 import styles from '../HomePage.module.css';
 
 const ORBIT_DOTS = [0, 1, 2] as const;
 
 const HeroStamp = memo(function HeroStamp() {
-  const innerRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rotate: 0, rotateX: 0, rotateY: 0, scale: 1 });
   const [smokeIndex, setSmokeIndex] = useState(0);
   const [hovered, setHovered] = useState(false);
-  const { reducedMotion, lowPower } = useScrollRotation(innerRef, tilt);
+  const reducedMotion = usePrefersReducedMotion();
+  const { lowPower } = usePerformanceProfile();
   const smoke = STAMP_SMOKE_PALETTE[smokeIndex] ?? STAMP_SMOKE_PALETTE[0]!;
   const animateStamp = !reducedMotion;
+  const enableTilt = !reducedMotion && !lowPower;
+
+  const innerTransform = enableTilt
+    ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) rotate(${tilt.rotate}deg) scale(${tilt.scale})`
+    : undefined;
 
   const smokeStyle = {
     '--stamp-smoke-core': smoke.core,
@@ -23,7 +29,7 @@ const HeroStamp = memo(function HeroStamp() {
   } as CSSProperties;
 
   const handlePointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    if (reducedMotion || lowPower) {
+    if (!enableTilt) {
       return;
     }
 
@@ -38,7 +44,7 @@ const HeroStamp = memo(function HeroStamp() {
       rotateY: x * 16,
       scale: 1.05,
     });
-  }, [reducedMotion, lowPower]);
+  }, [enableTilt]);
 
   const handlePointerLeave = useCallback(() => {
     setHovered(false);
@@ -49,14 +55,15 @@ const HeroStamp = memo(function HeroStamp() {
     setHovered(true);
   }, []);
 
-  const handleStampClick = useCallback(() => {
+  const handleStampClick = useCallback((event: SyntheticEvent<HTMLDivElement>) => {
     setSmokeIndex((current) => (current + 1) % STAMP_SMOKE_PALETTE.length);
+    event.currentTarget.blur();
   }, []);
 
   const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      handleStampClick();
+      handleStampClick(event);
     }
   }, [handleStampClick]);
 
@@ -93,7 +100,10 @@ const HeroStamp = memo(function HeroStamp() {
           <span key={index} style={{ '--orbit-index': index } as CSSProperties} />
         ))}
       </div>
-      <div ref={innerRef} className={styles.heroStampInner}>
+      <div
+        className={styles.heroStampInner}
+        style={innerTransform ? { transform: innerTransform } : undefined}
+      >
         <div className={styles.heroStampIconWrap}>
           <LogoIcon
             fluid

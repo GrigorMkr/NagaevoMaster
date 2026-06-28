@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const envPath = path.join(root, 'deploy', 'rustore-push.env');
 const buildGradlePath = path.join(root, 'android', 'app', 'build.gradle');
+const stringsPath = path.join(root, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
 
 function loadEnv(filePath) {
   if (!existsSync(filePath)) return {};
@@ -23,6 +24,38 @@ function loadEnv(filePath) {
 
 function escapeGradleString(value) {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function escapeXmlString(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function patchStringsXml(projectId) {
+  if (!existsSync(stringsPath)) {
+    console.warn('strings.xml не найден — пропуск project_id в манифесте.');
+    return;
+  }
+
+  let content = readFileSync(stringsPath, 'utf8');
+  const line = `    <string name="rustore_push_project_id">${escapeXmlString(projectId)}</string>`;
+
+  if (content.includes('name="rustore_push_project_id"')) {
+    content = content.replace(
+      /<string name="rustore_push_project_id">[\s\S]*?<\/string>/,
+      line.trim(),
+    );
+  } else {
+    content = content.replace(
+      /<\/resources>\s*$/,
+      `${line}\n</resources>\n`,
+    );
+  }
+
+  writeFileSync(stringsPath, content, 'utf8');
 }
 
 const env = loadEnv(envPath);
@@ -61,9 +94,10 @@ if (content.includes('RUSTORE_PUSH_PROJECT_ID')) {
 }
 
 writeFileSync(buildGradlePath, content, 'utf8');
+patchStringsXml(projectId);
 
 if (projectId) {
-  console.log(`RuStore Push: project ID записан в BuildConfig (${projectId.slice(0, 8)}…).`);
+  console.log(`RuStore Push: project ID записан в манифест и BuildConfig (${projectId.slice(0, 8)}…).`);
 } else {
   console.log('RuStore Push: deploy/rustore-push.env не задан — SDK не инициализируется (только FCM).');
 }

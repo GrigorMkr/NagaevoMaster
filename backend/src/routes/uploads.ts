@@ -7,6 +7,13 @@ import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { assertSafeUploadFilename } from '../utils/uploadSafety.js';
+import { isMessageAttachmentAllowed, MESSAGE_UPLOAD_MAX_BYTES } from '../utils/messageAttachmentTypes.js';
+import {
+  decodeMultipartFilename,
+  normalizeUploadedTextFile,
+  shouldNormalizeTextFile,
+  textMimeTypeForExtension,
+} from '../utils/textEncoding.js';
 
 const uploadsRouter = Router();
 
@@ -36,27 +43,11 @@ const imageUpload = multer({
   },
 });
 
-const MESSAGE_DOC_MIMES = new Set([
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/plain',
-]);
-
-function isMessageMimeAllowed(mime: string) {
-  return (mime.startsWith('image/') && mime !== 'image/svg+xml')
-    || mime.startsWith('video/')
-    || mime.startsWith('audio/')
-    || MESSAGE_DOC_MIMES.has(mime);
-}
-
 const messageUpload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024, files: 1 },
+  limits: { fileSize: MESSAGE_UPLOAD_MAX_BYTES, files: 1 },
   fileFilter: (_req, file, cb) => {
-    if (!isMessageMimeAllowed(file.mimetype)) {
+    if (!isMessageAttachmentAllowed(file.mimetype, file.originalname)) {
       cb(new HttpError(400, 'Недопустимый тип файла для переписки'));
       return;
     }
@@ -89,15 +80,61 @@ uploadsRouter.post('/message', requireAuth, messageUpload.single('file'), (req, 
     if (!req.file) {
       throw new HttpError(400, 'Файл не передан');
     }
+
+    const originalName = decodeMultipartFilename(req.file.originalname);
+    const savedSize = fs.statSync(req.file.path).size;
+    if (savedSize === 0) {
+      fs.unlinkSync(req.file.path);
+      throw new HttpError(400, 'Файл не получен сервером. Повторите отправку.');
+    }
+
+    if (shouldNormalizeTextFile(originalName)) {
+      normalizeUploadedTextFile(req.file.path);
+      if (fs.statSync(req.file.path).size === 0) {
+        fs.unlinkSync(req.file.path);
+        throw new HttpError(400, 'Не удалось обработать текстовый файл');
+      }
+    }
+
+    const textMime = textMimeTypeForExtension(originalName);
+    const mimeType = textMime ?? req.file.mimetype;
     const url = `${env.PUBLIC_UPLOAD_URL}/${req.file.filename}`;
-    const kind = req.file.mimetype.startsWith('audio/') ? 'voice' : 'file';
+    const kind = mimeType.startsWith('audio/') ? 'voice' : 'file';
     res.status(201).json({
       id: req.file.filename,
       url,
-      mimeType: req.file.mimetype,
-      name: req.file.originalname,
+      mimeType,
+      name: originalName,
       kind,
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+uploadsRouter.get('/download/:filename', (req, res, next) => {
+  try {
+    const filename = path.basename(req.params.filename ?? '');
+    if (!filename || filename.includes('..')) {
+      throw new HttpError(400, 'Некорректное имя файла');
+    }
+
+    const filePath = path.join(env.UPLOAD_DIR, filename);
+    if (!fs.existsSync(filePath)) {
+      throw new HttpError(404, 'Файл не найден');
+    }
+
+    const stats = fs.statSync(filePath);
+    if (stats.size === 0) {
+      throw new HttpError(404, 'Пустой файл');
+    }
+
+    const requestedName = typeof req.query.name === 'string'
+      ? decodeMultipartFilename(req.query.name)
+      : filename;
+    const downloadName = path.basename(requestedName) || filename;
+
+    res.download(filePath, downloadName);
   } catch (error) {
     next(error);
   }

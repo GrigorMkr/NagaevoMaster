@@ -4,6 +4,8 @@ import { ABOUT_IMAGES } from '@/data/aboutImages';
 import { COMMUNITY_RULES, BAN_POLICY_TEXT } from '@/constants/communityRules';
 import { APP_DESCRIPTION, APP_NAME, GEO } from '@/utils/constants';
 import { Reveal } from '@/components/ui/Reveal/Reveal';
+import { VkWallPostWidget } from '@/components/vk';
+import { getVkCommunityUrl, useVkWidgets } from '@/constants/vkWidgets';
 import { AboutCard } from './AboutCard';
 import pageStyles from '@/styles/page.module.css';
 import styles from './AboutPage.module.css';
@@ -25,6 +27,13 @@ const platformRules = [
 ];
 
 function AboutPage() {
+  const vk = useVkWidgets();
+  const communityUrl = vk.communityId ? getVkCommunityUrl(vk.communityId) : null;
+  const showWallPost = vk.wallPostOwnerId !== null
+    && vk.wallPostId !== null
+    && vk.wallPostId > 0
+    && Boolean(vk.wallPostHash);
+
   return (
     <>
       <PageMeta title="О проекте" description={APP_DESCRIPTION} />
@@ -79,6 +88,25 @@ function AboutPage() {
             </AboutCard>
           </div>
           </Reveal>
+
+          {(showWallPost || communityUrl) && (
+            <Reveal delay={120}>
+              <section className={styles.vkSection}>
+                {communityUrl && (
+                  <p className={styles.vkCommunityLead}>
+                    Новости и обсуждения — в сообществе{' '}
+                    <a href={communityUrl} target="_blank" rel="noopener noreferrer">
+                      ВКонтакте
+                    </a>
+                    .
+                  </p>
+                )}
+                {showWallPost && (
+                  <VkWallPostWidget className={styles.vkWallPost} />
+                )}
+              </section>
+            </Reveal>
+          )}
         </div>
       </div>
     </>

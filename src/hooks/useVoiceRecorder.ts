@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { requestMicrophoneStream } from '@/utils/microphoneAccess';
 
 const MAX_VOICE_SECONDS = 120;
 
@@ -11,14 +12,24 @@ interface UseVoiceRecorderResult {
   cancelRecording: () => void;
 }
 
-function pickMimeType() {
+function pickMimeType(): string | undefined {
+  if (typeof MediaRecorder === 'undefined') {
+    return undefined;
+  }
   const candidates = [
     'audio/webm;codecs=opus',
     'audio/webm',
     'audio/ogg;codecs=opus',
     'audio/mp4',
+    'audio/aac',
   ];
   return candidates.find((type) => MediaRecorder.isTypeSupported(type));
+}
+
+function extensionForMime(mimeType: string): string {
+  if (mimeType.includes('ogg')) return 'ogg';
+  if (mimeType.includes('mp4') || mimeType.includes('aac')) return 'm4a';
+  return 'webm';
 }
 
 function useVoiceRecorder(): UseVoiceRecorderResult {
@@ -52,28 +63,15 @@ function useVoiceRecorder(): UseVoiceRecorderResult {
 
   const startRecording = useCallback(async () => {
     if (!isSupported || isRecording) return;
-    const mimeType = pickMimeType();
-    if (!mimeType) {
-      throw new Error('Запись голоса не поддерживается в этом браузере');
-    }
 
-    let stream: MediaStream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (error) {
-      const name = error instanceof DOMException ? error.name : '';
-      if (name === 'NotAllowedError' || name === 'SecurityError') {
-        throw new Error(
-          'Микрофон недоступен. Разрешите доступ в браузере и обновите страницу после деплоя сайта.',
-          { cause: error },
-        );
-      }
-      throw error;
-    }
+    const stream = await requestMicrophoneStream();
     streamRef.current = stream;
     chunksRef.current = [];
 
-    const recorder = new MediaRecorder(stream, { mimeType });
+    const mimeType = pickMimeType();
+    const recorder = mimeType
+      ? new MediaRecorder(stream, { mimeType })
+      : new MediaRecorder(stream);
     recorderRef.current = recorder;
 
     recorder.ondataavailable = (event) => {
@@ -109,15 +107,16 @@ function useVoiceRecorder(): UseVoiceRecorderResult {
         setSeconds(0);
         recorderRef.current = null;
 
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
         chunksRef.current = [];
         if (blob.size === 0) {
           resolve(null);
           return;
         }
 
-        const extension = recorder.mimeType.includes('ogg') ? 'ogg' : 'webm';
-        resolve(new File([blob], `voice-${Date.now()}.${extension}`, { type: recorder.mimeType }));
+        const mimeType = recorder.mimeType || 'audio/webm';
+        const extension = extensionForMime(mimeType);
+        resolve(new File([blob], `voice-${Date.now()}.${extension}`, { type: mimeType }));
       };
       recorder.stop();
     });

@@ -87,6 +87,21 @@
   margin-top: 0.25rem;
 }
 
+.videoSection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.videoTitle {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-ui);
+  letter-spacing: var(--letter-badge);
+  text-transform: uppercase;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
 .storeBtn {
   display: flex;
   align-items: center;

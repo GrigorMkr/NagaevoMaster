@@ -1,0 +1,72 @@
+.wrap {
+  position: relative;
+  z-index: 12;
+  pointer-events: auto;
+}
+
+.menuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.menuBtnDark {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.menuBtnLight {
+  background: rgba(0, 0, 0, 0.1);
+  color: inherit;
+}
+
+.menuBtn:hover {
+  opacity: 1;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  min-width: 10.5rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-card);
+  border: none;
+  box-shadow: var(--shadow-lg);
+  z-index: 1300;
+  pointer-events: auto;
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.menu button:hover:not(:disabled) {
+  background: rgba(23, 98, 74, 0.08);
+}
+
+.menu button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.menuDanger {
+  color: #c44 !important;
+}

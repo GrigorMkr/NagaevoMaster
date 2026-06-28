@@ -1,0 +1,20 @@
+.vkWidgetFrame {
+  width: 100%;
+  min-height: 48px;
+}
+
+.vkWidgetError {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+}
+
+.vkWidgetLoading {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

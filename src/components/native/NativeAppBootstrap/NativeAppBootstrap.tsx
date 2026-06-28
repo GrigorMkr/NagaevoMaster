@@ -4,6 +4,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { isNativeAndroid, isNativeApp } from '@/utils/nativeApp';
 import { onBootSplashDismissed } from '@/utils/bootSplash';
+import { prewarmVkMaps } from '@/services/vkMapsRuntime';
 import { useNativeOAuthCompletion } from '@/hooks/useNativeOAuthCompletion';
 
 function NativeAppBootstrap() {
@@ -47,6 +48,7 @@ function NativeAppBootstrap() {
     };
 
     void init();
+    prewarmVkMaps();
 
     return () => {
       window.clearTimeout(fallbackTimer);

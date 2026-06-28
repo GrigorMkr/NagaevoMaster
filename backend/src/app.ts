@@ -29,6 +29,8 @@ import { pushRouter } from './routes/push.js';
 import { listingSocialRouter } from './routes/listingSocial.js';
 import { groupsRouter } from './routes/groups.js';
 import { geoRouter } from './routes/geo.js';
+import { siteRouter } from './routes/site.js';
+import { applyUploadStaticHeaders } from './utils/uploadStaticHeaders.js';
 
 function createApp() {
   const app = express();
@@ -60,10 +62,14 @@ function createApp() {
     dotfiles: 'deny',
     index: false,
     fallthrough: false,
+    setHeaders(res, filePath) {
+      applyUploadStaticHeaders(res, filePath);
+    },
   }));
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', service: 'nagaevomaster-api' });
   });
+  app.use('/api/site', siteRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/users', usersRouter);
   app.use('/api/listings', listingsRouter);

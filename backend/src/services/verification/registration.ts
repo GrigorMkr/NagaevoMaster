@@ -146,6 +146,9 @@ async function verifyRegistrationCode(
 
   await prisma.verificationChallenge.delete({ where: { id: challenge.id } });
 
+  const { sendWelcomeMessageToUser } = await import('../welcomeMessage.js');
+  void sendWelcomeMessageToUser(user.id).catch(() => {});
+
   return user;
 }
 

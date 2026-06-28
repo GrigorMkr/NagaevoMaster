@@ -25,8 +25,11 @@ deploy/google-services.json
 deploy/firebase-service-account.json
 deploy/captcha.env
 deploy/vkmaps.env
+deploy/vkwidgets.env
 deploy/ssl-local/
 hosting.reg.ru.env
+deploy/roskomnadzor-pdn.local.md
+deploy/roskomnadzor-pdn.local.pdf
 nagaevo-hosting.zip
 src/assets/fonts/loos-temp/
 src/assets/fonts/manrope-temp/

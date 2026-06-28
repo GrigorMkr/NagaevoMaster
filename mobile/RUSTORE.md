@@ -106,6 +106,16 @@ npm run deploy:hosting
 3. Консоль → приложение → **Загрузить версию** → новый APK.
 4. Заполните «Что нового» → модерация.
 
+### Автоматизация через GitFlic
+
+Сборка и загрузка черновика в RuStore из CI:
+
+```bash
+git push gitflic master   # после настройки remote
+```
+
+Инструкция: [`GITFLIC.md`](./GITFLIC.md) · файлы `gitflic-ci.yaml`, `rustore-deploy.sh`.
+
 ## Ссылки
 
 - Каталог (после публикации): `https://www.rustore.ru/catalog/app/ru.nagaevomaster.app`

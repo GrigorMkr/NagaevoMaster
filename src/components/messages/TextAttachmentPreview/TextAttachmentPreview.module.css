@@ -1,0 +1,35 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: min(100%, 28rem);
+}
+
+.fileName {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.62);
+  word-break: break-word;
+}
+
+.content {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.22);
+  color: inherit;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.note,
+.loading {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}

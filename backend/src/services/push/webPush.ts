@@ -2,6 +2,12 @@ import webpush from 'web-push';
 import { prisma } from '../../lib/prisma.js';
 import { env } from '../../config/env.js';
 import { extractFcmToken, isFcmEndpoint, isFcmConfigured, sendFcmMessage, sendFcmNotification, type MessagePushPayload } from './fcmPush.js';
+import {
+  extractRustoreToken,
+  isRustoreEndpoint,
+  isRustorePushConfigured,
+  sendRustoreNotification,
+} from './rustorePush.js';
 
 let configured = false;
 
@@ -24,7 +30,7 @@ function isWebPushConfigured(): boolean {
 }
 
 function isPushConfigured(): boolean {
-  return Boolean(isWebPushConfigured() || isFcmConfigured());
+  return Boolean(isWebPushConfigured() || isFcmConfigured() || isRustorePushConfigured());
 }
 
 async function sendMessagePush(payload: MessagePushPayload) {
@@ -50,6 +56,23 @@ async function sendMessagePush(payload: MessagePushPayload) {
   const pushPayload = JSON.stringify(body);
 
   await Promise.all(subscriptions.map(async (sub) => {
+    if (isRustoreEndpoint(sub.endpoint)) {
+      const result = await sendRustoreNotification(extractRustoreToken(sub.endpoint), {
+        title: payload.senderName,
+        body: payload.preview,
+        messageId: payload.messageId,
+        data: {
+          url: `/profile?section=messages&chat=${payload.conversationId}`,
+          messageId: payload.messageId,
+          senderName: payload.senderName,
+        },
+      });
+      if (!result.ok && result.invalidToken) {
+        await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => undefined);
+      }
+      return;
+    }
+
     if (isFcmEndpoint(sub.endpoint)) {
       const result = await sendFcmMessage(extractFcmToken(sub.endpoint), payload);
       if (!result.ok && result.invalidToken) {
@@ -116,6 +139,15 @@ async function sendFriendPush(payload: FriendPushPayload) {
   const pushPayload = JSON.stringify(body);
 
   await Promise.all(subscriptions.map(async (sub) => {
+    if (isRustoreEndpoint(sub.endpoint)) {
+      await sendRustoreNotification(extractRustoreToken(sub.endpoint), {
+        title: body.title,
+        body: body.body,
+        data: { url: body.url },
+      }).catch(() => undefined);
+      return;
+    }
+
     if (!ensureWebPush() && !isFcmEndpoint(sub.endpoint)) return;
 
     if (isFcmEndpoint(sub.endpoint)) {
@@ -176,6 +208,16 @@ async function sendGroupInvitePush(payload: GroupInvitePushPayload) {
   const pushPayload = JSON.stringify(body);
 
   await Promise.all(subscriptions.map(async (sub) => {
+    if (isRustoreEndpoint(sub.endpoint)) {
+      await sendRustoreNotification(extractRustoreToken(sub.endpoint), {
+        title: body.title,
+        body: body.body,
+        messageId,
+        data: { url: body.url, messageId },
+      }).catch(() => undefined);
+      return;
+    }
+
     if (isFcmEndpoint(sub.endpoint)) {
       await sendFcmNotification(extractFcmToken(sub.endpoint), {
         title: body.title,

@@ -1,0 +1,61 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal {
+  width: min(100%, 24rem);
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid rgba(232, 184, 74, 0.25);
+  box-shadow: var(--shadow-lg);
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: var(--font-size-lg);
+}
+
+.text {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.progressWrap {
+  margin-bottom: 1rem;
+}
+
+.progressBar {
+  height: 0.45rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e8b84a, #f0d080);
+  transition: width 0.25s ease;
+}
+
+.progressLabel {
+  margin: 0.45rem 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: grid;
+  gap: 0.5rem;
+}

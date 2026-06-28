@@ -310,6 +310,28 @@ export interface ModerationUserItem {
   createdAt: string;
 }
 
+export interface AdminNetworkUserItem {
+  id: string;
+  name: string;
+  email: string;
+  login: string;
+  role: string;
+  createdAt: string;
+  isOnline: boolean;
+  welcomeSent: boolean;
+}
+
+export interface AdminNetworkUsersResponse {
+  generatedAt: string;
+  online: AdminNetworkUserItem[];
+  newUsers: AdminNetworkUserItem[];
+}
+
+async function fetchAdminNetworkUsers(): Promise<AdminNetworkUsersResponse> {
+  const response = await api.get<AdminNetworkUsersResponse>('/moderation/users/network');
+  return response.data;
+}
+
 async function fetchModerationUsers(query = ''): Promise<ModerationUserItem[]> {
   const response = await api.get<ModerationUserItem[]>('/moderation/users', {
     params: query.trim() ? { q: query.trim() } : undefined,
@@ -379,6 +401,7 @@ export {
   deleteModerationForumPost,
   fetchModerationOnlineStats,
   fetchAdminDashboardStats,
+  fetchAdminNetworkUsers,
   fetchModerationUsers,
   updateModerationUserRole,
   fetchModerationSiteNews,

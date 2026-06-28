@@ -7,8 +7,10 @@ import { CompactListingRow } from '@/components/listings/CompactListingRow/Compa
 import { NewsAdminPanel } from '@/components/moderation/NewsAdminPanel/NewsAdminPanel';
 import { AdminDashboardOverview } from '@/components/moderation/AdminDashboardOverview/AdminDashboardOverview';
 import { AdminUsersPanel } from '@/components/moderation/AdminUsersPanel/AdminUsersPanel';
+import { AdminNetworkPanel } from '@/components/moderation/AdminNetworkPanel/AdminNetworkPanel';
 import { AdminDevApkPanel } from '@/components/moderation/AdminDevApkPanel/AdminDevApkPanel';
 import { CircularStatRing } from '@/components/ui/CircularStatRing/CircularStatRing';
+import { ToolbarIcon } from '@/components/ui/ToolbarIcon';
 import { ProfileExpandableSection } from '@/components/profile/ProfileExpandableSection/ProfileExpandableSection';
 import { ModerationReviewModal, type ReviewMode } from '@/components/moderation/ModerationReviewModal/ModerationReviewModal';
 import {
@@ -32,7 +34,11 @@ const BASE_TABS: { id: TabId; label: string }[] = [
   { id: 'news', label: 'Новости' },
 ];
 
-function ModerationDashboard() {
+interface ModerationDashboardProps {
+  onMessageUser?: (userId: string) => void;
+}
+
+function ModerationDashboard({ onMessageUser }: ModerationDashboardProps) {
   const canModerate = useAppSelector(selectCanModerate);
   const isAdmin = useAppSelector(selectIsAdmin);
   const tabs = useMemo(
@@ -54,6 +60,7 @@ function ModerationDashboard() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [reviewMode, setReviewMode] = useState<ReviewMode | null>(null);
+  const [networkOpen, setNetworkOpen] = useState(false);
 
   const loadTabData = useCallback(async () => {
     if (tab === 'overview' || tab === 'users' || tab === 'mobile') {
@@ -131,13 +138,26 @@ function ModerationDashboard() {
 
         {dashboardStats && (
           <div className={styles.liveBar} aria-label="Краткая сводка">
-            <CircularStatRing
-              compact
-              label="В сети"
-              value={dashboardStats.presence.totalOnline}
-              max={Math.max(dashboardStats.users.total, 1)}
-              accent="gold"
-            />
+            <div className={styles.liveStatWrap}>
+              <CircularStatRing
+                compact
+                label="В сети"
+                value={dashboardStats.presence.totalOnline}
+                max={Math.max(dashboardStats.users.total, 1)}
+                accent="gold"
+              />
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={styles.networkOpenBtn}
+                  onClick={() => setNetworkOpen(true)}
+                  aria-label="Список пользователей в сети"
+                  title="Список пользователей"
+                >
+                  <ToolbarIcon name="plus" accent="#e8b84a" motion="pulse" />
+                </button>
+              )}
+            </div>
             <CircularStatRing
               compact
               label="Пользователей"
@@ -245,6 +265,14 @@ function ModerationDashboard() {
           </div>
         )}
       </ProfileExpandableSection>
+
+      {isAdmin && onMessageUser && (
+        <AdminNetworkPanel
+          open={networkOpen}
+          onClose={() => setNetworkOpen(false)}
+          onMessageUser={onMessageUser}
+        />
+      )}
 
       {reviewMode && (
         <ModerationReviewModal

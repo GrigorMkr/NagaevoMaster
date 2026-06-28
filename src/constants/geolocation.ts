@@ -1,7 +1,7 @@
 /** Таймаут и кэш браузерной геолокации */
-const GEOLOCATION_TIMEOUT_MS = 10_000
-const GEOLOCATION_FRESH_TIMEOUT_MS = 15_000
-const GEOLOCATION_MAX_AGE_MS = 60_000
+const GEOLOCATION_TIMEOUT_MS = 15_000
+const GEOLOCATION_FRESH_TIMEOUT_MS = 30_000
+const GEOLOCATION_MAX_AGE_MS = 30_000
 /** Масштаб при показе «Моё местоположение» (улица/дом) */
 const USER_LOCATION_MAP_ZOOM = 16
 /** Не центрировать карту на сохранённых координатах старше этого срока */

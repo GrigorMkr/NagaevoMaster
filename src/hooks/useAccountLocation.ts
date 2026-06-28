@@ -1,11 +1,6 @@
 import { useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  GEOLOCATION_FRESH_TIMEOUT_MS,
-  GEOLOCATION_MAX_AGE_MS,
-  GEOLOCATION_TIMEOUT_MS,
-} from '@/constants';
 import { selectIsAuthenticated } from '@/features/user/userSelectors';
 import { clearAccountLocation, setAccountLocation, setLocating } from '@/features/user/userSlice';
 import { reverseGeocode } from '@/services/geoApi';
@@ -16,6 +11,7 @@ import {
     removeStoredAccountLocation,
     saveStoredAccountLocation,
 } from '@/utils/accountLocationStorage';
+import { DeviceGeolocationError, getDevicePosition } from '@/utils/deviceGeolocation';
 import { getErrorMessage } from '@/utils/errorMessage';
 
 function useAccountLocation() {
@@ -38,19 +34,14 @@ function useAccountLocation() {
     }, [dispatch, isAuthenticated]);
 
     const detectLocationAsync = useCallback((options?: { silent?: boolean; forceFresh?: boolean }) => new Promise<AccountLocation | null>((resolve) => {
-        if (!navigator.geolocation) {
-            if (!options?.silent) {
-                toast.error('Геолокация не поддерживается в этом браузере');
-            }
-            resolve(null);
-            return;
-        }
         const forceFresh = options?.forceFresh ?? false;
         dispatch(setLocating(true));
-        navigator.geolocation.getCurrentPosition((position) => {
-            void (async () => {
-                let lat = position.coords.latitude;
-                let lng = position.coords.longitude;
+
+        void (async () => {
+            try {
+                const position = await getDevicePosition({ forceFresh });
+                let lat = position.lat;
+                let lng = position.lng;
                 let label = 'Текущее местоположение';
 
                 if (isAuthenticated) {
@@ -73,25 +64,31 @@ function useAccountLocation() {
                 await persistLocation(location);
                 dispatch(setLocating(false));
                 if (!options?.silent) {
-                    toast.success(label === 'Текущее местоположение' ? 'Местоположение определено' : label);
+                    const accuracyHint = Number.isFinite(position.accuracy) && position.accuracy > 0
+                        ? ` (±${Math.round(position.accuracy)} м)`
+                        : '';
+                    toast.success(
+                        label === 'Текущее местоположение'
+                            ? `Местоположение определено${accuracyHint}`
+                            : `${label}${accuracyHint}`,
+                    );
                 }
                 resolve(location);
-            })();
-        }, () => {
-            dispatch(setLocating(false));
-            if (!options?.silent) {
-                toast.error('Не удалось определить местоположение');
+            } catch (error) {
+                dispatch(setLocating(false));
+                if (!options?.silent) {
+                    const message = error instanceof DeviceGeolocationError
+                        ? error.message
+                        : getErrorMessage(error, 'Не удалось определить местоположение');
+                    toast.error(message);
+                }
+                resolve(null);
             }
-            resolve(null);
-        }, {
-            enableHighAccuracy: true,
-            timeout: forceFresh ? GEOLOCATION_FRESH_TIMEOUT_MS : GEOLOCATION_TIMEOUT_MS,
-            maximumAge: forceFresh ? 0 : GEOLOCATION_MAX_AGE_MS,
-        });
+        })();
     }), [dispatch, isAuthenticated, persistLocation]);
 
     const detectLocation = useCallback(() => {
-        void detectLocationAsync();
+        void detectLocationAsync({ forceFresh: true });
     }, [detectLocationAsync]);
 
     const resetLocation = useCallback(async () => {

@@ -51,6 +51,27 @@
   color: var(--color-text-muted);
 }
 
+.vkLead {
+  margin-bottom: 0.75rem;
+}
+
+.vkWidget {
+  margin-top: 0.25rem;
+}
+
+.vkFallbackLink {
+  display: inline-block;
+  margin-top: 0.5rem;
+  margin-right: 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.vkFallbackLink:hover {
+  text-decoration: underline;
+}
+
 .form {
   padding: var(--spacing-2xl);
   background: var(--color-bg-card);

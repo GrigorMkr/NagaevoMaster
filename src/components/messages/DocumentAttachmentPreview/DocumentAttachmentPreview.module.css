@@ -1,0 +1,59 @@
+.wrap {
+  width: min(100%, 920px);
+  height: min(78dvh, 920px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.frame {
+  flex: 1;
+  width: 100%;
+  min-height: 320px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: #fff;
+}
+
+.loading {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}
+
+.officeHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
+.fallback {
+  width: min(100%, 420px);
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.fallbackName {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.fallbackHint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.loading {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}

@@ -6,6 +6,7 @@ import { HttpError } from '../middleware/errorHandler.js';
 import { env } from '../config/env.js';
 import { isPushConfigured, isWebPushConfigured } from '../services/push/webPush.js';
 import { isFcmConfigured } from '../services/push/fcmPush.js';
+import { isRustorePushConfigured } from '../services/push/rustorePush.js';
 
 const pushRouter = Router();
 
@@ -78,6 +79,7 @@ pushRouter.get('/status', requireAuth, async (req: AuthRequest, res, next) => {
       configured: isPushConfigured(),
       webPushConfigured: isWebPushConfigured(),
       fcmConfigured: isFcmConfigured(),
+      rustoreConfigured: isRustorePushConfigured(),
       subscribed: count > 0,
     });
   } catch (error) {
@@ -88,7 +90,7 @@ pushRouter.get('/status', requireAuth, async (req: AuthRequest, res, next) => {
 pushRouter.post('/subscribe', requireAuth, async (req: AuthRequest, res, next) => {
   try {
     const data = subscribeSchema.parse(req.body);
-    const isNativeToken = data.endpoint.startsWith('fcm:');
+    const isNativeToken = data.endpoint.startsWith('fcm:') || data.endpoint.startsWith('rustore:');
     if (!isNativeToken && !isPushConfigured()) {
       throw new HttpError(503, 'Push-уведомления не настроены');
     }

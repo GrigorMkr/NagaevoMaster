@@ -7,8 +7,18 @@ import { isPushEnabledPreference, setPushEnabledPreference } from '@/utils/pushP
 import { playMessageSound } from '@/utils/messageSound';
 import { tryClaimMessageNotice } from '@/utils/messageNotice';
 import { showMessageLightning } from '@/utils/messageLightningToast';
+import {
+  addRuStorePushListeners,
+  checkRuStorePushAvailability,
+  deleteRuStorePushToken,
+  fetchRuStorePushTokens,
+  isRuStorePushAvailable,
+  type RemoteMessage,
+} from '@/services/rustorePush';
 
+const FCM_PROVIDER = 'firebase';
 const FCM_ENDPOINT_PREFIX = 'fcm:';
+const RUSTORE_ENDPOINT_PREFIX = 'rustore:';
 const REGISTRATION_TIMEOUT_MS = 20_000;
 const SUBSCRIBE_RETRIES = 3;
 
@@ -52,13 +62,16 @@ function sleep(ms: number): Promise<void> {
 }
 
 let pendingNativeToken: string | null = null;
+let pendingNativeTokenPrefix = FCM_ENDPOINT_PREFIX;
 let nativePushInitialized = false;
+let rustorePushListenersInitialized = false;
 let lastRegistrationError: string | null = null;
 let pendingRegistration: PendingRegistration | null = null;
 
-async function saveNativeToken(token: string): Promise<boolean> {
+async function savePushToken(token: string, prefix: string): Promise<boolean> {
   if (!hasAuthToken()) {
     pendingNativeToken = token;
+    pendingNativeTokenPrefix = prefix;
     return false;
   }
 
@@ -66,7 +79,7 @@ async function saveNativeToken(token: string): Promise<boolean> {
   for (let attempt = 1; attempt <= SUBSCRIBE_RETRIES; attempt += 1) {
     try {
       await api.post('/push/subscribe', {
-        endpoint: `${FCM_ENDPOINT_PREFIX}${token}`,
+        endpoint: `${prefix}${token}`,
         keys: {
           p256dh: 'native',
           auth: Capacitor.getPlatform(),
@@ -83,8 +96,9 @@ async function saveNativeToken(token: string): Promise<boolean> {
     }
   }
 
-  console.error('[push] failed to save FCM token:', lastError);
+  console.error('[push] failed to save push token:', lastError);
   pendingNativeToken = token;
+  pendingNativeTokenPrefix = prefix;
   return false;
 }
 
@@ -93,7 +107,7 @@ async function flushPendingNativePushToken(): Promise<boolean> {
     return false;
   }
 
-  return saveNativeToken(pendingNativeToken);
+  return savePushToken(pendingNativeToken, pendingNativeTokenPrefix);
 }
 
 function navigateFromPushData(data?: Record<string, string>) {
@@ -104,7 +118,11 @@ function navigateFromPushData(data?: Record<string, string>) {
   window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
 }
 
-function handleForegroundNotification(notification: { title?: string; body?: string; data?: Record<string, string> }) {
+function handleForegroundNotification(notification: {
+  title?: string;
+  body?: string;
+  data?: Record<string, string>;
+}) {
   const messageId = notification.data?.messageId;
   if (typeof messageId === 'string' && !tryClaimMessageNotice(messageId)) {
     return;
@@ -113,6 +131,15 @@ function handleForegroundNotification(notification: { title?: string; body?: str
   showMessageLightning({
     senderName: notification.data?.senderName ?? notification.title ?? 'Новое сообщение',
     preview: notification.body ?? 'Откройте переписку',
+  });
+}
+
+function handleRuStoreRemoteMessage(message: RemoteMessage) {
+  const data = message.data ?? {};
+  handleForegroundNotification({
+    title: message.notification?.title ?? data.title,
+    body: message.notification?.body ?? data.message ?? data.body,
+    data,
   });
 }
 
@@ -136,17 +163,43 @@ function waitForNativeRegistration(): Promise<string> {
   });
 }
 
+function tokenPrefixForProvider(provider?: string): string {
+  if (provider === FCM_PROVIDER) {
+    return FCM_ENDPOINT_PREFIX;
+  }
+  return RUSTORE_ENDPOINT_PREFIX;
+}
+
+function initRuStorePushBridge() {
+  if (rustorePushListenersInitialized || !isRuStorePushAvailable()) {
+    return;
+  }
+
+  rustorePushListenersInitialized = true;
+  addRuStorePushListeners({
+    onNewToken: (token, provider) => {
+      void savePushToken(token, tokenPrefixForProvider(provider));
+    },
+    onMessageReceived: handleRuStoreRemoteMessage,
+    onError: (errors, provider) => {
+      const label = provider ? `${provider}: ` : '';
+      console.warn('[push] Universal Push SDK error:', `${label}${errors.join('; ')}`);
+    },
+  });
+}
+
 async function initNativePushListeners(PushNotifications: PushNotificationsPlugin): Promise<void> {
   if (nativePushInitialized) {
     return;
   }
 
   nativePushInitialized = true;
+  initRuStorePushBridge();
 
   await PushNotifications.addListener('registration', (event) => {
     lastRegistrationError = null;
     settlePendingRegistration(event.value);
-    void saveNativeToken(event.value).catch(() => undefined);
+    void savePushToken(event.value, FCM_ENDPOINT_PREFIX);
   });
 
   await PushNotifications.addListener('registrationError', (event) => {
@@ -163,6 +216,53 @@ async function initNativePushListeners(PushNotifications: PushNotificationsPlugi
   await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
     navigateFromPushData(event.notification.data as Record<string, string> | undefined);
   });
+}
+
+async function registerUniversalPushTokens(): Promise<boolean> {
+  if (!isRuStorePushAvailable()) {
+    return false;
+  }
+
+  initRuStorePushBridge();
+  const availability = await checkRuStorePushAvailability();
+  if (!availability.available) {
+    return false;
+  }
+
+  const tokens = await fetchRuStorePushTokens();
+  if (!tokens) {
+    return false;
+  }
+
+  let saved = false;
+  if (tokens.rustore) {
+    saved = await savePushToken(tokens.rustore, RUSTORE_ENDPOINT_PREFIX) || saved;
+  }
+  if (tokens.firebase) {
+    saved = await savePushToken(tokens.firebase, FCM_ENDPOINT_PREFIX) || saved;
+  }
+  if (!saved && tokens.token) {
+    saved = await savePushToken(
+      tokens.token,
+      availability.rustore ? RUSTORE_ENDPOINT_PREFIX : FCM_ENDPOINT_PREFIX,
+    );
+  }
+
+  return saved;
+}
+
+async function registerFcmPushToken(PushNotifications: PushNotificationsPlugin): Promise<boolean> {
+  try {
+    const registrationPromise = waitForNativeRegistration();
+    await PushNotifications.register();
+    const token = await registrationPromise;
+    return savePushToken(token, FCM_ENDPOINT_PREFIX);
+  } catch (error) {
+    if (error instanceof Error && error.message !== 'FCM registration timeout') {
+      console.error('[push] FCM register failed:', error.message);
+    }
+    return false;
+  }
 }
 
 async function checkNativePushPermission(): Promise<NativePushPermission | null> {
@@ -189,7 +289,7 @@ async function ensureNativePushNotifications(options?: {
 
   const PushNotifications = await getPushNotificationsModule();
   if (!PushNotifications) {
-    console.warn('[push] PushNotifications plugin unavailable — пересоберите APK с Firebase');
+    console.warn('[push] PushNotifications plugin unavailable — пересоберите APK');
     return false;
   }
 
@@ -210,21 +310,19 @@ async function ensureNativePushNotifications(options?: {
     return false;
   }
 
-  try {
-    const registrationPromise = waitForNativeRegistration();
-    await PushNotifications.register();
-    const token = await registrationPromise;
-    return saveNativeToken(token);
-  } catch (error) {
-    const flushed = await flushPendingNativePushToken().catch(() => false);
-    if (flushed) {
+  if (isRuStorePushAvailable()) {
+    const universalRegistered = await registerUniversalPushTokens();
+    if (universalRegistered) {
       return true;
     }
-    if (error instanceof Error && error.message !== 'FCM registration timeout') {
-      console.error('[push] register failed:', error.message);
-    }
-    return false;
   }
+
+  const fcmRegistered = await registerFcmPushToken(PushNotifications);
+  if (fcmRegistered) {
+    return true;
+  }
+
+  return flushPendingNativePushToken().catch(() => false);
 }
 
 async function forceNativePushOnLaunch(): Promise<void> {
@@ -238,6 +336,7 @@ async function unsubscribeNativePush(): Promise<void> {
   if (!isNativeApp()) return;
   setPushSubscribed(false);
   pendingNativeToken = null;
+  await deleteRuStorePushToken().catch(() => undefined);
 }
 
 function getLastNativePushRegistrationError(): string | null {
@@ -252,6 +351,7 @@ export {
   unsubscribeNativePush,
   getLastNativePushRegistrationError,
   FCM_ENDPOINT_PREFIX,
+  RUSTORE_ENDPOINT_PREFIX,
 };
 
 export type {

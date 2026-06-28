@@ -16,6 +16,9 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(MessageSoundPlugin.class);
         registerPlugin(MessageNotifyPlugin.class);
+        registerPlugin(RuStoreUpdatePlugin.class);
+        registerPlugin(RuStoreReviewPlugin.class);
+        registerPlugin(RuStorePushPlugin.class);
         super.onCreate(savedInstanceState);
         registerPushChannel();
     }

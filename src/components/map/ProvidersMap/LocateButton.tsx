@@ -11,11 +11,11 @@ const LocateButton = memo(function LocateButton() {
   const { isLocating, detectLocationAsync } = useAccountLocation();
 
   const handleLocate = useCallback(() => {
-    if (!map || !mapLoaded) {
-      return;
-    }
     void detectLocationAsync({ forceFresh: true }).then((location) => {
-      const coords = location ? safeLatLngToLngLat(location.lat, location.lng) : null;
+      if (!location || !map || !mapLoaded) {
+        return;
+      }
+      const coords = safeLatLngToLngLat(location.lat, location.lng);
       if (!coords) {
         return;
       }

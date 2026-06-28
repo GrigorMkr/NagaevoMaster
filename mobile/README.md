@@ -48,4 +48,20 @@ npm run cap:ios
 
 Файлы `deploy/google-services.json`, `deploy/firebase-service-account.json` в git не попадают.
 
+## VK Карты (mmr-gl в APK)
+
+В Capacitor карта работает через **MMR GL JS** (`mmr-gl`) — это официальный Web SDK VK Карт (npm / React). Нативный `ru.mail.maps:mapkit` для чистого Kotlin не нужен: UI рендерится в WebView.
+
+Перед **bundled** сборкой (`build:rustore`, `build:apk:bundled`) задайте ключ:
+
+```bash
+cp deploy/vkmaps.env.example deploy/vkmaps.env
+# VK_MAPS_API_KEY из RuStore Console → Инструменты → VK Карты
+npm run build:rustore
+```
+
+Ключ вшивается в `dist` как `VITE_MAP_TOKEN` при `build:hosting`. Без него тайлы не загрузятся.
+
+На сайте и в «лёгком» APK (оболочка + live-сайт) ключ берётся с хостинга.
+
 ID приложения: `ru.nagaevomaster.app`

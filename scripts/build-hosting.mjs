@@ -8,6 +8,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const isBundledHosting = process.env.CAPACITOR_BUNDLED === '1' || process.env.CAPACITOR_BUNDLED === 'true'
 const productionEnvPath = path.join(root, '.env.production')
 const vkMapsEnvPath = path.join(root, 'deploy', 'vkmaps.env')
+const vkWidgetsEnvPath = path.join(root, 'deploy', 'vkwidgets.env')
+const oauthEnvPath = path.join(root, 'deploy', 'oauth.env')
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return
@@ -24,10 +26,49 @@ function loadEnvFile(filePath) {
 }
 
 loadEnvFile(productionEnvPath)
+loadEnvFile(oauthEnvPath)
 loadEnvFile(vkMapsEnvPath)
+loadEnvFile(vkWidgetsEnvPath)
 
 if (!process.env.VITE_MAP_TOKEN && process.env.VK_MAPS_API_KEY) {
   process.env.VITE_MAP_TOKEN = process.env.VK_MAPS_API_KEY
+}
+
+if (!process.env.VITE_VK_WIDGETS_API_ID && process.env.VK_WIDGETS_API_ID) {
+  process.env.VITE_VK_WIDGETS_API_ID = process.env.VK_WIDGETS_API_ID
+}
+if (!process.env.VITE_VK_WIDGETS_API_ID && process.env.VK_CLIENT_ID) {
+  process.env.VITE_VK_WIDGETS_API_ID = process.env.VK_CLIENT_ID
+}
+
+const vkWidgetEnvMap = [
+  ['VITE_VK_COMMUNITY_ID', 'VK_COMMUNITY_ID'],
+  ['VITE_VK_VIDEO_URL', 'VK_VIDEO_URL'],
+  ['VITE_VK_VIDEO_OID', 'VK_VIDEO_OID'],
+  ['VITE_VK_VIDEO_ID', 'VK_VIDEO_ID'],
+  ['VITE_VK_VIDEO_HASH', 'VK_VIDEO_HASH'],
+  ['VITE_VK_VIDEO_HD', 'VK_VIDEO_HD'],
+  ['VITE_VK_VIDEO_AUTOPLAY', 'VK_VIDEO_AUTOPLAY'],
+  ['VITE_VK_VIDEO_LOOP', 'VK_VIDEO_LOOP'],
+  ['VITE_VK_VIDEO_START', 'VK_VIDEO_START'],
+  ['VITE_VK_WALL_POST_OWNER_ID', 'VK_WALL_POST_OWNER_ID'],
+  ['VITE_VK_WALL_POST_ID', 'VK_WALL_POST_ID'],
+  ['VITE_VK_WALL_POST_HASH', 'VK_WALL_POST_HASH'],
+  ['VITE_VK_CONTACT_US_TEXT', 'VK_CONTACT_US_TEXT'],
+]
+
+for (const [viteKey, deployKey] of vkWidgetEnvMap) {
+  if (!process.env[viteKey] && process.env[deployKey]) {
+    process.env[viteKey] = process.env[deployKey]
+  }
+}
+
+if (isBundledHosting && !process.env.VITE_MAP_TOKEN?.trim()) {
+  console.warn(`
+⚠ VK Карты: deploy/vkmaps.env не задан (VK_MAPS_API_KEY).
+  Карта в bundled APK не загрузится без ключа.
+  cp deploy/vkmaps.env.example deploy/vkmaps.env
+`)
 }
 
 const sitemap = spawnSync('node', ['scripts/generate-sitemap.mjs'], {

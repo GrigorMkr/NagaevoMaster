@@ -159,6 +159,34 @@
   }
 }
 
+.vkSection {
+  margin-top: var(--spacing-3xl);
+  padding: var(--spacing-2xl);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.vkCommunityLead {
+  margin: 0 0 var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.vkCommunityLead a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.vkCommunityLead a:hover {
+  text-decoration: underline;
+}
+
+.vkWallPost {
+  width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cardImage,
   .cardPanel,

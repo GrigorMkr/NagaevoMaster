@@ -68,7 +68,7 @@ const tarExcludes = [
   '--exclude=backend/uploads',
   '--exclude=backend/.env',
 ].join(' ');
-execSync(`tar -czf "${archivePath}" ${tarExcludes} backend scripts package.json package-lock.json`, {
+execSync(`tar -czf "${archivePath}" ${tarExcludes} backend deploy scripts package.json package-lock.json`, {
   cwd: root,
   stdio: 'inherit',
   shell: true,

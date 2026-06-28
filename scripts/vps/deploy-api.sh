@@ -27,6 +27,13 @@ fi
 
 mkdir -p uploads
 
+if [[ -f "${APP_DIR}/deploy/nginx-api.conf.example" ]]; then
+  echo "==> Nginx (лимит загрузок)"
+  install -m 644 "${APP_DIR}/deploy/nginx-api.conf.example" /etc/nginx/sites-available/nagaevomaster-api
+  nginx -t
+  systemctl reload nginx
+fi
+
 echo "==> PM2"
 if pm2 describe nagaevomaster-api >/dev/null 2>&1; then
   pm2 restart nagaevomaster-api --update-env
