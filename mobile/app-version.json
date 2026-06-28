@@ -1,9 +1,9 @@
 {
-  "version": "1.0.14",
-  "versionCode": 15,
-  "releasedAt": "2026-06-26",
+  "version": "1.0.15",
+  "versionCode": 16,
+  "releasedAt": "2026-06-28",
   "apkSizeMb": 27.9,
-  "apkFileName": "nagaevomaster-1.0.14.apk",
+  "apkFileName": "nagaevomaster-1.0.15.apk",
   "releaseNotes": [
     "Доска объявлений в нижней навигации приложения",
     "Заставка с логотипом до полной загрузки сайта",

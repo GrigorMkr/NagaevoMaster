@@ -5,5 +5,5 @@
     <string name="package_name">ru.nagaevomaster.app</string>
     <string name="custom_url_scheme">ru.nagaevomaster.app</string>
     <string name="pushes_notification_channel_id">nagaevo_messages</string>
-    <string name="rustore_push_project_id"></string>
+    <string name="rustore_push_project_id">Ya1db13x4k9ch76Hc-zOf6fhDY6B7KYA</string>
 </resources>

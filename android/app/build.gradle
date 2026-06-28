@@ -16,8 +16,8 @@ android {
         applicationId "ru.nagaevomaster.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.0.14"
+        versionCode 16
+        versionName "1.0.15"
         buildConfigField "String", "RUSTORE_PUSH_PROJECT_ID", '""'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

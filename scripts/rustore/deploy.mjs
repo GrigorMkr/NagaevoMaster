@@ -7,10 +7,10 @@
  *   RUSTORE_PRIVATE_KEY / RS_PRIVATE_KEY
  *   RUSTORE_PACKAGE_NAME, RUSTORE_WHATS_NEW, … — см. rustore-deploy.sh
  */
-import { createSign } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildRuStoreAuthBody, formatRuStoreTimestamp, RUSTORE_AUTH_URL } from './rustore-key.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const API_BASE = 'https://public-api.rustore.ru/public';
@@ -57,36 +57,17 @@ function requireEnv(...names) {
 }
 
 function formatTimestamp(date = new Date()) {
-  const pad = (value, size = 2) => String(value).padStart(size, '0');
-  const offsetMin = -date.getTimezoneOffset();
-  const sign = offsetMin >= 0 ? '+' : '-';
-  const abs = Math.abs(offsetMin);
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-    + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-    + `.${pad(date.getMilliseconds(), 3)}${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+  return formatRuStoreTimestamp(date);
 }
 
-function normalizePrivateKey(raw) {
-  let key = raw.replace(/\\n/g, '\n').trim();
-  if (key.includes('BEGIN')) {
-    return key;
-  }
-  const body = key.replace(/\s/g, '');
-  const lines = body.match(/.{1,64}/g) ?? [body];
-  return `-----BEGIN PRIVATE KEY-----\n${lines.join('\n')}\n-----END PRIVATE KEY-----`;
-}
-
-async function fetchPublicToken(keyId, privateKeyPem) {
+async function fetchPublicToken(keyId, privateKeyRaw) {
   const timestamp = formatTimestamp();
-  const signer = createSign('RSA-SHA512');
-  signer.update(`${keyId}${timestamp}`);
-  signer.end();
-  const signature = signer.sign(privateKeyPem).toString('base64');
+  const authBody = buildRuStoreAuthBody(keyId, timestamp, privateKeyRaw);
 
-  const response = await fetch(`${API_BASE}/auth`, {
+  const response = await fetch(RUSTORE_AUTH_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ keyId, timestamp, signature }),
+    body: JSON.stringify(authBody),
   });
 
   const body = await response.json().catch(() => ({}));
@@ -187,7 +168,7 @@ async function uploadApk(token, packageName, versionId, apkPath) {
 async function main() {
   const keyId = requireEnv('RUSTORE_KEY_ID', 'RS_KEY_ID', 'KEY_ID');
   const privateKeyRaw = requireEnv('RUSTORE_PRIVATE_KEY', 'RS_PRIVATE_KEY', 'PRIVATE_KEY');
-  const packageName = env('RUSTORE_PACKAGE_NAME', 'ru.nagaevomaster.app');
+  const packageName = env('RUSTORE_PACKAGE_NAME', env('RS_PACKAGE_NAME', 'ru.nagaevomaster.app'));
   const apkPath = resolveApkPath();
 
   const categories = JSON.parse(env('RUSTORE_CATEGORIES', '["social"]'));
@@ -203,26 +184,49 @@ async function main() {
     ),
     whatsNew: readWhatsNew(),
     moderInfo: env('RUSTORE_MODER_INFO', 'Обновление мобильного приложения nagaevomaster.ru'),
-    priceValue: Number(env('RUSTORE_PRICE_VALUE', '0')),
     publishType: env('RUSTORE_PUBLISH_TYPE', 'INSTANTLY'),
   };
+
+  const priceValue = Number(env('RUSTORE_PRICE_VALUE', '0'));
+  if (priceValue > 0) {
+    draftBody.priceValue = priceValue;
+  }
 
   console.log(`RuStore deploy: ${packageName}`);
   console.log(`APK: ${path.relative(root, apkPath)}`);
 
-  const token = await fetchPublicToken(keyId, normalizePrivateKey(privateKeyRaw));
+  const token = await fetchPublicToken(keyId, privateKeyRaw);
   console.log('RuStore auth: OK');
 
-  const draft = await apiJson(
-    token,
-    'POST',
-    `${API_BASE}/v1/application/${packageName}/version`,
-    draftBody,
-  );
+  let versionId = Number(env('RUSTORE_VERSION_ID', '0')) || null;
 
-  const versionId = draft?.body?.versionId ?? draft?.versionId;
   if (!versionId) {
-    throw new Error(`versionId не получен: ${JSON.stringify(draft).slice(0, 400)}`);
+    try {
+      const draft = await apiJson(
+        token,
+        'POST',
+        `${API_BASE}/v1/application/${packageName}/version`,
+        draftBody,
+      );
+      versionId = draft?.body?.versionId
+        ?? (typeof draft?.body === 'number' ? draft.body : null)
+        ?? draft?.versionId;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const existing = message.match(/draft version with ID = (\d+)/i);
+      if (existing) {
+        versionId = Number(existing[1]);
+        console.log(`Используем существующий черновик: ${versionId}`);
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    console.log(`Черновик (задан вручную): ${versionId}`);
+  }
+
+  if (!versionId) {
+    throw new Error('versionId не получен');
   }
   console.log(`Черновик версии: ${versionId}`);
 

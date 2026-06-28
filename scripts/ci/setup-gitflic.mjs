@@ -122,8 +122,11 @@ function collectCiVariables() {
   if (keyId) vars.RS_KEY_ID = keyId;
   if (privateKey) vars.RS_PRIVATE_KEY = privateKey;
 
+  if (keyId && !privateKey) {
+    warn('RUSTORE_KEY_ID задан, но RUSTORE_PRIVATE_KEY пуст — deploy:rustore не сработает');
+  }
   if (!vars.RS_KEY_ID || !vars.RS_PRIVATE_KEY) {
-    warn('RS_KEY_ID / RS_PRIVATE_KEY не найдены — job deploy:rustore не сработает до добавления deploy/rustore.env');
+    warn('RS_KEY_ID / RS_PRIVATE_KEY неполные — job deploy:rustore не сработает до заполнения deploy/rustore.env');
   }
 
   return vars;

@@ -7,10 +7,10 @@
  *   RUSTORE_KEY_ID=123456
  *   RUSTORE_PRIVATE_KEY=...   # приватный ключ из консоли (одной строкой)
  */
-import { createSign } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildRuStoreAuthBody, formatRuStoreTimestamp, RUSTORE_AUTH_URL } from './rustore-key.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const envPath = path.join(root, 'deploy', 'rustore.env');
@@ -27,37 +27,6 @@ function loadEnv(file) {
   return vars;
 }
 
-function formatTimestamp(date = new Date()) {
-  const pad = (value, size = 2) => String(value).padStart(size, '0');
-  const offsetMin = -date.getTimezoneOffset();
-  const sign = offsetMin >= 0 ? '+' : '-';
-  const abs = Math.abs(offsetMin);
-  const hours = pad(Math.floor(abs / 60));
-  const minutes = pad(abs % 60);
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-    + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-    + `.${pad(date.getMilliseconds(), 3)}${sign}${hours}:${minutes}`;
-}
-
-function buildSignature(privateKeyPem, keyId, timestamp) {
-  const payload = `${keyId}${timestamp}`;
-  const signer = createSign('RSA-SHA512');
-  signer.update(payload);
-  signer.end();
-  return signer.sign(privateKeyPem).toString('base64');
-}
-
-function normalizePrivateKey(raw) {
-  let key = raw.replace(/\\n/g, '\n').trim();
-  if (key.includes('BEGIN')) {
-    return key;
-  }
-  const body = key.replace(/\s/g, '');
-  const lines = body.match(/.{1,64}/g) ?? [body];
-  return `-----BEGIN PRIVATE KEY-----\n${lines.join('\n')}\n-----END PRIVATE KEY-----`;
-}
-
 const vars = loadEnv(envPath);
 if (!vars?.RUSTORE_KEY_ID || !vars?.RUSTORE_PRIVATE_KEY) {
   console.error('Создайте deploy/rustore.env из deploy/rustore.env.example');
@@ -66,27 +35,32 @@ if (!vars?.RUSTORE_KEY_ID || !vars?.RUSTORE_PRIVATE_KEY) {
 }
 
 const keyId = vars.RUSTORE_KEY_ID;
-const privateKey = normalizePrivateKey(vars.RUSTORE_PRIVATE_KEY);
-const timestamp = formatTimestamp();
+const timestamp = formatRuStoreTimestamp();
 
-let signature;
+let authBody;
 try {
-  signature = buildSignature(privateKey, keyId, timestamp);
+  authBody = buildRuStoreAuthBody(keyId, timestamp, vars.RUSTORE_PRIVATE_KEY);
 } catch (error) {
-  console.error('Не удалось подписать запрос. Проверьте RUSTORE_PRIVATE_KEY.');
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
 }
 
-const response = await fetch('https://public-api.rustore.ru/public/auth', {
+const response = await fetch(RUSTORE_AUTH_URL, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ keyId, timestamp, signature }),
+  body: JSON.stringify(authBody),
 });
 
 const body = await response.text();
 if (!response.ok) {
   console.error(`Ошибка ${response.status}: ${body.slice(0, 300)}`);
+  if (body.includes('Signature encode error')) {
+    console.error('');
+    console.error('Подпись формируется корректно локально, но RuStore её отклоняет.');
+    console.error('Проверьте, что RUSTORE_KEY_ID совпадает с ID ключа в консоли для этого private key.');
+    console.error('Если ключ обновляли в консоли — создайте новый ключ и сохраните новую пару keyId + private key.');
+    console.error(`keyId: ${keyId}, timestamp: ${timestamp}`);
+  }
   process.exit(1);
 }
 

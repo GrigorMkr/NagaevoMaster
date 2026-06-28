@@ -7,6 +7,20 @@
 
 Официальная инструкция: [GitFlic + RuStore](https://docs.gitflic.ru/cicd/rustore/) · [RuStore DevTools](https://www.rustore.ru/help/developers/tools/dev-tools/gitflic)
 
+**Шаблоны GitFlic (референс):**
+
+| Файл | URL |
+|------|-----|
+| `gitflic-ci.yaml` | [gitflic/RuStore/gitflic-ci.yaml](https://gitflic.ru/project/gitflic/gitflic/blob?file=RuStore/gitflic-ci.yaml&branch=master) |
+| `rustore-deploy.sh` | [gitflic/RuStore/rustore-deploy.sh](https://gitflic.ru/project/gitflic/gitflic/blob?file=RuStore/rustore-deploy.sh&branch=master) |
+
+Шаблон GitFlic — минимальный пример на `debian:latest` + `curl`/`openssl`. В этом проекте:
+
+- **build** — полная сборка на **Windows self-hosted runner** (Node, JDK, Android SDK);
+- **rustore** — тот же RuStore Public API, но через `scripts/rustore/deploy.mjs` (удобнее на Windows, без apt-get).
+
+Обязательные переменные CI/CD совпадают с шаблоном: **`RS_KEY_ID`**, **`RS_PRIVATE_KEY`**.
+
 ## Автонастройка (одной командой)
 
 ```bash
@@ -110,5 +124,28 @@ git push -u gitflic-company main
 - Один активный черновик на приложение — удалите старый в консоли, если deploy падает.
 - `versionCode` в APK должен быть больше опубликованного.
 - Подпись APK — тем же keystore, что и предыдущие версии.
+- **Новые чувствительные разрешения** (микрофон, GPS) — первую загрузку с ними нужно сделать **вручную** через [console.rustore.ru](https://console.rustore.ru) с обоснованием; API отклонит такой APK.
+
+## Черновик без модерации
+
+Как в шаблоне GitFlic можно пропустить `send_to_moderation` — задайте переменную CI/CD или локально:
+
+```bash
+# только черновик + APK, без commit на модерацию
+RUSTORE_SUBMIT_FOR_MODERATION=false npm run rustore:deploy
+```
+
+В GitFlic: переменная `RUSTORE_SUBMIT_FOR_MODERATION` = `false` в настройках проекта или в `gitflic-ci.yaml`.
+
+## Сравнение с шаблоном GitFlic
+
+| | Шаблон GitFlic | NagaevoMaster |
+|---|----------------|---------------|
+| Образ | `debian:latest` | Windows runner (ваш ПК) |
+| Сборка APK | `echo "Делаю build"` (заглушка) | `npm run build:rustore` |
+| Deploy | `bash rustore-deploy.sh` (curl) | `node scripts/rustore/deploy.mjs` |
+| Stage | `rustore` | `rustore` |
+| Ключи | `RS_KEY_ID`, `RS_PRIVATE_KEY` | те же |
+| Пакет | `RS_PACKAGE_NAME` | `ru.nagaevomaster.app` |
 
 См. также: [`RUSTORE.md`](./RUSTORE.md) · [`README.md`](../README.md)
