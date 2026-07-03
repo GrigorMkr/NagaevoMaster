@@ -8,6 +8,7 @@ import { SortBy } from '@/enums/sort';
 import { enrichListing, enrichListings } from '@/utils/listingEnrich';
 import { resolveUploadUrl } from '@/utils/mediaUrl';
 import { asArray } from '@/utils/apiGuards';
+import { postMultipartUpload } from './multipartUpload';
 import { api } from './api';
 import {
   fetchModerationListings,
@@ -169,12 +170,8 @@ interface CreateListingPayload {
 }
 
 async function uploadListingImage(file: File): Promise<string> {
-    const form = new FormData();
-    form.append('file', file);
-    const response = await api.post<{ id: string; url: string }>('/uploads', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return resolveUploadUrl(response.data.url);
+    const response = await postMultipartUpload<{ id: string; url: string }>('/uploads', file);
+    return resolveUploadUrl(response.url);
 }
 
 async function createListing(payload: CreateListingPayload): Promise<Listing> {

@@ -9,7 +9,7 @@ export function resolveOAuthApiBase(): string {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname
     if (host === 'nagaevomaster.ru' || host === 'www.nagaevomaster.ru') {
-      return `${PROD_API_ORIGIN}/api`
+      return `${window.location.origin}/api`;
     }
     if (host === 'localhost') {
       return '/api'

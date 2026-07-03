@@ -14,9 +14,6 @@ function resolveAbsoluteApiBase(): string {
     return `${PROD_API_ORIGIN}/api`;
   }
   if (typeof window !== 'undefined' && isSiteOrigin()) {
-    if (import.meta.env.PROD && window.location.hostname !== 'localhost') {
-      return `${PROD_API_ORIGIN}/api`;
-    }
     return `${window.location.origin}/api`;
   }
   const configured = import.meta.env.VITE_API_URL;

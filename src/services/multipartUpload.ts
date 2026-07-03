@@ -1,7 +1,21 @@
 import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { UPLOAD_TIMEOUT_MS } from '@/constants/ui';
+import { PROD_API_ORIGIN, resolveAbsoluteApiBase, isSiteOrigin } from '@/utils/apiBase';
 import { isNativeApp } from '@/utils/nativeApp';
-import { resolveAbsoluteApiBase } from '@/utils/apiBase';
+
+/** Крупные загрузки — напрямую на VPS (100 МБ), минуя PHP-прокси REG.RU. */
+function resolveUploadApiBase(): string {
+  if (
+    typeof window !== 'undefined'
+    && isSiteOrigin()
+    && !isNativeApp()
+    && import.meta.env.PROD
+    && window.location.hostname !== 'localhost'
+  ) {
+    return `${PROD_API_ORIGIN}/api`;
+  }
+  return resolveAbsoluteApiBase();
+}
 
 type UploadProgressHandler = (percent: number) => void;
 
@@ -39,6 +53,11 @@ function shouldMaterializeFile(file: File): boolean {
   }
 
   if (!isNativeApp()) {
+    return false;
+  }
+
+  // Крупные файлы отправляем как есть — иначе FileReader на Android долго читает в память.
+  if (file.size > 4 * 1024 * 1024) {
     return false;
   }
 
@@ -226,7 +245,7 @@ async function sendMultipartUpload<T>(
   const formData = new FormData();
   formData.append('file', file, file.name);
 
-  const base = resolveAbsoluteApiBase().replace(/\/$/, '');
+  const base = resolveUploadApiBase().replace(/\/$/, '');
   const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
   const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 
@@ -260,11 +279,15 @@ async function sendMultipartUpload<T>(
         return;
       }
 
-      reject(new Error(payload?.message ?? `HTTP ${xhr.status}`));
+      reject(new Error(payload?.message ?? (
+        xhr.status === 413
+          ? 'Файл слишком большой для сервера (максимум 100 МБ)'
+          : `HTTP ${xhr.status}`
+      )));
     });
 
     xhr.addEventListener('error', () => reject(new Error('Ошибка сети при загрузке файла')));
-    xhr.addEventListener('timeout', () => reject(new Error('Превышено время загрузки файла')));
+    xhr.addEventListener('timeout', () => reject(new Error('Превышено время загрузки файла (проверьте интернет)')));
     xhr.send(formData);
   });
 }

@@ -42,7 +42,11 @@ const env = {
   PORT: Number(process.env.PORT ?? 4000),
   NODE_ENV,
   JWT_SECRET,
-  CORS_ORIGIN: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN ?? (
+    NODE_ENV === 'production'
+      ? 'https://nagaevomaster.ru,https://www.nagaevomaster.ru,https://localhost,capacitor://localhost'
+      : 'http://localhost:3000'
+  ),
   UPLOAD_DIR: process.env.UPLOAD_DIR ?? './uploads',
   PUBLIC_UPLOAD_URL: ensureHttpsUrl(process.env.PUBLIC_UPLOAD_URL ?? '/uploads'),
   SMTP_HOST: process.env.SMTP_HOST,

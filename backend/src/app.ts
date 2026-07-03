@@ -50,12 +50,15 @@ function createApp() {
         || origin === 'http://localhost'
         || origin.startsWith('capacitor://')
       ) {
-        callback(null, true);
+        callback(null, origin);
         return;
       }
-      callback(new Error(`CORS blocked: ${origin}`));
+      callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86_400,
   }));
   app.use(express.json({ limit: '2mb' }));
   app.use(env.PUBLIC_UPLOAD_URL, express.static(path.resolve(env.UPLOAD_DIR), {

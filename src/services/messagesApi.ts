@@ -1,4 +1,5 @@
 import { api } from './api';
+import { UPLOAD_TIMEOUT_MS } from '@/constants/ui';
 import type { ChatMessage, ConversationDetail, ConversationSummary, SendMessagePayload } from '@/types/message';
 
 async function fetchConversations(): Promise<ConversationSummary[]> {
@@ -25,6 +26,7 @@ async function sendMessage(conversationId: string, payload: SendMessagePayload |
   const body = typeof payload === 'string'
     ? { type: 'text' as const, body: payload }
     : payload;
+  const hasAttachment = Boolean(body.attachmentUrl);
   const response = await api.post<ChatMessage>(`/messages/conversations/${conversationId}/messages`, {
     type: body.type ?? 'text',
     body: body.body ?? '',
@@ -32,6 +34,9 @@ async function sendMessage(conversationId: string, payload: SendMessagePayload |
     attachmentName: body.attachmentName,
     attachmentMime: body.attachmentMime,
     listingId: body.listingId,
+  }, {
+    // После загрузки вложения даём API больше 15 с (axios default).
+    timeout: hasAttachment ? UPLOAD_TIMEOUT_MS : undefined,
   });
   return response.data;
 }

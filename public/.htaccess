@@ -24,7 +24,10 @@
   RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
   RewriteRule ^ https://nagaevomaster.ru%{REQUEST_URI} [L,R=301]
 
-  # API → PHP-прокси на Render (same-origin для браузера)
+  # API → PHP-прокси на VPS (same-origin для браузера)
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
   RewriteRule ^api(?:/.*)?$ api/index.php [L,QSA]
 
   RewriteRule ^\.well-known/ - [L]

@@ -61,7 +61,10 @@ api.interceptors.response.use((response) => {
   }
 
   const message = error.response?.data?.message ?? error.message ?? 'Произошла ошибка при запросе';
-  return Promise.reject(new Error(message));
+  const friendly = message.includes('timeout of') && message.includes('exceeded')
+    ? 'Превышено время ожидания сервера. Проверьте интернет и повторите.'
+    : message;
+  return Promise.reject(new Error(friendly));
 });
 
 export {
