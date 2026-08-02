@@ -1,7 +1,8 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, type SyntheticEvent } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { NEWS_CATEGORY_LABELS } from '@/enums';
+import { NEWS_IMAGE_FALLBACK } from '@/data/realNews';
 import type { NewsItem } from '@/types/news';
 import styles from './NewsCard.module.css';
 
@@ -10,12 +11,20 @@ interface NewsCardProps {
   variant?: 'default' | 'compact' | 'tile' | 'showcase' | 'showcaseLarge' | 'showcaseCompact';
 }
 
+function handleNewsImageError(event: SyntheticEvent<HTMLImageElement>) {
+  const img = event.currentTarget;
+  if (img.dataset.fallbackApplied === '1') return;
+  img.dataset.fallbackApplied = '1';
+  img.src = NEWS_IMAGE_FALLBACK;
+}
+
 const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardProps) {
   const dateLabel = useMemo(
     () => format(new Date(item.publishedAt), 'd MMM', { locale: ru }),
     [item.publishedAt],
   );
   const categoryLabel = NEWS_CATEGORY_LABELS[item.category];
+  const imageSrc = item.imageUrl || NEWS_IMAGE_FALLBACK;
 
   if (variant === 'showcase' || variant === 'showcaseLarge' || variant === 'showcaseCompact') {
     const showcaseClass = variant === 'showcaseLarge'
@@ -34,13 +43,12 @@ const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardP
         >
           <div className={styles.showcaseImageWrap}>
             <img
-              src={item.imageUrl}
+              src={imageSrc}
               alt=""
               className={styles.showcaseImage}
               loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+              referrerPolicy="no-referrer"
+              onError={handleNewsImageError}
             />
             <span className={styles.showcaseShine} aria-hidden />
             <span className={styles.badge}>{categoryLabel}</span>
@@ -69,13 +77,12 @@ const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardP
         >
           <div className={styles.thumbTile}>
             <img
-              src={item.imageUrl}
+              src={imageSrc}
               alt=""
               className={styles.thumbImage}
               loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+              referrerPolicy="no-referrer"
+              onError={handleNewsImageError}
             />
             <span className={styles.badgeTile}>{categoryLabel}</span>
           </div>
@@ -96,13 +103,12 @@ const NewsCard = memo(function NewsCard({ item, variant = 'default' }: NewsCardP
     <article className={cardClass}>
       <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className={styles.imageLink}>
         <img
-          src={item.imageUrl}
+          src={imageSrc}
           alt=""
           className={styles.image}
           loading="lazy"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
+          referrerPolicy="no-referrer"
+          onError={handleNewsImageError}
         />
         <span className={styles.badge}>{categoryLabel}</span>
       </a>

@@ -4,6 +4,7 @@ import { ensureHttpsUrl } from '@/utils/secureUrl';
 import { asArray } from '@/utils/apiGuards';
 import { api } from './api';
 import { NAGAEVO_ARTICLE_IMAGES, REAL_EXTERNAL_NEWS, REAL_LOCAL_NEWS, } from '@/data/realNews';
+import { isGitHubPagesHost } from '@/utils/demoHost';
 const SKIP_TITLE_RE = /#СВО|Меганом|Таврида/i;
 function stripHtml(html: string): string {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -167,6 +168,11 @@ function mergeSiteNewsWithFeed(siteNews: NewsItem[], feed: NewsItem[], limit: nu
 }
 
 async function fetchLocalNews(): Promise<NewsItem[]> {
+    // GitHub Pages: no API / DK host often down — use bundled demo covers
+    if (isGitHubPagesHost()) {
+        return REAL_LOCAL_NEWS.slice(0, NEWS_LOCAL_LIMIT);
+    }
+
     const rssUrl = import.meta.env.DEV
         ? '/api/news/category/news/feed/'
         : `${import.meta.env.VITE_API_URL ?? '/api'}/news/feed`;
