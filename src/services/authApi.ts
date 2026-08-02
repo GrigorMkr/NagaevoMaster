@@ -4,6 +4,7 @@ import { AUTH_TOKEN_STORAGE_KEY } from '@/constants/auth';
 import { createMockToken, findMockAccount, getMockUserFromToken, isMockEmailRegistered, saveMockUserSession, } from '@/data/mock/authUsers';
 import type { User } from '@/types/user';
 import { isRecord } from '@/utils/apiGuards';
+import { isGitHubPagesHost } from '@/utils/demoHost';
 import { resolveAbsoluteApiBase } from '@/utils/apiBase';
 import axios from 'axios';
 import { api } from './api';
@@ -50,6 +51,11 @@ function normalizeEmail(email: string): string {
 
 function shouldUseAuthMock(): boolean {
     return USE_MOCK_FALLBACK;
+}
+
+/** On GitHub Pages skip dead /api and use demo accounts immediately */
+function shouldPreferAuthMock(): boolean {
+    return shouldUseAuthMock() && isGitHubPagesHost();
 }
 
 function getAuthToken(): string | null {
@@ -120,6 +126,9 @@ async function loginRequest(
     captchaToken?: string,
 ): Promise<AuthResponse> {
     const normalizedEmail = normalizeEmail(email);
+    if (shouldPreferAuthMock()) {
+        return mockLogin(normalizedEmail, password);
+    }
     try {
         const response = await api.post<AuthResponse>('/auth/login', {
             user: normalizedEmail,
@@ -145,6 +154,15 @@ async function sendRegistrationCode(
         ...data,
         user: normalizeEmail(data.user),
     };
+    if (shouldPreferAuthMock()) {
+        const target = channel === 'email' ? payload.user : data.phone;
+        sessionStorage.setItem(`mock-register:${channel}:${target}`, JSON.stringify(payload));
+        return {
+            message: channel === 'email' ? 'Код отправлен на email (демо: 123456)' : 'Код отправлен в SMS (демо: 123456)',
+            channel,
+            target,
+        };
+    }
     try {
         const response = await api.post<SendCodeResponse>('/auth/register/send-code', {
             channel,
