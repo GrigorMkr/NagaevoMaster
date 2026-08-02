@@ -1,6 +1,7 @@
 import type { ListingKind } from '@/types/listing';
 import type { AppIconName } from '@/types/icon';
-import { publicUrl } from '@/utils/publicUrl';
+
+const boardImage = (file: string) => `${import.meta.env.BASE_URL}images/board/${file}`;
 
 interface BoardCategory {
   slug: string;
@@ -34,7 +35,7 @@ const BOARD_KINDS: BoardKindConfig[] = [
     icon: 'shopping',
     accent: '#e8b84a',
     glow: 'rgba(232, 184, 74, 0.35)',
-    coverImage: publicUrl('/images/board/sale.png'),
+    coverImage: boardImage('sale.png'),
     coverPosition: 'center 40%',
     examples: 'авто · дом · мото · яйца · сметана',
     categories: [
@@ -56,7 +57,7 @@ const BOARD_KINDS: BoardKindConfig[] = [
     icon: 'briefcase',
     accent: '#5eb8ff',
     glow: 'rgba(94, 184, 255, 0.32)',
-    coverImage: publicUrl('/images/board/vacancy.png'),
+    coverImage: boardImage('vacancy.png'),
     coverPosition: '18% center',
     examples: 'подработка · сезон · мастер · офис',
     categories: [
@@ -77,7 +78,7 @@ const BOARD_KINDS: BoardKindConfig[] = [
     icon: 'compass',
     accent: '#f08a7e',
     glow: 'rgba(240, 138, 126, 0.32)',
-    coverImage: publicUrl('/images/board/lost.png'),
+    coverImage: boardImage('lost.png'),
     coverPosition: '12% center',
     examples: 'кот · ключи · карта · телефон',
     categories: [
