@@ -5,6 +5,7 @@ import {
   DESKTOP_BACKGROUND_INTERVAL_MS,
 } from '@/data/desktopBackgrounds';
 import { shouldUseMobileLayout } from '@/hooks/useMobileLayout';
+import { publicUrl } from '@/utils/publicUrl';
 
 const DESKTOP_MEDIA = '(min-width: 769px)';
 
@@ -54,7 +55,7 @@ const SiteBackground = memo(function SiteBackground() {
     <div className="siteSurface" aria-hidden="true">
       <img
         className="siteSurface__img siteSurface__imgMobile"
-        src="/backgrounds/desktop-red-lake.jpg"
+        src={publicUrl('/backgrounds/desktop-red-lake.jpg')}
         alt=""
         decoding="async"
         fetchPriority="high"

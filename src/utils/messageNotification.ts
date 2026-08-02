@@ -1,6 +1,7 @@
 import { playMessageSound } from '@/utils/messageSound';
 import { isNativeApp } from '@/utils/nativeApp';
 import { showNativeMessageNotification } from '@/utils/nativeMessageNotify';
+import { publicUrl } from '@/utils/publicUrl';
 
 function buildNotificationTag(messageId?: string): string {
   return messageId ? `message-${messageId}` : 'nagaevo-message';
@@ -32,8 +33,8 @@ async function showMessageNotification(
 
   const notificationOptions = {
     body: preview,
-    icon: '/apple-touch-icon.png',
-    badge: '/favicon-32.png',
+    icon: publicUrl('/apple-touch-icon.png'),
+    badge: publicUrl('/favicon-32.png'),
     tag,
     renotify: true,
     silent: true,

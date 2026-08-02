@@ -15,8 +15,6 @@ artifacts
 .env.production
 deploy.env
 deploy/regru.env
-deploy/keenetic.env
-deploy/vps-de.env
 deploy/notify.env
 deploy/oauth.env
 deploy/push.env
